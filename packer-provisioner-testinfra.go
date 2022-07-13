@@ -2,44 +2,56 @@
 package main
 
 import (
-  "os"
-  "context"
   "log"
+  "context"
 
   "github.com/hashicorp/hcl/v2/hcldec"
-  "github.com/hashicorp/packer-plugin-sdk/plugin"
   "github.com/hashicorp/packer-plugin-sdk/packer"
+  "github.com/hashicorp/packer-plugin-sdk/template/config"
+  "github.com/hashicorp/packer-plugin-sdk/template/interpolate"
 )
 
 // config data from packer template/config
-type TestinfraConfig struct {}
+type TestinfraConfig struct {
+  TestFile string `mapstructure:"test_file"`
+
+  ctx interpolate.Context
+}
 
 // implements the packer.Provisioner interface
 type TestinfraProvisioner struct{
   config TestinfraConfig
 }
 
-func main() {
-  // initialize packer plugin set for testinfra
-  packerPluginSet := plugin.NewSet()
-  packerPluginSet.RegisterProvisioner(plugin.DEFAULT_NAME, new(TestinfraProvisioner))
-
-  // execute packer plugin for testinfra
-  err := packerPluginSet.Run()
-  if err != nil {
-    log.Fatalf("Packer Provisioner Testinfra failure: %v", err.Error())
-  }
-}
-
+// implements configspec with hcl2spec helper function
 func (provisioner *TestinfraProvisioner) ConfigSpec() hcldec.ObjectSpec {
   return provisioner.config.FlatMapstructure().HCL2Spec()
 }
 
 
-func (provisioner *TestinfraProvisioner) Prepare(...interface{}) error {
+func (provisioner *TestinfraProvisioner) Prepare(raws ...interface{}) error {
+  // parse testinfra provisioner config
+  err := config.Decode(&provisioner.config, &config.DecodeOpts{
+    Interpolate:        true,
+    InterpolateContext: &provisioner.config.ctx,
+  }, raws...)
+  if err != nil {
+    return err
+  }
+
   return nil
 }
 
-func (provisioner *TestinfraProvisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator, data map[string]interface{}) error {
+func (provisioner *TestinfraProvisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator, generatedData map[string]interface{}) error {
+  // parse generated data for context
+  provisioner.config.ctx.Data = generatedData
+  testFile, err := interpolate.Render(provisioner.config.TestFile, &provisioner.config.ctx)
+  if err != nil {
+    log.Fatalf("Error parsing config for TestFile: %v", err.Error())
+    return err
+  }
+
+  log.Printf("Testinfra file is: %v", testFile)
+
   return nil
 }
