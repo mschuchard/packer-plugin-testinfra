@@ -2,7 +2,9 @@
 package main
 
 import (
+  "os"
   "log"
+  "errors"
   "context"
 
   "github.com/hashicorp/hcl/v2/hcldec"
@@ -13,6 +15,7 @@ import (
 
 // config data from packer template/config
 type TestinfraConfig struct {
+  PytestPath string `mapstructure:"pytest_path"`
   TestFile string `mapstructure:"test_file"`
 
   ctx interpolate.Context
@@ -28,7 +31,7 @@ func (provisioner *TestinfraProvisioner) ConfigSpec() hcldec.ObjectSpec {
   return provisioner.config.FlatMapstructure().HCL2Spec()
 }
 
-
+// prepares the provisioner plugin
 func (provisioner *TestinfraProvisioner) Prepare(raws ...interface{}) error {
   // parse testinfra provisioner config
   err := config.Decode(&provisioner.config, &config.DecodeOpts{
@@ -36,13 +39,33 @@ func (provisioner *TestinfraProvisioner) Prepare(raws ...interface{}) error {
     InterpolateContext: &provisioner.config.ctx,
   }, raws...)
   if err != nil {
+    log.Fatal("Error decoding the supplied Packer config.")
+    return err
+  }
+
+  // set default executable path for py.test
+  if provisioner.config.PytestPath == "" {
+    provisioner.config.PytestPath = "py.test"
+  } else { // verify py.test exists at supplied path
+    if _, err := os.Stat(provisioner.config.PytestPath); errors.Is(err, os.ErrNotExist) {
+      log.Fatalf("The Pytest executable does not exist at: %s", provisioner.config.PytestPath)
+      return err
+    }
+  }
+
+  // verify testinfra file exists
+  if _, err := os.Stat(provisioner.config.TestFile); errors.Is(err, os.ErrNotExist) {
+    log.Fatalf("The Testinfra file does not exist at: %s", provisioner.config.TestFile)
     return err
   }
 
   return nil
 }
 
+// executes the provisioner plugin
 func (provisioner *TestinfraProvisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator, generatedData map[string]interface{}) error {
+  ui.Say("Testing machine image with Testinfra")
+
   // parse generated data for context
   provisioner.config.ctx.Data = generatedData
   testFile, err := interpolate.Render(provisioner.config.TestFile, &provisioner.config.ctx)
@@ -51,7 +74,9 @@ func (provisioner *TestinfraProvisioner) Provision(ctx context.Context, ui packe
     return err
   }
 
-  log.Printf("Testinfra file is: %v", testFile)
+  // more logging and output
+  log.Printf("Testinfra file is: %s", testFile)
+  ui.Say("Testinfra machine image testing is complete")
 
   return nil
 }
