@@ -1,4 +1,4 @@
-.PHONY: dev
+.PHONY: build
 
 build:
 	@go build -o packer-provisioner-testinfra
@@ -22,7 +22,8 @@ plugin-check: install-packer-sdc build
 	@packer-sdc plugin-check packer-provisioner-testinfra
 
 generate: install-packer-sdc
-	PATH="${PATH}:$(go env GOPATH)/bin" go generate ./...
+	export PATH="${PATH}:$(go env GOPATH)/bin"
+	@go generate ./...
 	#packer-sdc renderdocs -src ./docs -dst ./.docs -partials ./docs-partials
 
 test: unit acceptance plugin-check
