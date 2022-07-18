@@ -3,6 +3,7 @@ package main
 
 import (
   "os"
+  "os/exec"
   "log"
   "errors"
   "context"
@@ -74,8 +75,22 @@ func (provisioner *TestinfraProvisioner) Provision(ctx context.Context, ui packe
     return err
   }
 
-  // more logging and output
+  // prepare testinfra test command
   log.Printf("Testinfra file is: %s", testFile)
+  cmd := exec.Command(provisioner.config.PytestPath, "-v", "--hosts=<user>@<hostname>:<port>", provisioner.config.TestFile)
+  cmd.Env = os.Environ()
+
+  // execute testinfra tests
+  if err := cmd.Start(); err != nil {
+    return err
+  }
+  err = cmd.Wait()
+  if err != nil {
+    log.Fatalf("Non-zero exit status: %s", err)
+    return err
+  }
+
+  // finish
   ui.Say("Testinfra machine image testing is complete")
 
   return nil
