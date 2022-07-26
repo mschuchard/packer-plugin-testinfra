@@ -4,6 +4,7 @@ package main
 import (
   "os"
   "os/exec"
+  "fmt"
   "log"
   "errors"
   "context"
@@ -17,7 +18,7 @@ import (
 // config data from packer template/config
 type TestinfraConfig struct {
   PytestPath string `mapstructure:"pytest_path"`
-  TestFile string `mapstructure:"test_file"`
+  TestFile   string `mapstructure:"test_file"`
 
   ctx interpolate.Context
 }
@@ -67,8 +68,20 @@ func (provisioner *TestinfraProvisioner) Prepare(raws ...interface{}) error {
 func (provisioner *TestinfraProvisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator, generatedData map[string]interface{}) error {
   ui.Say("Testing machine image with Testinfra")
 
-  // parse generated data for context
+  // parse generated data for context and required values
   provisioner.config.ctx.Data = generatedData
+  hostname := generatedData["Host"].(string)
+  user := generatedData["User"].(string)
+  port := generatedData["Port"].(string)
+  communication := fmt.Sprintf("--hosts=%s@%s:%s", user, hostname, port)
+
+  // pyest path
+  pytestPath, err := interpolate.Render(provisioner.config.PytestPath, &provisioner.config.ctx)
+  if err != nil {
+    log.Fatalf("Error parsing config for PytestPath: %v", err.Error())
+    return err
+  }
+  // testfile
   testFile, err := interpolate.Render(provisioner.config.TestFile, &provisioner.config.ctx)
   if err != nil {
     log.Fatalf("Error parsing config for TestFile: %v", err.Error())
@@ -76,8 +89,8 @@ func (provisioner *TestinfraProvisioner) Provision(ctx context.Context, ui packe
   }
 
   // prepare testinfra test command
-  log.Printf("Testinfra file is: %s", testFile)
-  cmd := exec.Command(provisioner.config.PytestPath, "-v", "--hosts=<user>@<hostname>:<port>", provisioner.config.TestFile)
+  log.Printf("Complete command is: %s -v %s %s", pytestPath, communication, testFile)
+  cmd := exec.Command(pytestPath, "-v", communication, testFile)
   cmd.Env = os.Environ()
 
   // execute testinfra tests
