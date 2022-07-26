@@ -1,1 +1,3 @@
 go.sum
+fixtures/__pycache__
+fixtures/.pytest_cache
