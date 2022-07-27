@@ -1,14 +1,14 @@
 .PHONY: build
 
 build:
-	@go build -o packer-provisioner-testinfra
+	@go build -o packer-plugin-testinfra
 
 unit:
 	@go test -v
 
 acceptance: build
 	@mkdir -p ~/.packer.d/plugins/
-	@mv packer-provisioner-testinfra ~/.packer.d/plugins/packer-provisioner-testinfra
+	@mv packer-plugin-testinfra ~/.packer.d/plugins/packer-plugin-testinfra
 	@PACKER_ACC=1 go test -v packer-provisioner-testinfra_acceptance_test.go -timeout=5m
 	@rm testinfra_provisioner_docker_test.pkr.hcl
 
@@ -20,7 +20,7 @@ install-packer-sdc:
 #	@/bin/sh -c "[ -d docs ] && zip -r docs.zip docs/"
 
 plugin-check: install-packer-sdc build
-	@packer-sdc plugin-check packer-provisioner-testinfra
+	@packer-sdc plugin-check packer-plugin-testinfra
 
 generate: install-packer-sdc
 	export PATH="${PATH}:$(go env GOPATH)/bin"

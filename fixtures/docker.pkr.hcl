@@ -19,6 +19,6 @@ build {
 
   provisioner "testinfra" {
     pytest_path = "/usr/local/bin/py.test"
-    test_file   = ""
+    test_file   = "${path.cwd}/fixtures/test.py"
   }
 }

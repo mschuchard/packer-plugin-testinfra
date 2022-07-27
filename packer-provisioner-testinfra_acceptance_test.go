@@ -45,7 +45,7 @@ func TestTestinfraProvisioner(test *testing.T) {
       logsString := string(logsBytes)
 
       // verify logfile content
-      if matched, _ := regexp.MatchString("docker.ubuntu:.*", logsString); !matched {
+      if matched, _ := regexp.MatchString("docker.ubuntu: Testing machine image with Testinfra.*", logsString); !matched {
         test.Fatalf("logs doesn't contain expected testinfra value %q", logsString)
       }
 

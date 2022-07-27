@@ -1,6 +1,7 @@
 package main
 
 import (
+  "os"
   "log"
 
   "github.com/hashicorp/packer-plugin-sdk/plugin"
@@ -15,5 +16,6 @@ func main() {
   err := packerPluginSet.Run()
   if err != nil {
     log.Fatalf("Packer Provisioner Testinfra failure: %v", err.Error())
+    os.Exit(1)
   }
 }
