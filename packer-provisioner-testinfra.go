@@ -25,7 +25,8 @@ type TestinfraConfig struct {
 
 // implements the packer.Provisioner interface
 type TestinfraProvisioner struct{
-  config TestinfraConfig
+  config        TestinfraConfig
+  generatedData map[string]interface{}
 }
 
 // implements configspec with hcl2spec helper function
@@ -68,12 +69,25 @@ func (provisioner *TestinfraProvisioner) Prepare(raws ...interface{}) error {
 func (provisioner *TestinfraProvisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator, generatedData map[string]interface{}) error {
   ui.Say("Testing machine image with Testinfra")
 
-  // parse generated data for context and required values
+  // prepare generated data and context
+  provisioner.generatedData = generatedData
   provisioner.config.ctx.Data = generatedData
-  hostname := generatedData["Host"].(string)
-  user := generatedData["User"].(string)
-  port := generatedData["Port"].(string)
-  communication := fmt.Sprintf("--hosts=%s@%s:%s", user, hostname, port)
+
+  // parse generated data for required values
+  ipaddress := provisioner.generatedData["Host"].(string)
+  user := provisioner.generatedData["User"].(string)
+  connectionType := provisioner.generatedData["ConnType"].(string)
+  port := provisioner.generatedData["Port"].(int64)
+  containerId := provisioner.generatedData["ContainerID"].(string)
+
+  // determine communication string by packer connection type
+  communication := ""
+  if connectionType == "ssh" {
+    communication = fmt.Sprintf("--hosts=%s@%s:%d", user, ipaddress, port)
+  }
+  if connectionType == "docker" {
+    communication = fmt.Sprintf("--hosts='docker://[%s@]%s'", user, containerId)
+  }
 
   // pyest path
   pytestPath, err := interpolate.Render(provisioner.config.PytestPath, &provisioner.config.ctx)
