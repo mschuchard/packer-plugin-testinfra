@@ -74,11 +74,11 @@ func (provisioner *TestinfraProvisioner) Provision(ctx context.Context, ui packe
   provisioner.config.ctx.Data = generatedData
 
   // parse generated data for required values
+  connectionType := provisioner.generatedData["ConnType"].(string)
   ipaddress := provisioner.generatedData["Host"].(string)
   user := provisioner.generatedData["User"].(string)
-  connectionType := provisioner.generatedData["ConnType"].(string)
   port := provisioner.generatedData["Port"].(int64)
-  containerId := provisioner.generatedData["ContainerID"].(string)
+  instanceId := provisioner.generatedData["ID"].(string)
 
   // determine communication string by packer connection type
   communication := ""
@@ -86,7 +86,7 @@ func (provisioner *TestinfraProvisioner) Provision(ctx context.Context, ui packe
     communication = fmt.Sprintf("--hosts=%s@%s:%d", user, ipaddress, port)
   }
   if connectionType == "docker" {
-    communication = fmt.Sprintf("--hosts='docker://[%s@]%s'", user, containerId)
+    communication = fmt.Sprintf("--hosts='docker://%s'", instanceId)
   }
 
   // pyest path
@@ -103,17 +103,18 @@ func (provisioner *TestinfraProvisioner) Provision(ctx context.Context, ui packe
   }
 
   // prepare testinfra test command
-  log.Printf("Complete command is: %s -v %s %s", pytestPath, communication, testFile)
+  log.Printf("Complete Testinfra command is: %s -v %s %s", pytestPath, communication, testFile)
   cmd := exec.Command(pytestPath, "-v", communication, testFile)
   cmd.Env = os.Environ()
 
   // execute testinfra tests
   if err := cmd.Start(); err != nil {
+    log.Fatalf("Initialization of Testinfra py.test command execution returned non-zero exit status: %s", err)
     return err
   }
   err = cmd.Wait()
   if err != nil {
-    log.Fatalf("Non-zero exit status: %s", err)
+    log.Fatalf("Testinfra returned non-zero exit status: %s", err)
     return err
   }
 
