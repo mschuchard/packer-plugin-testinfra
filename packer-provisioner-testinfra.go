@@ -87,7 +87,7 @@ func (provisioner *TestinfraProvisioner) Provision(ctx context.Context, ui packe
     communication = fmt.Sprintf("--hosts=%s@%s:%d", user, ipaddress, port)
   }
   if connectionType == "docker" {
-    communication = fmt.Sprintf("--hosts='docker://%s'", instanceId)
+    communication = fmt.Sprintf("--hosts=docker://%s", instanceId)
   }
 
   // pyest path
@@ -104,8 +104,8 @@ func (provisioner *TestinfraProvisioner) Provision(ctx context.Context, ui packe
   }
 
   // prepare testinfra test command
-  log.Printf("Complete Testinfra command is: %s -v %s %s", pytestPath, communication, testFile)
   cmd := exec.Command(pytestPath, "-v", communication, testFile)
+  log.Printf("Complete Testinfra command is: %s", cmd.String())
   cmd.Env = os.Environ()
 
   // prepare stdout and stderr pipes
@@ -127,10 +127,23 @@ func (provisioner *TestinfraProvisioner) Provision(ctx context.Context, ui packe
   }
 
   // display testinfra results
-  outSlurp, _ := io.ReadAll(stdout)
-  ui.Message(string(outSlurp))
-  errSlurp, _ := io.ReadAll(stderr)
-  ui.Error(string(errSlurp))
+  outSlurp, err := io.ReadAll(stdout)
+  if err != nil {
+    log.Fatalf("Unable to read stdout from Testinfra: %s", err)
+    return err
+  }
+  if len(outSlurp) > 0 {
+    ui.Message(string(outSlurp))
+  }
+
+  errSlurp, err := io.ReadAll(stderr)
+  if err != nil {
+    log.Fatalf("Unable to read stderr from Testinfra: %s", err)
+    return err
+  }
+  if len(errSlurp) > 0 {
+    ui.Error(string(errSlurp))
+  }
 
   // wait for testinfra to complete
   err = cmd.Wait()
