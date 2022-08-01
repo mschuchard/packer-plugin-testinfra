@@ -4,10 +4,11 @@ package main
 import (
   "os"
   "os/exec"
+  "io"
   "fmt"
   "log"
-  "errors"
   "context"
+  "errors"
 
   "github.com/hashicorp/hcl/v2/hcldec"
   "github.com/hashicorp/packer-plugin-sdk/packer"
@@ -107,11 +108,31 @@ func (provisioner *TestinfraProvisioner) Provision(ctx context.Context, ui packe
   cmd := exec.Command(pytestPath, "-v", communication, testFile)
   cmd.Env = os.Environ()
 
-  // execute testinfra tests
+  // prepare stdout and stderr pipes
+  stdout, err := cmd.StdoutPipe()
+  if err != nil {
+    log.Fatal(err)
+    return err
+  }
+  stderr, err := cmd.StderrPipe()
+  if err != nil {
+    log.Fatal(err)
+    return err
+  }
+
+  // initialize testinfra tests
   if err := cmd.Start(); err != nil {
     log.Fatalf("Initialization of Testinfra py.test command execution returned non-zero exit status: %s", err)
     return err
   }
+
+  // display testinfra results
+  outSlurp, _ := io.ReadAll(stdout)
+  ui.Message(string(outSlurp))
+  errSlurp, _ := io.ReadAll(stderr)
+  ui.Error(string(errSlurp))
+
+  // wait for testinfra to complete
   err = cmd.Wait()
   if err != nil {
     log.Fatalf("Testinfra returned non-zero exit status: %s", err)
