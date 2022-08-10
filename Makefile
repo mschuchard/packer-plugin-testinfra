@@ -10,7 +10,6 @@ acceptance: build
 	@mkdir -p ~/.packer.d/plugins/
 	@mv packer-plugin-testinfra ~/.packer.d/plugins/packer-plugin-testinfra
 	@PACKER_ACC=1 go test -v packer-provisioner-testinfra_acceptance_test.go -timeout=5m
-	@rm testinfra_provisioner_docker_test.pkr.hcl
 
 install-packer-sdc:
 	@go install github.com/hashicorp/packer-plugin-sdk/cmd/packer-sdc@latest
