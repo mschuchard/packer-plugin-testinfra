@@ -58,7 +58,9 @@ func (provisioner *TestinfraProvisioner) Prepare(raws ...interface{}) error {
   }
 
   // verify testinfra file exists
-  if _, err := os.Stat(provisioner.config.TestFile); errors.Is(err, os.ErrNotExist) {
+  if provisioner.config.TestFile == "" {
+    return fmt.Errorf("The Testinfra test_file was not specified")
+  } else if _, err := os.Stat(provisioner.config.TestFile); errors.Is(err, os.ErrNotExist) {
     log.Printf("The Testinfra file does not exist at: %s", provisioner.config.TestFile)
     return err
   }

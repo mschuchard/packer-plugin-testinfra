@@ -1,7 +1,9 @@
 package main
 
 import (
+  "os"
   "testing"
+  "errors"
 
   "github.com/hashicorp/packer-plugin-sdk/packer"
 )
@@ -59,6 +61,19 @@ func TestProvisionerPrepareMinimal(test *testing.T) {
   }
 }
 
+// test provisioner prepare errors on unspecified test file
+func TestProvisionerPrepareEmptyTestFile(test *testing.T) {
+  var provisioner TestinfraProvisioner
+  var emptyTestFileTestinfraConfig = &TestinfraConfig{
+    PytestPath: "/usr/local/bin/py.test",
+  }
+
+  err := provisioner.Prepare(emptyTestFileTestinfraConfig)
+  if err == nil {
+    test.Errorf("Prepare function did not fail on unspecified testfile")
+  }
+}
+
 // test provisioner prepare errors on nonexistent pytest
 func TestProvisionerPrepareNoPytest(test *testing.T) {
   var provisioner TestinfraProvisioner
@@ -68,7 +83,7 @@ func TestProvisionerPrepareNoPytest(test *testing.T) {
   }
 
   err := provisioner.Prepare(noPytestTestinfraConfig)
-  if err == nil {
+  if !(errors.Is(err, os.ErrNotExist)) {
     test.Errorf("Prepare function did not fail on nonexistent pytest")
   }
 }
@@ -82,7 +97,7 @@ func TestProvisionerPrepareNoTestFile(test *testing.T) {
   }
 
   err := provisioner.Prepare(noTestFileTestinfraConfig)
-  if err == nil {
+  if !(errors.Is(err, os.ErrNotExist)) {
     test.Errorf("Prepare function did not fail on nonexistent testfile")
   }
 }
