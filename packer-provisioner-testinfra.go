@@ -43,7 +43,7 @@ func (provisioner *TestinfraProvisioner) Prepare(raws ...interface{}) error {
     InterpolateContext: &provisioner.config.ctx,
   }, raws...)
   if err != nil {
-    log.Fatal("Error decoding the supplied Packer config.")
+    log.Print("Error decoding the supplied Packer config.")
     return err
   }
 
@@ -52,14 +52,14 @@ func (provisioner *TestinfraProvisioner) Prepare(raws ...interface{}) error {
     provisioner.config.PytestPath = "py.test"
   } else { // verify py.test exists at supplied path
     if _, err := os.Stat(provisioner.config.PytestPath); errors.Is(err, os.ErrNotExist) {
-      log.Fatalf("The Pytest executable does not exist at: %s", provisioner.config.PytestPath)
+      log.Printf("The Pytest executable does not exist at: %s", provisioner.config.PytestPath)
       return err
     }
   }
 
   // verify testinfra file exists
   if _, err := os.Stat(provisioner.config.TestFile); errors.Is(err, os.ErrNotExist) {
-    log.Fatalf("The Testinfra file does not exist at: %s", provisioner.config.TestFile)
+    log.Printf("The Testinfra file does not exist at: %s", provisioner.config.TestFile)
     return err
   }
 
@@ -93,13 +93,13 @@ func (provisioner *TestinfraProvisioner) Provision(ctx context.Context, ui packe
   // pyest path
   pytestPath, err := interpolate.Render(provisioner.config.PytestPath, &provisioner.config.ctx)
   if err != nil {
-    log.Fatalf("Error parsing config for PytestPath: %v", err.Error())
+    log.Printf("Error parsing config for PytestPath: %v", err.Error())
     return err
   }
   // testfile
   testFile, err := interpolate.Render(provisioner.config.TestFile, &provisioner.config.ctx)
   if err != nil {
-    log.Fatalf("Error parsing config for TestFile: %v", err.Error())
+    log.Printf("Error parsing config for TestFile: %v", err.Error())
     return err
   }
 
@@ -111,25 +111,25 @@ func (provisioner *TestinfraProvisioner) Provision(ctx context.Context, ui packe
   // prepare stdout and stderr pipes
   stdout, err := cmd.StdoutPipe()
   if err != nil {
-    log.Fatal(err)
+    log.Print(err)
     return err
   }
   stderr, err := cmd.StderrPipe()
   if err != nil {
-    log.Fatal(err)
+    log.Print(err)
     return err
   }
 
   // initialize testinfra tests
   if err := cmd.Start(); err != nil {
-    log.Fatalf("Initialization of Testinfra py.test command execution returned non-zero exit status: %s", err)
+    log.Printf("Initialization of Testinfra py.test command execution returned non-zero exit status: %s", err)
     return err
   }
 
   // display testinfra results
   outSlurp, err := io.ReadAll(stdout)
   if err != nil {
-    log.Fatalf("Unable to read stdout from Testinfra: %s", err)
+    log.Printf("Unable to read stdout from Testinfra: %s", err)
     return err
   }
   if len(outSlurp) > 0 {
@@ -138,7 +138,7 @@ func (provisioner *TestinfraProvisioner) Provision(ctx context.Context, ui packe
 
   errSlurp, err := io.ReadAll(stderr)
   if err != nil {
-    log.Fatalf("Unable to read stderr from Testinfra: %s", err)
+    log.Printf("Unable to read stderr from Testinfra: %s", err)
     return err
   }
   if len(errSlurp) > 0 {
@@ -148,7 +148,7 @@ func (provisioner *TestinfraProvisioner) Provision(ctx context.Context, ui packe
   // wait for testinfra to complete
   err = cmd.Wait()
   if err != nil {
-    log.Fatalf("Testinfra returned non-zero exit status: %s", err)
+    log.Printf("Testinfra returned non-zero exit status: %s", err)
     return err
   }
 
