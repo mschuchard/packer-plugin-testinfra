@@ -79,22 +79,26 @@ func (provisioner *TestinfraProvisioner) Provision(ctx context.Context, ui packe
 
   // parse generated data for required values
   connectionType := provisioner.generatedData["ConnType"].(string)
-  ipaddress := provisioner.generatedData["Host"].(string)
   user := provisioner.generatedData["User"].(string)
+  ipaddress := provisioner.generatedData["Host"].(string)
   port := provisioner.generatedData["Port"].(int64)
+  httpAddr := provisioner.generatedData["PackerHTTPAddr"].(string)
+  if len(httpAddr) == 0 {
+    httpAddr = fmt.Sprintf("%s:%d", ipaddress, port)
+  }
   instanceID := provisioner.generatedData["ID"].(string)
 
   // determine communication string by packer connection type
   log.Printf("Communicating via %s connection type", connectionType)
   communication := ""
   if connectionType == "ssh" {
-    communication = fmt.Sprintf("--hosts=%s@%s:%d", user, ipaddress, port)
+    communication = fmt.Sprintf("--hosts=%s@%s", user, httpAddr)
   }
   if connectionType == "docker" {
     communication = fmt.Sprintf("--hosts=docker://%s", instanceID)
   }
 
-  // pyest path
+  // pytest path
   pytestPath, err := interpolate.Render(provisioner.config.PytestPath, &provisioner.config.ctx)
   if err != nil {
     log.Printf("Error parsing config for PytestPath: %v", err.Error())
@@ -131,7 +135,7 @@ func (provisioner *TestinfraProvisioner) Provision(ctx context.Context, ui packe
     return err
   }
 
-  // display testinfra results
+  // capture and display testinfra output
   outSlurp, err := io.ReadAll(stdout)
   if err != nil {
     log.Printf("Unable to read stdout from Testinfra: %s", err)
@@ -150,14 +154,14 @@ func (provisioner *TestinfraProvisioner) Provision(ctx context.Context, ui packe
     ui.Error(string(errSlurp))
   }
 
-  // wait for testinfra to complete
+  // wait for testinfra to complete and flush buffers
   err = cmd.Wait()
   if err != nil {
     log.Printf("Testinfra returned non-zero exit status: %s", err)
     return err
   }
 
-  // finish
+  // finish and return
   ui.Say("Testinfra machine image testing is complete")
 
   return nil
