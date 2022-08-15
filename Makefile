@@ -1,9 +1,12 @@
 .PHONY: build
 
-build:
+tidy:
+	@go mod tidy
+
+build: tidy
 	@go build -o packer-plugin-testinfra
 
-unit:
+unit: tidy
 	@go test -v
 
 acceptance: build

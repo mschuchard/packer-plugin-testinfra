@@ -49,6 +49,7 @@ func (provisioner *TestinfraProvisioner) Prepare(raws ...interface{}) error {
 
   // set default executable path for py.test
   if provisioner.config.PytestPath == "" {
+    log.Print("Setting PytestPath to default 'py.test'")
     provisioner.config.PytestPath = "py.test"
   } else { // verify py.test exists at supplied path
     if _, err := os.Stat(provisioner.config.PytestPath); errors.Is(err, os.ErrNotExist) {
@@ -81,15 +82,16 @@ func (provisioner *TestinfraProvisioner) Provision(ctx context.Context, ui packe
   ipaddress := provisioner.generatedData["Host"].(string)
   user := provisioner.generatedData["User"].(string)
   port := provisioner.generatedData["Port"].(int64)
-  instanceId := provisioner.generatedData["ID"].(string)
+  instanceID := provisioner.generatedData["ID"].(string)
 
   // determine communication string by packer connection type
+  log.Printf("Communicating via %s connection type", connectionType)
   communication := ""
   if connectionType == "ssh" {
     communication = fmt.Sprintf("--hosts=%s@%s:%d", user, ipaddress, port)
   }
   if connectionType == "docker" {
-    communication = fmt.Sprintf("--hosts=docker://%s", instanceId)
+    communication = fmt.Sprintf("--hosts=docker://%s", instanceID)
   }
 
   // pyest path
@@ -123,6 +125,7 @@ func (provisioner *TestinfraProvisioner) Provision(ctx context.Context, ui packe
   }
 
   // initialize testinfra tests
+  ui.Say("Beginning Testinfra validation of machine image")
   if err := cmd.Start(); err != nil {
     log.Printf("Initialization of Testinfra py.test command execution returned non-zero exit status: %s", err)
     return err
