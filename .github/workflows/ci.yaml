@@ -1,0 +1,22 @@
+---
+name: build and test
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  go-build:
+    runs-on: ubuntu-latest
+    container: golang:1.18-alpine
+    steps:
+    - name: checkout
+      uses: actions/checkout@v3
+    - name: install prereqs
+      run: apk add --no-cache --update build-base
+    - name: build
+      run: make build
+    - name: unit test
+      run: make unit
