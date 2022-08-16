@@ -1,0 +1,24 @@
+---
+# setup environment
+os: linux
+dist: focal
+language: go
+go: 1.18
+
+branches:
+  only:
+  - master
+
+notifications:
+  email: false
+
+git:
+  depth: 5
+
+# execute tests
+install:
+- sudo apt-get update && sudo apt-get install -y build-essentials
+- sudo touch /usr/local/bin/py.test
+script:
+- make build
+- make unit
