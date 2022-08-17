@@ -74,9 +74,11 @@ func TestProvisionerPrepareEmptyTestFile(test *testing.T) {
   }
 }
 
-// test provisioner prepare errors on nonexistent pytest
-func TestProvisionerPrepareNoPytest(test *testing.T) {
+// test provisioner prepare errors on nonexistent files
+func TestProvisionerPrepareNonExistFiles(test *testing.T) {
   var provisioner TestinfraProvisioner
+
+  // test no pytest
   var noPytestTestinfraConfig = &TestinfraConfig{
     PytestPath: "/home/foo/py.test",
     TestFile:   "fixtures/test.py",
@@ -86,18 +88,77 @@ func TestProvisionerPrepareNoPytest(test *testing.T) {
   if !(errors.Is(err, os.ErrNotExist)) {
     test.Errorf("Prepare function did not fail on nonexistent pytest")
   }
-}
 
-// test provisioner prepare errors on nonexistent test file
-func TestProvisionerPrepareNoTestFile(test *testing.T) {
-  var provisioner TestinfraProvisioner
+  // test no testfile
   var noTestFileTestinfraConfig = &TestinfraConfig{
     PytestPath: "/usr/local/bin/py.test",
     TestFile:   "/home/foo/test.py",
   }
 
-  err := provisioner.Prepare(noTestFileTestinfraConfig)
+  err = provisioner.Prepare(noTestFileTestinfraConfig)
   if !(errors.Is(err, os.ErrNotExist)) {
     test.Errorf("Prepare function did not fail on nonexistent testfile")
+  }
+}
+
+// test provisioner determineCommunication properly determines communication strings
+func TestProvisionerDetermineCommunication(test *testing.T) {
+  var provisioner TestinfraProvisioner
+
+  // test ssh with empty httpaddr
+  generatedData := map[string]interface{}{
+    "ConnType": "ssh",
+    "User": "me",
+    "Host": "192.168.0.1",
+    "Port": int64(22),
+    "PackerHTTPAddr": "",
+    "ID": "1234567890",
+  }
+
+  provisioner.generatedData = generatedData
+
+  communication, err := provisioner.determineCommunication()
+  if err != nil {
+    test.Errorf("determineCommunication function failed to determine ssh: %s", err)
+  }
+  if communication != "--hosts=me@192.168.0.1:22" {
+    test.Errorf("Communication string incorrectly determined: %s", communication)
+  }
+
+  // test docker
+  generatedData = map[string]interface{}{
+    "ConnType": "docker",
+    "User": "me",
+    "Host": "192.168.0.1",
+    "Port": int64(22),
+    "PackerHTTPAddr": "",
+    "ID": "1234567890abcdefg",
+  }
+
+  provisioner.generatedData = generatedData
+
+  communication, err = provisioner.determineCommunication()
+  if err != nil {
+    test.Errorf("determineCommunication function failed to determine docker: %s", err)
+  }
+  if communication != "--hosts=docker://1234567890abcdefg" {
+    test.Errorf("Communication string incorrectly determined: %s", communication)
+  }
+
+  // test fails on no communication
+  generatedData = map[string]interface{}{
+    "ConnType": "unknown",
+    "User": "me",
+    "Host": "192.168.0.1",
+    "Port": int64(22),
+    "PackerHTTPAddr": "",
+    "ID": "1234567890abcdefg",
+  }
+
+  provisioner.generatedData = generatedData
+
+  _, err = provisioner.determineCommunication()
+  if err == nil {
+    test.Errorf("DetermineCommunication function did not fail on unknown connection type")
   }
 }
