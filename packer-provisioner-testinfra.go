@@ -77,25 +77,10 @@ func (provisioner *TestinfraProvisioner) Provision(ctx context.Context, ui packe
   provisioner.generatedData = generatedData
   provisioner.config.ctx.Data = generatedData
 
-  // parse generated data for required values
-  connectionType := provisioner.generatedData["ConnType"].(string)
-  user := provisioner.generatedData["User"].(string)
-  ipaddress := provisioner.generatedData["Host"].(string)
-  port := provisioner.generatedData["Port"].(int64)
-  httpAddr := provisioner.generatedData["PackerHTTPAddr"].(string)
-  if len(httpAddr) == 0 {
-    httpAddr = fmt.Sprintf("%s:%d", ipaddress, port)
-  }
-  instanceID := provisioner.generatedData["ID"].(string)
-
-  // determine communication string by packer connection type
-  log.Printf("Communicating via %s connection type", connectionType)
-  communication := ""
-  if connectionType == "ssh" {
-    communication = fmt.Sprintf("--hosts=%s@%s", user, httpAddr)
-  }
-  if connectionType == "docker" {
-    communication = fmt.Sprintf("--hosts=docker://%s", instanceID)
+  // assign communication string
+  communication, err := provisioner.determineCommunication()
+  if err != nil {
+    return err
   }
 
   // pytest path
@@ -165,4 +150,40 @@ func (provisioner *TestinfraProvisioner) Provision(ctx context.Context, ui packe
   ui.Say("Testinfra machine image testing is complete")
 
   return nil
+}
+
+// determine and return appropriate communication string for pytest/testinfra
+func (provisioner *TestinfraProvisioner) determineCommunication() (string, error)  {
+  // parse generated data for required values
+  connectionType := provisioner.generatedData["ConnType"].(string)
+  user := provisioner.generatedData["User"].(string)
+  ipaddress := provisioner.generatedData["Host"].(string)
+  port := provisioner.generatedData["Port"].(int64)
+  httpAddr := provisioner.generatedData["PackerHTTPAddr"].(string)
+  if len(httpAddr) == 0 {
+    httpAddr = fmt.Sprintf("%s:%d", ipaddress, port)
+  }
+  instanceID := provisioner.generatedData["ID"].(string)
+
+  // parse generated data for optional values
+  //uuid := provisioner.generatedData["PackerRunUUID"].(string)
+  //password := provisioner.generatedData["Password"].(string)
+  //sshPubKey := provisioner.generatedData["SSHPublicKey"].(string)
+  //sshPrivKey := provisioner.generatedData["SSHPrivateKey"].(string)
+  //winRMPassword := provisioner.generatedData["WinRMPassword"].(string)
+
+  // determine communication string by packer connection type
+  log.Printf("Communicating via %s connection type", connectionType)
+  communication := ""
+  if connectionType == "ssh" {
+    communication = fmt.Sprintf("--hosts=%s@%s", user, httpAddr)
+  }
+  if connectionType == "docker" {
+    communication = fmt.Sprintf("--hosts=docker://%s", instanceID)
+  }
+  if len(communication) == 0 {
+    return "", fmt.Errorf("Communication with machine image could not be properly determined")
+  }
+
+  return communication, nil
 }
