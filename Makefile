@@ -22,10 +22,11 @@ install-packer-sdc:
 #	@/bin/sh -c "[ -d docs ] && zip -r docs.zip docs/"
 
 plugin-check: install-packer-sdc build
+	export PATH="${PATH}:$(shell go env GOPATH)/bin"
 	@packer-sdc plugin-check packer-plugin-testinfra
 
 generate: install-packer-sdc
-	export PATH="${PATH}:$(go env GOPATH)/bin"
+	export PATH="${PATH}:$(shell go env GOPATH)/bin"
 	@go generate ./...
 	#packer-sdc renderdocs -src ./docs -dst ./.docs -partials ./docs-partials
 
