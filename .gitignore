@@ -1,4 +1,3 @@
-go.sum
 packer_*_test.txt
 fixtures/__pycache__
 .pytest_cache

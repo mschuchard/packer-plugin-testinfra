@@ -8,7 +8,7 @@ before:
     # consumption by Packer.io. To include a separate docs.zip uncomment the following command.
     #- make ci-release-docs
     # Check plugin compatibility with required version of the Packer SDK
-    - make plugin-check
+    #- make plugin-check
 builds:
   # A separated build to run the packer-plugins-check only once for a linux_amd64 binary
   - id: plugin-check
@@ -34,15 +34,14 @@ builds:
     goarch:
     - amd64
     - '386'
-    - arm
     - arm64
     ignore:
-    - goos: openbsd
-      goarch: arm64
     - goos: darwin
       goarch: '386'
     - goos: linux
       goarch: amd64
+    - goos: linux
+      goarch: '386'
     binary: '{{ .ProjectName }}_v{{ .Version }}_{{ .Env.API_VERSION }}_{{ .Os }}_{{ .Arch }}'
 archives:
 - format: zip
@@ -65,8 +64,6 @@ signs:
     - "--detach-sign"
     - "${artifact}"
 release:
-  # If you want to manually examine the release before its live, uncomment this line:
-  # draft: true
   # As part of the release doc files are included as a separate deliverable for consumption by Packer.io.
   # To include a separate docs.zip uncomment the extra_files config and the docs.zip command hook above.
   #extra_files:
