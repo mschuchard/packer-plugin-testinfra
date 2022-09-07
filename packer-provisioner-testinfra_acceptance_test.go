@@ -12,17 +12,17 @@ import (
   "github.com/hashicorp/packer-plugin-sdk/acctest"
 )
 
-//go:embed fixtures/docker.pkr.hcl
-var testDockerTemplate string
+//go:embed fixtures/test.pkr.hcl
+var testTemplate string
 
 // testinfra basic acceptance testing function
 func TestTestinfraProvisioner(test *testing.T) {
   // initialize acceptance test config struct
   testCase := &acctest.PluginTestCase{
-		Name:     "testinfra_provisioner_docker_test",
+		Name:     "testinfra_provisioner_test",
     Init:     true,
     Setup:    func() error { return nil },
-    Template: testDockerTemplate,
+    Template: testTemplate,
     Type:     "provisioner",
     Check: func(buildCommand *exec.Cmd, logfile string) error {
       // verify good exit code from packer process
@@ -46,6 +46,9 @@ func TestTestinfraProvisioner(test *testing.T) {
 
       // verify logfile content
       if matched, _ := regexp.MatchString("docker.ubuntu: Testing machine image with Testinfra.*", logsString); !matched {
+        test.Fatalf("logs do not contain expected testinfra value %q", logsString)
+      }
+      if matched, _ := regexp.MatchString("virtualbox-vm.ubuntu: Testing machine image with Testinfra.*", logsString); !matched {
         test.Fatalf("logs doesn't contain expected testinfra value %q", logsString)
       }
 
