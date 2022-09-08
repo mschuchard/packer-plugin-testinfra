@@ -27,7 +27,7 @@ func TestTestinfraProvisioner(test *testing.T) {
     Check: func(buildCommand *exec.Cmd, logfile string) error {
       // verify good exit code from packer process
       if buildCommand.ProcessState != nil && buildCommand.ProcessState.ExitCode() != 0 {
-        return fmt.Errorf("Bad exit code. Logfile: %s", logfile)
+        return fmt.Errorf("Bad exit code from Packer build. Logfile: %s", logfile)
       }
 
       // manage logfile
@@ -40,16 +40,16 @@ func TestTestinfraProvisioner(test *testing.T) {
       // manage logfile content
       logsBytes, err := ioutil.ReadAll(logs)
       if err != nil {
-        return fmt.Errorf("Unable to read logs in: %s", logfile)
+        return fmt.Errorf("Unable to read logs at: %s", logfile)
       }
       logsString := string(logsBytes)
 
       // verify logfile content
       if matched, _ := regexp.MatchString("docker.ubuntu: Testing machine image with Testinfra.*", logsString); !matched {
-        test.Fatalf("logs do not contain expected testinfra value %q", logsString)
+        test.Fatalf("Logs do not contain expected testinfra value %q", logsString)
       }
       if matched, _ := regexp.MatchString("virtualbox-vm.ubuntu: Testing machine image with Testinfra.*", logsString); !matched {
-        test.Fatalf("logs doesn't contain expected testinfra value %q", logsString)
+        test.Fatalf("Logs doesn't contain expected testinfra value %q", logsString)
       }
 
       return nil

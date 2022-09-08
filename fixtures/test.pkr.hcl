@@ -22,7 +22,9 @@ source "docker" "ubuntu" {
 source "virtualbox-vm" "ubuntu" {
   guest_additions_mode = "disable"
   skip_export          = true
+  ssh_host             = "127.0.0.1"
   ssh_username         = "vagrant"
+  ssh_certificate_file = "${path.cwd}/fixtures/.vagrant/machines/default/virtualbox/private_key"
   vm_name              = "fixtures_default_1662571353037_70563"
 }
 
@@ -31,6 +33,6 @@ build {
 
   provisioner "testinfra" {
     pytest_path = "/usr/local/bin/py.test"
-    test_file   = "${path.cwd}/test.py"
+    test_file   = "${path.cwd}/fixtures/test.py"
   }
 }
