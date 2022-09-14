@@ -153,10 +153,12 @@ func (provisioner *TestinfraProvisioner) Provision(ctx context.Context, ui packe
 }
 
 // determine and return appropriate communication string for pytest/testinfra
-func (provisioner *TestinfraProvisioner) determineCommunication() (string, error)  {
+func (provisioner *TestinfraProvisioner) determineCommunication() (string, error) {
   // parse generated data for required values
   connectionType := provisioner.generatedData["ConnType"].(string)
   user := provisioner.generatedData["User"].(string)
+  sshPrivateKeyFile := provisioner.generatedData["SSHPrivateKeyFile"].(string)
+  sshAgentAuth := provisioner.generatedData["SSHAgentAuth"].(bool)
   ipaddress := provisioner.generatedData["Host"].(string)
   port := provisioner.generatedData["Port"].(int64)
   httpAddr := provisioner.generatedData["PackerHTTPAddr"].(string)
@@ -173,10 +175,18 @@ func (provisioner *TestinfraProvisioner) determineCommunication() (string, error
   //winRMPassword := provisioner.generatedData["WinRMPassword"].(string)
 
   // determine communication string by packer connection type
-  log.Printf("Communicating via %s connection type", connectionType)
+  log.Printf("Testinfra communicating via %s connection type", connectionType)
   communication := ""
+
   switch connectionType {
   case "ssh":
+    // assign ssh private key file
+    sshPrivKeyFile, err := provisioner.determineSSHAuth(sshPrivateKeyFile, sshAgentAuth)
+    if err != nil {
+      return "", err
+    }
+    log.Printf("SSH private key filesystem location is: %s", sshPrivKeyFile)
+
     communication = fmt.Sprintf("--hosts=%s@%s", user, httpAddr)
   case "winrm":
     communication = fmt.Sprintf("--hosts=winrm://%s@%s", user, httpAddr)
@@ -188,4 +198,9 @@ func (provisioner *TestinfraProvisioner) determineCommunication() (string, error
   }
 
   return communication, nil
+}
+
+// determine ssh authentication
+func (provisioner *TestinfraProvisioner) determineSSHAuth(sshPrivateKeyFile string, sshAgentAuth bool) (string, error) {
+  return "foo", nil
 }

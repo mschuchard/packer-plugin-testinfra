@@ -109,6 +109,8 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
   generatedData := map[string]interface{}{
     "ConnType": "ssh",
     "User": "me",
+    "SSHPrivateKeyFile": "",
+    "SSHAgentAuth": true,
     "Host": "192.168.0.1",
     "Port": int64(22),
     "PackerHTTPAddr": "",
@@ -129,6 +131,8 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
   generatedData = map[string]interface{}{
     "ConnType": "winrm",
     "User": "me",
+    "SSHPrivateKeyFile": "",
+    "SSHAgentAuth": false,
     "Host": "192.168.0.1",
     "Port": int64(5985),
     "PackerHTTPAddr": "192.168.0.1:5986",
@@ -149,6 +153,8 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
   generatedData = map[string]interface{}{
     "ConnType": "docker",
     "User": "me",
+    "SSHPrivateKeyFile": "",
+    "SSHAgentAuth": false,
     "Host": "192.168.0.1",
     "Port": int64(0),
     "PackerHTTPAddr": "",
@@ -169,6 +175,8 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
   generatedData = map[string]interface{}{
     "ConnType": "unknown",
     "User": "me",
+    "SSHPrivateKeyFile": "",
+    "SSHAgentAuth": false,
     "Host": "192.168.0.1",
     "Port": int64(22),
     "PackerHTTPAddr": "",
