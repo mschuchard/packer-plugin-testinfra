@@ -175,10 +175,12 @@ func (provisioner *TestinfraProvisioner) determineCommunication() (string, error
   // determine communication string by packer connection type
   log.Printf("Communicating via %s connection type", connectionType)
   communication := ""
-  if connectionType == "ssh" {
+  switch connectionType {
+  case "ssh":
     communication = fmt.Sprintf("--hosts=%s@%s", user, httpAddr)
-  }
-  if connectionType == "docker" {
+  case "winrm":
+    communication = fmt.Sprintf("--hosts=winrm://%s@%s", user, httpAddr)
+  case "docker":
     communication = fmt.Sprintf("--hosts=docker://%s", instanceID)
   }
   if len(communication) == 0 {

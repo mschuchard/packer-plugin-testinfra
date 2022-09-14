@@ -125,12 +125,32 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
     test.Errorf("Communication string incorrectly determined: %s", communication)
   }
 
+  // test winrm with httpaddr
+  generatedData = map[string]interface{}{
+    "ConnType": "winrm",
+    "User": "me",
+    "Host": "192.168.0.1",
+    "Port": int64(5985),
+    "PackerHTTPAddr": "192.168.0.1:5986",
+    "ID": "1234567890",
+  }
+
+  provisioner.generatedData = generatedData
+
+  communication, err = provisioner.determineCommunication()
+  if err != nil {
+    test.Errorf("determineCommunication function failed to determine ssh: %s", err)
+  }
+  if communication != "--hosts=winrm://me@192.168.0.1:5986" {
+    test.Errorf("Communication string incorrectly determined: %s", communication)
+  }
+
   // test docker
   generatedData = map[string]interface{}{
     "ConnType": "docker",
     "User": "me",
     "Host": "192.168.0.1",
-    "Port": int64(22),
+    "Port": int64(0),
     "PackerHTTPAddr": "",
     "ID": "1234567890abcdefg",
   }
