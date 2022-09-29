@@ -182,11 +182,11 @@ func (provisioner *TestinfraProvisioner) determineCommunication() (string, error
   switch connectionType {
   case "ssh":
     // assign ssh private key file
-    sshPrivKeyFile, err := provisioner.determineSSHAuth(sshPrivateKeyFile, sshAgentAuth)
+    sshPrivateKeyFile, err := provisioner.determineSSHAuth(sshPrivateKeyFile, sshAgentAuth)
     if err != nil {
       return "", err
     }
-    log.Printf("SSH private key filesystem location is: %s", sshPrivKeyFile)
+    log.Printf("SSH private key filesystem location is: %s", sshPrivateKeyFile)
 
     communication = fmt.Sprintf("--hosts=%s@%s", user, httpAddr)
   case "winrm":

@@ -109,7 +109,7 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
   generatedData := map[string]interface{}{
     "ConnType": "ssh",
     "User": "me",
-    "SSHPrivateKeyFile": "",
+    "SSHPrivateKeyFile": "/path/to/sshprivatekeyfile",
     "SSHAgentAuth": true,
     "Host": "192.168.0.1",
     "Port": int64(22),
@@ -188,5 +188,41 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
   _, err = provisioner.determineCommunication()
   if err == nil {
     test.Errorf("DetermineCommunication function did not fail on unknown connection type")
+  }
+}
+
+// test provisioner determineSSHAuth properly determines ssh private key file location
+func TestProvisionerDetermineSSHAuth(test *testing.T) {
+  var provisioner TestinfraProvisioner
+
+  // dummy up fake ssh private key
+  generatedData := map[string]interface{}{
+    "SSHPrivateKey": "abcdefg12345",
+  }
+
+  provisioner.generatedData = generatedData
+
+  // test successfully returns ssh private key file location
+  sshPrivateKeyFile, err := provisioner.determineSSHAuth("/tmp/sshprivatekeyfile", false)
+  if err != nil {
+    test.Errorf("determineSSHAuth failed to determine ssh private key file location: %s", err)
+  }
+  if sshPrivateKeyFile != "/tmp/sshprivatekeyfile" {
+    test.Errorf("ssh private key file location incorrectly determined: %s", sshPrivateKeyFile)
+  }
+
+  // test successfully uses empty ssh private key file
+  sshPrivateKeyFile, err = provisioner.determineSSHAuth("", true)
+  if err != nil {
+    test.Errorf("determineSSHAuth failed to determine keyless ssh: %s", err)
+  }
+  if sshPrivateKeyFile != "" {
+    test.Errorf("ssh private key file empty location incorrectly determined: %s", sshPrivateKeyFile)
+  }
+
+  // test successfully creates tmpfile for private key
+  sshPrivateKeyFile, err = provisioner.determineSSHAuth("", false)
+  if err != nil {
+    test.Errorf("determineSSHAuth failed to create tmpfile and return location of written ssh private key: %s", err)
   }
 }
