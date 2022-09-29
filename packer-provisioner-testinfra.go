@@ -14,6 +14,7 @@ import (
   "github.com/hashicorp/packer-plugin-sdk/packer"
   "github.com/hashicorp/packer-plugin-sdk/template/config"
   "github.com/hashicorp/packer-plugin-sdk/template/interpolate"
+  "github.com/hashicorp/packer-plugin-sdk/tmp"
 )
 
 // config data from packer template/config
@@ -202,5 +203,27 @@ func (provisioner *TestinfraProvisioner) determineCommunication() (string, error
 
 // determine ssh authentication
 func (provisioner *TestinfraProvisioner) determineSSHAuth(sshPrivateKeyFile string, sshAgentAuth bool) (string, error) {
-  return "foo", nil
+  if sshPrivateKeyFile != "" || sshAgentAuth {
+    // we have a legitimate private key file, so use that
+    return sshPrivateKeyFile, nil
+  } else {
+    // write a tmpfile for storing a private key
+    tmpSSHPrivateKey, err := tmp.File("testinfra-key")
+    if err != nil {
+      return "", fmt.Errorf("Error creating a temp file for the ssh private key: %v", err)
+    }
+    // attempt to obtain a private key
+    SSHPrivateKey := provisioner.generatedData["SSHPrivateKey"].(string)
+    // write the private key to the tmpfile
+    _, err = tmpSSHPrivateKey.WriteString(SSHPrivateKey)
+    if err != nil {
+      return "", fmt.Errorf("Failed to write ssh private key to temp file")
+    }
+    // and then close the tmpfile storing the private key
+    err = tmpSSHPrivateKey.Close()
+    if err != nil {
+      return "", fmt.Errorf("Failed to close ssh private key temp file")
+    }
+    return tmpSSHPrivateKey.Name(), nil
+  }
 }
