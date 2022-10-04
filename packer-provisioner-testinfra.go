@@ -188,7 +188,7 @@ func (provisioner *TestinfraProvisioner) determineCommunication() (string, error
     }
     log.Printf("SSH private key filesystem location is: %s", sshPrivateKeyFile)
 
-    communication = fmt.Sprintf("--hosts=%s@%s", user, httpAddr)
+    communication = fmt.Sprintf("--hosts=%s@%s --ssh-identity-file=%s --ssh-extra-args=\"-o StrictHostKeyChecking=no\"", user, httpAddr, sshPrivateKeyFile)
   case "winrm":
     communication = fmt.Sprintf("--hosts=winrm://%s@%s", user, httpAddr)
   case "docker":

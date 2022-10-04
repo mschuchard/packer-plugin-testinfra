@@ -123,7 +123,7 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
   if err != nil {
     test.Errorf("determineCommunication function failed to determine ssh: %s", err)
   }
-  if communication != "--hosts=me@192.168.0.1:22" {
+  if communication != "--hosts=me@192.168.0.1:22 --ssh-identity-file=/path/to/sshprivatekeyfile --ssh-extra-args=\"-o StrictHostKeyChecking=no\"" {
     test.Errorf("Communication string incorrectly determined: %s", communication)
   }
 

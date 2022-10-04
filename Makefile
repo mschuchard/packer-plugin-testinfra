@@ -12,6 +12,7 @@ unit: tidy
 acceptance: build
 	# vagrant up and vagrant suspend one-time in fixtures dir
 	@mkdir -p ~/.packer.d/plugins/
+	# current packer-sdk bug cannot find plugin installed locally
 	@cp packer-plugin-testinfra ~/.packer.d/plugins/packer-plugin-testinfra
 	@PACKER_ACC=1 go test -v packer-provisioner-testinfra_acceptance_test.go -timeout=5m
 
