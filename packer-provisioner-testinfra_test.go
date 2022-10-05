@@ -131,8 +131,7 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
   generatedData = map[string]interface{}{
     "ConnType": "winrm",
     "User": "me",
-    "SSHPrivateKeyFile": "",
-    "SSHAgentAuth": false,
+    "Password": "password",
     "Host": "192.168.0.1",
     "Port": int64(5985),
     "PackerHTTPAddr": "192.168.0.1:5986",
@@ -143,9 +142,9 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
 
   communication, err = provisioner.determineCommunication()
   if err != nil {
-    test.Errorf("determineCommunication function failed to determine ssh: %s", err)
+    test.Errorf("determineCommunication function failed to determine winrm: %s", err)
   }
-  if communication != "--hosts=winrm://me@192.168.0.1:5986" {
+  if communication != "--hosts=winrm://me:password@192.168.0.1:5986" {
     test.Errorf("Communication string incorrectly determined: %s", communication)
   }
 
@@ -153,8 +152,6 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
   generatedData = map[string]interface{}{
     "ConnType": "docker",
     "User": "me",
-    "SSHPrivateKeyFile": "",
-    "SSHAgentAuth": false,
     "Host": "192.168.0.1",
     "Port": int64(0),
     "PackerHTTPAddr": "",
@@ -175,8 +172,6 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
   generatedData = map[string]interface{}{
     "ConnType": "unknown",
     "User": "me",
-    "SSHPrivateKeyFile": "",
-    "SSHAgentAuth": false,
     "Host": "192.168.0.1",
     "Port": int64(22),
     "PackerHTTPAddr": "",

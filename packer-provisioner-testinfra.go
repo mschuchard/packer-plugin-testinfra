@@ -158,8 +158,6 @@ func (provisioner *TestinfraProvisioner) determineCommunication() (string, error
   // parse generated data for required values
   connectionType := provisioner.generatedData["ConnType"].(string)
   user := provisioner.generatedData["User"].(string)
-  sshPrivateKeyFile := provisioner.generatedData["SSHPrivateKeyFile"].(string)
-  sshAgentAuth := provisioner.generatedData["SSHAgentAuth"].(bool)
   ipaddress := provisioner.generatedData["Host"].(string)
   port := provisioner.generatedData["Port"].(int64)
   httpAddr := provisioner.generatedData["PackerHTTPAddr"].(string)
@@ -182,6 +180,8 @@ func (provisioner *TestinfraProvisioner) determineCommunication() (string, error
   switch connectionType {
   case "ssh":
     // assign ssh private key file
+    sshPrivateKeyFile := provisioner.generatedData["SSHPrivateKeyFile"].(string)
+    sshAgentAuth := provisioner.generatedData["SSHAgentAuth"].(bool)
     sshPrivateKeyFile, err := provisioner.determineSSHAuth(sshPrivateKeyFile, sshAgentAuth)
     if err != nil {
       return "", err
@@ -190,7 +190,10 @@ func (provisioner *TestinfraProvisioner) determineCommunication() (string, error
 
     communication = fmt.Sprintf("--hosts=%s@%s --ssh-identity-file=%s --ssh-extra-args=\"-o StrictHostKeyChecking=no\"", user, httpAddr, sshPrivateKeyFile)
   case "winrm":
-    communication = fmt.Sprintf("--hosts=winrm://%s@%s", user, httpAddr)
+    // assign winrm password
+    winRMPassword := provisioner.generatedData["Password"]
+
+    communication = fmt.Sprintf("--hosts=winrm://%s:%s@%s", user, winRMPassword, httpAddr)
   case "docker":
     communication = fmt.Sprintf("--hosts=docker://%s", instanceID)
   }
