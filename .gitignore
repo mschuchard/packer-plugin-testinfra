@@ -4,3 +4,4 @@ fixtures/.vagrant
 .pytest_cache
 packer-plugin-testinfra
 *_test.pkr.hcl
+crash.log

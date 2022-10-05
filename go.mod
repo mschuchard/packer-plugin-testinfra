@@ -5,7 +5,8 @@ go 1.18
 require (
 	github.com/hashicorp/hcl/v2 v2.14.1
 	github.com/hashicorp/packer-plugin-sdk v0.3.2
-	github.com/zclconf/go-cty v1.11.0
+	// https://github.com/hashicorp/packer-plugin-sdk/issues/131, https://github.com/zclconf/go-cty/issues/134
+	github.com/zclconf/go-cty v1.10.0
 )
 
 require (
