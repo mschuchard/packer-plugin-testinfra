@@ -160,9 +160,9 @@ func (provisioner *TestinfraProvisioner) determineCommunication() (string, error
   user := provisioner.generatedData["User"].(string)
   ipaddress := provisioner.generatedData["Host"].(string)
   port := provisioner.generatedData["Port"].(int64)
-  httpAddr := provisioner.generatedData["PackerHTTPAddr"].(string)
-  if len(httpAddr) == 0 {
-    httpAddr = fmt.Sprintf("%s:%d", ipaddress, port)
+  httpAddr := fmt.Sprintf("%s:%d", ipaddress, port)
+  if len(ipaddress) == 0 {
+    httpAddr = provisioner.generatedData["PackerHTTPAddr"].(string)
   }
   instanceID := provisioner.generatedData["ID"].(string)
 
