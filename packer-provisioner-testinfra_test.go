@@ -105,7 +105,7 @@ func TestProvisionerPrepareNonExistFiles(test *testing.T) {
 func TestProvisionerDetermineCommunication(test *testing.T) {
   var provisioner TestinfraProvisioner
 
-  // test ssh with empty httpaddr
+  // test ssh with httpaddr
   generatedData := map[string]interface{}{
     "ConnType": "ssh",
     "User": "me",
@@ -113,7 +113,7 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
     "SSHAgentAuth": true,
     "Host": "192.168.0.1",
     "Port": int64(22),
-    "PackerHTTPAddr": "",
+    "PackerHTTPAddr": "192.168.0.1:8200",
     "ID": "1234567890",
   }
 
@@ -127,13 +127,13 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
     test.Errorf("Communication string incorrectly determined: %s", communication)
   }
 
-  // test winrm with httpaddr
+  // test winrm with empty host and port
   generatedData = map[string]interface{}{
     "ConnType": "winrm",
     "User": "me",
     "Password": "password",
-    "Host": "192.168.0.1",
-    "Port": int64(5985),
+    "Host": "",
+    "Port": int64(0),
     "PackerHTTPAddr": "192.168.0.1:5986",
     "ID": "1234567890",
   }
@@ -174,7 +174,7 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
     "User": "me",
     "Host": "192.168.0.1",
     "Port": int64(22),
-    "PackerHTTPAddr": "",
+    "PackerHTTPAddr": "192.168.0.1:22",
     "ID": "1234567890abcdefg",
   }
 
