@@ -42,7 +42,7 @@ default: `null`
 
 ### Communicators
 
-This plugin currently supports the `ssh` and `docker` communicator types. Please ensure that SSH is enabled for the built image if it is not a Docker image.
+This plugin currently supports the `ssh` and `docker` communicator types. It also supports the `winrm` communicator as a beta feature. Please ensure that SSH or WinRM is enabled for the built image if it is not a Docker image.
 
 ## Contributing
 Code should pass all unit and acceptance tests. New features should involve new unit tests.
