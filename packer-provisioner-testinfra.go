@@ -4,6 +4,7 @@ package main
 import (
   "os"
   "os/exec"
+  "strings"
   "io"
   "fmt"
   "log"
@@ -20,7 +21,7 @@ import (
 // config data from packer template/config
 type TestinfraConfig struct {
   PytestPath string `mapstructure:"pytest_path"`
-  TestFile   string `mapstructure:"test_file"`
+  TestFiles  []string `mapstructure:"test_files"`
 
   ctx interpolate.Context
 }
@@ -60,11 +61,15 @@ func (provisioner *TestinfraProvisioner) Prepare(raws ...interface{}) error {
   }
 
   // verify testinfra file exists
-  if provisioner.config.TestFile == "" {
-    return fmt.Errorf("The Testinfra test_file was not specified")
-  } else if _, err := os.Stat(provisioner.config.TestFile); errors.Is(err, os.ErrNotExist) {
-    log.Printf("The Testinfra file does not exist at: %s", provisioner.config.TestFile)
-    return err
+  if len(provisioner.config.TestFiles) == 0 {
+    return fmt.Errorf("The Testinfra test_files were not specified")
+  } else {
+    for _, testFile := range provisioner.config.TestFiles {
+      if _, err := os.Stat(testFile); errors.Is(err, os.ErrNotExist) {
+        log.Printf("The Testinfra test_file does not exist at: %s", testFile)
+        return err
+      }
+    }
   }
 
   return nil
@@ -91,14 +96,14 @@ func (provisioner *TestinfraProvisioner) Provision(ctx context.Context, ui packe
     return err
   }
   // testfile
-  testFile, err := interpolate.Render(provisioner.config.TestFile, &provisioner.config.ctx)
+  testFiles := provisioner.config.TestFiles
   if err != nil {
-    log.Printf("Error parsing config for TestFile: %v", err.Error())
+    log.Printf("Error parsing config for TestFiles: %v", err.Error())
     return err
   }
 
   // prepare testinfra test command
-  cmd := exec.Command(pytestPath, "-v", communication, testFile)
+  cmd := exec.Command(pytestPath, "-v", communication, strings.Join(testFiles, " "))
   log.Printf("Complete Testinfra command is: %s", cmd.String())
   cmd.Env = os.Environ()
 
