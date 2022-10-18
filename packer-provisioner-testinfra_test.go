@@ -2,6 +2,7 @@ package main
 
 import (
   "os"
+  "reflect"
   "testing"
   "errors"
 
@@ -11,11 +12,11 @@ import (
 // global helper vars for tests
 var basicTestinfraConfig = &TestinfraConfig{
   PytestPath: "/usr/local/bin/py.test",
-  TestFile:   "fixtures/test.py",
+  TestFiles:  []string{"fixtures/test.py"},
 }
 
 var minTestinfraConfig = &TestinfraConfig{
-  TestFile: "fixtures/test.py",
+  TestFiles: []string{"fixtures/test.py"},
 }
 
 // test config for packer template/config data
@@ -24,7 +25,7 @@ func TestProvisionerConfig(test *testing.T) {
     config: *basicTestinfraConfig,
   }
 
-  if provisioner.config.PytestPath != "/usr/local/bin/py.test" || provisioner.config.TestFile != "fixtures/test.py" {
+  if provisioner.config.PytestPath != "/usr/local/bin/py.test" || !(reflect.DeepEqual(provisioner.config.TestFiles, []string{"fixtures/test.py"})) {
     test.Errorf("Provisioner config struct not initialized correctly")
   }
 }
@@ -81,7 +82,7 @@ func TestProvisionerPrepareNonExistFiles(test *testing.T) {
   // test no pytest
   var noPytestTestinfraConfig = &TestinfraConfig{
     PytestPath: "/home/foo/py.test",
-    TestFile:   "fixtures/test.py",
+    TestFiles:  []string{"fixtures/test.py"},
   }
 
   err := provisioner.Prepare(noPytestTestinfraConfig)
@@ -89,10 +90,10 @@ func TestProvisionerPrepareNonExistFiles(test *testing.T) {
     test.Errorf("Prepare function did not fail on nonexistent pytest")
   }
 
-  // test no testfile
+  // test nonexistent testfile
   var noTestFileTestinfraConfig = &TestinfraConfig{
     PytestPath: "/usr/local/bin/py.test",
-    TestFile:   "/home/foo/test.py",
+    TestFiles:  []string{"fixtures/test.py", "/home/foo/test.py"},
   }
 
   err = provisioner.Prepare(noTestFileTestinfraConfig)
