@@ -20,7 +20,8 @@ import (
 
 // config data from packer template/config
 type TestinfraConfig struct {
-  PytestPath string `mapstructure:"pytest_path"`
+  Processes  int      `mapstructure:"processes"`
+  PytestPath string   `mapstructure:"pytest_path"`
   TestFiles  []string `mapstructure:"test_files"`
 
   ctx interpolate.Context
@@ -47,6 +48,11 @@ func (provisioner *TestinfraProvisioner) Prepare(raws ...interface{}) error {
   if err != nil {
     log.Print("Error decoding the supplied Packer config.")
     return err
+  }
+
+  // set default number of parallel processes
+  if provisioner.config.Processes == 0 {
+    log.Print("Not overriding Testinfra default number of parallel processes.")
   }
 
   // set default executable path for py.test

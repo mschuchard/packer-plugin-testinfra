@@ -11,6 +11,7 @@ import (
 
 // global helper vars for tests
 var basicTestinfraConfig = &TestinfraConfig{
+  Processes:  4,
   PytestPath: "/usr/local/bin/py.test",
   TestFiles:  []string{"fixtures/test.py"},
 }
@@ -25,7 +26,7 @@ func TestProvisionerConfig(test *testing.T) {
     config: *basicTestinfraConfig,
   }
 
-  if provisioner.config.PytestPath != "/usr/local/bin/py.test" || !(reflect.DeepEqual(provisioner.config.TestFiles, []string{"fixtures/test.py"})) {
+  if provisioner.config.PytestPath != "/usr/local/bin/py.test" || !(reflect.DeepEqual(provisioner.config.TestFiles, []string{"fixtures/test.py"})) || provisioner.config.Processes != 4 {
     test.Errorf("Provisioner config struct not initialized correctly")
   }
 }
@@ -55,6 +56,10 @@ func TestProvisionerPrepareMinimal(test *testing.T) {
   err := provisioner.Prepare(minTestinfraConfig)
   if err != nil {
     test.Errorf("Prepare function failed with minimal Testinfra Packer config")
+  }
+
+  if provisioner.config.Processes != 0 {
+    test.Errorf("Default empty setting for Processes is incorrect: %d", provisioner.config.Processes)
   }
 
   if provisioner.config.PytestPath != "py.test" {
