@@ -5,6 +5,7 @@ import (
   "os"
   "os/exec"
   "strings"
+  "strconv"
   "io"
   "fmt"
   "log"
@@ -95,6 +96,17 @@ func (provisioner *TestinfraProvisioner) Provision(ctx context.Context, ui packe
     return err
   }
 
+  // processes
+  var processes int
+  if provisioner.config.Processes != 0 {
+    processes = provisioner.config.Processes
+    if err != nil {
+      log.Printf("Error parsing config for Processes: %v", err.Error())
+      return err
+    }
+  } else {
+    processes = 0
+  }
   // pytest path
   pytestPath, err := interpolate.Render(provisioner.config.PytestPath, &provisioner.config.ctx)
   if err != nil {
@@ -109,7 +121,12 @@ func (provisioner *TestinfraProvisioner) Provision(ctx context.Context, ui packe
   }
 
   // prepare testinfra test command
-  cmd := exec.Command(pytestPath, "-v", communication, strings.Join(testFiles, " "))
+  var cmd *exec.Cmd
+  if processes == 0 {
+    cmd = exec.Command(pytestPath, "-v", communication, strings.Join(testFiles, " "))
+  } else {
+    cmd = exec.Command(pytestPath, "-n", strconv.Itoa(processes), "-v", communication, strings.Join(testFiles, " "))
+  }
   log.Printf("Complete Testinfra command is: %s", cmd.String())
   cmd.Env = os.Environ()
 
