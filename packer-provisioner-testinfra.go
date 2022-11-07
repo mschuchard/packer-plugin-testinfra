@@ -23,6 +23,7 @@ import (
 type TestinfraConfig struct {
   Processes  int      `mapstructure:"processes"`
   PytestPath string   `mapstructure:"pytest_path"`
+  Sudo       bool     `mapstructure:"sudo"`
   TestFiles  []string `mapstructure:"test_files"`
 
   ctx interpolate.Context
