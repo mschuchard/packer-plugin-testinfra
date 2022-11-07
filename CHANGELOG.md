@@ -1,6 +1,7 @@
 ### 1.1.0 (Next)
 - Support multiple TestInfra `test_files`.
 - Support parallel test execution.
+- Support executing tests with sudo.
 
 ### 1.0.1
 - Testinfra WinRM backend support (beta).

@@ -114,7 +114,10 @@ func (provisioner *TestinfraProvisioner) Provision(ctx context.Context, ui packe
   // processes
   optionalArgs := ""
   if provisioner.config.Processes != 0 {
-    optionalArgs = fmt.Sprintf("-n %d", provisioner.config.Processes)
+    optionalArgs = fmt.Sprintf("%s -n %d", optionalArgs, provisioner.config.Processes)
+  }
+  if provisioner.config.Sudo == true {
+    optionalArgs = fmt.Sprintf("%s --sudo", optionalArgs)
   }
 
   // prepare testinfra test command

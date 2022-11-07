@@ -13,6 +13,7 @@ import (
 var basicTestinfraConfig = &TestinfraConfig{
   Processes:  4,
   PytestPath: "/usr/local/bin/py.test",
+  Sudo:       true,
   TestFiles:  []string{"fixtures/test.py"},
 }
 
@@ -26,7 +27,7 @@ func TestProvisionerConfig(test *testing.T) {
     config: *basicTestinfraConfig,
   }
 
-  if provisioner.config.PytestPath != "/usr/local/bin/py.test" || !(reflect.DeepEqual(provisioner.config.TestFiles, []string{"fixtures/test.py"})) || provisioner.config.Processes != 4 {
+  if provisioner.config.PytestPath != "/usr/local/bin/py.test" || !(reflect.DeepEqual(provisioner.config.TestFiles, []string{"fixtures/test.py"})) || provisioner.config.Processes != 4 || provisioner.config.Sudo != true {
     test.Errorf("Provisioner config struct not initialized correctly")
   }
 }
@@ -60,6 +61,10 @@ func TestProvisionerPrepareMinimal(test *testing.T) {
 
   if provisioner.config.Processes != 0 {
     test.Errorf("Default empty setting for Processes is incorrect: %d", provisioner.config.Processes)
+  }
+
+  if provisioner.config.Sudo != false {
+    test.Errorf("Default false setting for Sudo is incorrect: %t", provisioner.config.Sudo)
   }
 
   if provisioner.config.PytestPath != "py.test" {
