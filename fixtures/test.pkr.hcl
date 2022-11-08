@@ -29,7 +29,9 @@ source "virtualbox-vm" "ubuntu" {
 }
 
 build {
-  sources = ["source.docker.ubuntu", "source.virtualbox-vm.ubuntu"]
+  #TODO: vbox plugin bugs
+  #sources = ["source.docker.ubuntu", "source.virtualbox-vm.ubuntu"]
+  sources = ["source.docker.ubuntu"]
 
   provisioner "testinfra" {
     pytest_path = "/usr/local/bin/py.test"
