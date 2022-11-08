@@ -4,7 +4,7 @@ package main
 import (
   "os"
   "os/exec"
-  "strings"
+  "strconv"
   "io"
   "fmt"
   "log"
@@ -90,11 +90,15 @@ func (provisioner *TestinfraProvisioner) Provision(ctx context.Context, ui packe
   provisioner.generatedData = generatedData
   provisioner.config.ctx.Data = generatedData
 
+  // initialize args with base argument
+  args := []string{"-v"}
+
   // assign determined communication string
   communication, err := provisioner.determineCommunication()
   if err != nil {
     return err
   }
+  args = append(args, communication)
 
   // assign mandatory populated values
   // pytest path
@@ -109,19 +113,19 @@ func (provisioner *TestinfraProvisioner) Provision(ctx context.Context, ui packe
     log.Printf("Error parsing config for TestFiles: %v", err.Error())
     return err
   }
+  args = append(args, testFiles...)
 
   // assign optional populated values
   // processes
-  optionalArgs := ""
   if provisioner.config.Processes != 0 {
-    optionalArgs = fmt.Sprintf("%s -n %d", optionalArgs, provisioner.config.Processes)
+    args = append(args, "-n", strconv.Itoa(provisioner.config.Processes))
   }
   if provisioner.config.Sudo == true {
-    optionalArgs = fmt.Sprintf("%s --sudo", optionalArgs)
+    args = append(args, "--sudo")
   }
 
   // prepare testinfra test command
-  cmd := exec.Command(pytestPath, "-v", communication, optionalArgs, strings.Join(testFiles, " "))
+  cmd := exec.Command(pytestPath, args...)
   log.Printf("Complete Testinfra command is: %s", cmd.String())
   cmd.Env = os.Environ()
 
