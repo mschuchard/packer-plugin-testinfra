@@ -2,6 +2,7 @@
 - Support multiple TestInfra `test_files`.
 - Support parallel test execution.
 - Support executing tests with sudo.
+- Support executing tests by marker expression.
 
 ### 1.0.1
 - Testinfra WinRM backend support (beta).

@@ -11,6 +11,7 @@ import (
 
 // global helper vars for tests
 var basicTestinfraConfig = &TestinfraConfig{
+  Marker:     "fast",
   Processes:  4,
   PytestPath: "/usr/local/bin/py.test",
   Sudo:       true,
@@ -21,13 +22,13 @@ var minTestinfraConfig = &TestinfraConfig{
   TestFiles: []string{"fixtures/test.py"},
 }
 
-// test config for packer template/config data
+// test basic config for packer template/config data
 func TestProvisionerConfig(test *testing.T) {
   var provisioner = &TestinfraProvisioner{
     config: *basicTestinfraConfig,
   }
 
-  if provisioner.config.PytestPath != "/usr/local/bin/py.test" || !(reflect.DeepEqual(provisioner.config.TestFiles, []string{"fixtures/test.py"})) || provisioner.config.Processes != 4 || provisioner.config.Sudo != true {
+  if provisioner.config.PytestPath != "/usr/local/bin/py.test" || !(reflect.DeepEqual(provisioner.config.TestFiles, []string{"fixtures/test.py"})) || provisioner.config.Marker != "fast" || provisioner.config.Processes != 4 || provisioner.config.Sudo != true {
     test.Errorf("Provisioner config struct not initialized correctly")
   }
 }
@@ -57,6 +58,10 @@ func TestProvisionerPrepareMinimal(test *testing.T) {
   err := provisioner.Prepare(minTestinfraConfig)
   if err != nil {
     test.Errorf("Prepare function failed with minimal Testinfra Packer config")
+  }
+
+  if provisioner.config.Marker != "" {
+    test.Errorf("Default empty setting for Marker is incorrect: %s", provisioner.config.Marker)
   }
 
   if provisioner.config.Processes != 0 {
