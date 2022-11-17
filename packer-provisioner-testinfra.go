@@ -20,6 +20,7 @@ import (
 
 // config data from packer template/config
 type TestinfraConfig struct {
+  Marker     string   `mapstructure:"marker"`
   Processes  int      `mapstructure:"processes"`
   PytestPath string   `mapstructure:"pytest_path"`
   Sudo       bool     `mapstructure:"sudo"`
@@ -51,10 +52,19 @@ func (provisioner *TestinfraProvisioner) Prepare(raws ...interface{}) error {
     return err
   }
 
-  // set default number of parallel processes
-  if provisioner.config.Processes == 0 {
-    log.Print("Not overriding Testinfra default number of parallel processes.")
+  // log optional arguments
+  if provisioner.config.Marker != "" {
+    log.Printf("Executing tests with marker expression: %s", provisioner.config.Marker)
   }
+
+  log.Printf("Number of Testinfra processes: %d.", provisioner.config.Processes)
+
+  if provisioner.config.Sudo {
+    log.Print("Testinfra will execute with sudo.")
+  } else {
+    log.Print("Testinfra will not execute with sudo.")
+  }
+
 
   // set default executable path for py.test
   if provisioner.config.PytestPath == "" {
@@ -107,13 +117,8 @@ func (provisioner *TestinfraProvisioner) Provision(ctx context.Context, ui packe
     log.Printf("Error parsing config for PytestPath: %v", err.Error())
     return err
   }
-  // testfile
-  testFiles := provisioner.config.TestFiles
-  if err != nil {
-    log.Printf("Error parsing config for TestFiles: %v", err.Error())
-    return err
-  }
-  args = append(args, testFiles...)
+  // testfiles
+  args = append(args, provisioner.config.TestFiles...)
 
   // assign optional populated values
   // processes
