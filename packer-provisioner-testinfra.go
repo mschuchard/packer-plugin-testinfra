@@ -121,10 +121,20 @@ func (provisioner *TestinfraProvisioner) Provision(ctx context.Context, ui packe
   args = append(args, provisioner.config.TestFiles...)
 
   // assign optional populated values
+  // marker
+  marker, err := interpolate.Render(provisioner.config.Marker, &provisioner.config.ctx)
+  if err != nil {
+    log.Printf("Error parsing config for Marker: %v", err.Error())
+    return err
+  }
+  if marker != "" {
+    args = append(args, "-m", marker)
+  }
   // processes
   if provisioner.config.Processes != 0 {
     args = append(args, "-n", strconv.Itoa(provisioner.config.Processes))
   }
+  // sudo
   if provisioner.config.Sudo == true {
     args = append(args, "--sudo")
   }
