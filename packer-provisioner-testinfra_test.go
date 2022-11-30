@@ -204,6 +204,26 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
     test.Errorf("Communication string incorrectly determined: %s", communication)
   }
 
+  // test lxc
+  generatedData = map[string]interface{}{
+    "ConnType": "lxc",
+    "User": "me",
+    "Host": "192.168.0.1",
+    "Port": int64(0),
+    "PackerHTTPAddr": "",
+    "ID": "1234567890abcdefg",
+  }
+
+  provisioner.generatedData = generatedData
+
+  communication, err = provisioner.determineCommunication()
+  if err != nil {
+    test.Errorf("determineCommunication function failed to determine lxc: %s", err)
+  }
+  if communication != "--hosts=lxc://1234567890abcdefg" {
+    test.Errorf("Communication string incorrectly determined: %s", communication)
+  }
+
   // test fails on no communication
   generatedData = map[string]interface{}{
     "ConnType": "unknown",

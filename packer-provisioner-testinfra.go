@@ -240,6 +240,8 @@ func (provisioner *TestinfraProvisioner) determineCommunication() (string, error
     communication = fmt.Sprintf("--hosts=docker://%s", instanceID)
   case "podman":
     communication = fmt.Sprintf("--hosts=podman://%s", instanceID)
+  case "lxc":
+    communication = fmt.Sprintf("--hosts=lxc://%s", instanceID)
   }
   if len(communication) == 0 {
     return "", fmt.Errorf("Communication with machine image could not be properly determined")
