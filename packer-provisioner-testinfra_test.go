@@ -184,6 +184,26 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
     test.Errorf("Communication string incorrectly determined: %s", communication)
   }
 
+  // test podman
+  generatedData = map[string]interface{}{
+    "ConnType": "podman",
+    "User": "me",
+    "Host": "192.168.0.1",
+    "Port": int64(0),
+    "PackerHTTPAddr": "",
+    "ID": "1234567890abcdefg",
+  }
+
+  provisioner.generatedData = generatedData
+
+  communication, err = provisioner.determineCommunication()
+  if err != nil {
+    test.Errorf("determineCommunication function failed to determine podman: %s", err)
+  }
+  if communication != "--hosts=podman://1234567890abcdefg" {
+    test.Errorf("Communication string incorrectly determined: %s", communication)
+  }
+
   // test fails on no communication
   generatedData = map[string]interface{}{
     "ConnType": "unknown",
