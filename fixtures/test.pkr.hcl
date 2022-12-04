@@ -29,7 +29,7 @@ source "virtualbox-vm" "ubuntu" {
 }
 
 build {
-  #TODO: vbox plugin bugs
+  #TODO: https://github.com/hashicorp/packer-plugin-virtualbox/issues/77
   #sources = ["source.docker.ubuntu", "source.virtualbox-vm.ubuntu"]
   sources = ["source.docker.ubuntu"]
 

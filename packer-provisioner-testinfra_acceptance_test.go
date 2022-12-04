@@ -48,7 +48,7 @@ func TestTestinfraProvisioner(test *testing.T) {
       if docker_matched, _ := regexp.MatchString("docker.ubuntu: Testing machine image with Testinfra.*", logsString); !docker_matched {
         test.Fatalf("Logs do not contain expected docker testinfra value %q", logsString)
       }
-      //TODO: vbox plugin bugs
+      //TODO: https://github.com/hashicorp/packer-plugin-virtualbox/issues/77
       /*if vbox_matched, _ := regexp.MatchString("virtualbox-vm.ubuntu: Testing machine image with Testinfra.*", logsString); !vbox_matched {
         test.Fatalf("Logs do not contain expected virtualbox testinfra value %q", logsString)
       }*/

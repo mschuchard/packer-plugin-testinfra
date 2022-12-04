@@ -1,3 +1,5 @@
+### 1.1.1 (Next)
+
 ### 1.1.0
 - Support multiple TestInfra `test_files`.
 - Support parallel test execution.
