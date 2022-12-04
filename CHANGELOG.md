@@ -1,4 +1,4 @@
-### 1.1.0 (Next)
+### 1.1.0
 - Support multiple TestInfra `test_files`.
 - Support parallel test execution.
 - Support executing tests with sudo.

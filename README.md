@@ -9,7 +9,7 @@ This plugin requires Packer version >= 1.7.0 due to the modern SDK usage. A simp
 packer {
   required_plugins {
     testinfra = {
-      version = "~> 1.0.0"
+      version = "~> 1.1.0"
       source  = "github.com/mschuchard/testinfra"
     }
   }
@@ -27,22 +27,28 @@ A basic example for usage of this plugin follows below:
 ```hcl
 build {
   provisioner "testinfra" {
+    processes   = 2
     pytest_path = "/usr/local/bin/py.test"
-    test_file   = "${path.root}/test.py"
+    sudo        = false
+    test_files  = ["${path.root}/test.py"]
   }
 }
 ```
 
 ### Arguments
 
+- **processes**: The number of parallel processes for Testinfra test execution.  
+default: `null`
 - **pytest_path**: The path to the installed `py.test` executable for initiating the Testinfra tests.  
 default: `py.test`
-- **test_file**: The path to the file containing the Testinfra tests for execution and validation of the machine image artifact.  
+- **sudo**: Whether or not to execute the tests with `sudo` elevated permissions.  
+default: false
+- **test_files**: The paths to the files containing the Testinfra tests for execution and validation of the machine image artifact.  
 default: `null`
 
 ### Communicators
 
-This plugin currently supports the `ssh` and `docker` communicator types. It also supports the `winrm` communicator as a beta feature. Please ensure that SSH or WinRM is enabled for the built image if it is not a Docker image.
+This plugin currently supports the `ssh` and `docker` communicator types. It also supports the `winrm`, `lxc`, and `podman` communicator types as a beta feature. Please ensure that SSH or WinRM is enabled for the built image if it is not a Docker, LXC, or Podman image.
 
 ## Contributing
 Code should pass all unit and acceptance tests. New features should involve new unit tests.
