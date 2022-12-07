@@ -100,47 +100,11 @@ func (provisioner *TestinfraProvisioner) Provision(ctx context.Context, ui packe
   provisioner.generatedData = generatedData
   provisioner.config.ctx.Data = generatedData
 
-  // initialize args with base argument
-  args := []string{"-v"}
-
-  // assign determined communication string
-  communication, err := provisioner.determineCommunication()
-  if err != nil {
-    return err
-  }
-  args = append(args, communication)
-
-  // assign mandatory populated values
-  // pytest path
-  pytestPath, err := interpolate.Render(provisioner.config.PytestPath, &provisioner.config.ctx)
-  if err != nil {
-    log.Printf("Error parsing config for PytestPath: %v", err.Error())
-    return err
-  }
-  // testfiles
-  args = append(args, provisioner.config.TestFiles...)
-
-  // assign optional populated values
-  // marker
-  marker, err := interpolate.Render(provisioner.config.Marker, &provisioner.config.ctx)
-  if err != nil {
-    log.Printf("Error parsing config for Marker: %v", err.Error())
-    return err
-  }
-  if marker != "" {
-    args = append(args, "-m", marker)
-  }
-  // processes
-  if provisioner.config.Processes != 0 {
-    args = append(args, "-n", strconv.Itoa(provisioner.config.Processes))
-  }
-  // sudo
-  if provisioner.config.Sudo == true {
-    args = append(args, "--sudo")
-  }
-
   // prepare testinfra test command
-  cmd := exec.Command(pytestPath, args...)
+  cmd, err := provisioner.determineExecCmd()
+  if err != nil {
+    return err
+  }
   log.Printf("Complete Testinfra command is: %s", cmd.String())
   cmd.Env = os.Environ()
 
@@ -193,6 +157,50 @@ func (provisioner *TestinfraProvisioner) Provision(ctx context.Context, ui packe
   ui.Say("Testinfra machine image testing is complete")
 
   return nil
+}
+
+// determine and return execution command for testinfra
+func (provisioner *TestinfraProvisioner) determineExecCmd() (*exec.Cmd, error) {
+  // initialize args with base argument
+  args := []string{"-v"}
+
+  // assign determined communication string
+  communication, err := provisioner.determineCommunication()
+  if err != nil {
+    return nil, err
+  }
+  args = append(args, communication)
+
+  // assign mandatory populated values
+  // pytest path
+  pytestPath, err := interpolate.Render(provisioner.config.PytestPath, &provisioner.config.ctx)
+  if err != nil {
+    log.Printf("Error parsing config for PytestPath: %v", err.Error())
+    return nil, err
+  }
+  // testfiles
+  args = append(args, provisioner.config.TestFiles...)
+
+  // assign optional populated values
+  // marker
+  marker, err := interpolate.Render(provisioner.config.Marker, &provisioner.config.ctx)
+  if err != nil {
+    log.Printf("Error parsing config for Marker: %v", err.Error())
+    return nil, err
+  }
+  if marker != "" {
+    args = append(args, "-m", marker)
+  }
+  // processes
+  if provisioner.config.Processes != 0 {
+    args = append(args, "-n", strconv.Itoa(provisioner.config.Processes))
+  }
+  // sudo
+  if provisioner.config.Sudo == true {
+    args = append(args, "--sudo")
+  }
+
+  return exec.Command(pytestPath, args...), nil
 }
 
 // determine and return appropriate communication string for pytest/testinfra
@@ -250,7 +258,7 @@ func (provisioner *TestinfraProvisioner) determineCommunication() (string, error
   return communication, nil
 }
 
-// determine ssh authentication
+// determine and return ssh authentication
 func (provisioner *TestinfraProvisioner) determineSSHAuth(sshPrivateKeyFile string, sshAgentAuth bool) (string, error) {
   if sshPrivateKeyFile != "" || sshAgentAuth {
     // we have a legitimate private key file, so use that
