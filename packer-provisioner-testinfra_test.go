@@ -3,6 +3,7 @@ package main
 import (
   "os"
   "reflect"
+  "regexp"
   "testing"
   "errors"
 
@@ -300,9 +301,15 @@ func TestProvisionerDetermineSSHAuth(test *testing.T) {
     test.Errorf("ssh private key file empty location incorrectly determined: %s", sshPrivateKeyFile)
   }
 
-  // test successfully creates tmpfile for private key
+  // test successfully creates tmpfile with expected content for private key
   sshPrivateKeyFile, err = provisioner.determineSSHAuth("", false)
   if err != nil {
     test.Errorf("determineSSHAuth failed to create tmpfile and return location of written ssh private key: %s", err)
+  }
+  if matched, _ := regexp.Match(`/tmp/testinfra-key\d+`, []byte(sshPrivateKeyFile)); !matched {
+    test.Errorf("temporary ssh private key file was not created in the expected location: %s", sshPrivateKeyFile)
+  }
+  if sshPrivateKey, _ := os.ReadFile(sshPrivateKeyFile); string(sshPrivateKey) != generatedData["SSHPrivateKey"] {
+    test.Errorf("temporary ssh key file content is not the ssh private key: %s", sshPrivateKey)
   }
 }
