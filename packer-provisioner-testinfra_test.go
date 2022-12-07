@@ -117,6 +117,35 @@ func TestProvisionerPrepareNonExistFiles(test *testing.T) {
   }
 }
 
+// test provisioner determineExecCmd properly determines execution command
+func TestProvisionerCmdExec(test *testing.T) {
+  // test basic config with ssh generated data
+  var provisioner = &TestinfraProvisioner{
+    config: *basicTestinfraConfig,
+  }
+
+  generatedData := map[string]interface{}{
+    "ConnType": "ssh",
+    "User": "me",
+    "SSHPrivateKeyFile": "/path/to/sshprivatekeyfile",
+    "SSHAgentAuth": true,
+    "Host": "192.168.0.1",
+    "Port": int64(22),
+    "PackerHTTPAddr": "192.168.0.1:8200",
+    "ID": "1234567890",
+  }
+
+  provisioner.generatedData = generatedData
+
+  execCmd, err := provisioner.determineExecCmd()
+  if err != nil {
+    test.Errorf("determineExecCmd function failed to determine execution command for basic config with SSH communicator: %s", err)
+  }
+  if execCmd.String() != "/usr/local/bin/py.test -v --hosts=me@192.168.0.1:22 --ssh-identity-file=/path/to/sshprivatekeyfile --ssh-extra-args=\"-o StrictHostKeyChecking=no\" fixtures/test.py -m fast -n 4 --sudo" {
+    test.Errorf("determineExecCmd function failed to properly determine execution command for basic config with SSH communicator: %s", execCmd.String())
+  }
+}
+
 // test provisioner determineCommunication properly determines communication strings
 func TestProvisionerDetermineCommunication(test *testing.T) {
   var provisioner TestinfraProvisioner
