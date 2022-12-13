@@ -1,8 +1,10 @@
 package main
 
 import (
+  "fmt"
   "os"
   "reflect"
+  "strings"
   "regexp"
   "testing"
   "errors"
@@ -28,8 +30,9 @@ func TestProvisionerConfig(test *testing.T) {
   var provisioner = &TestinfraProvisioner{
     config: *basicTestinfraConfig,
   }
+  configInput := *basicTestinfraConfig
 
-  if provisioner.config.PytestPath != "/usr/local/bin/py.test" || !(reflect.DeepEqual(provisioner.config.TestFiles, []string{"fixtures/test.py"})) || provisioner.config.Marker != "fast" || provisioner.config.Processes != 4 || provisioner.config.Sudo != true {
+  if provisioner.config.PytestPath != configInput.PytestPath || !(reflect.DeepEqual(provisioner.config.TestFiles, configInput.TestFiles)) || provisioner.config.Marker != configInput.Marker || provisioner.config.Processes != configInput.Processes || provisioner.config.Sudo != configInput.Sudo {
     test.Errorf("Provisioner config struct not initialized correctly")
   }
 }
@@ -103,7 +106,7 @@ func TestProvisionerPrepareNonExistFiles(test *testing.T) {
 
   err := provisioner.Prepare(noPytestTestinfraConfig)
   if !(errors.Is(err, os.ErrNotExist)) {
-    test.Errorf("Prepare function did not fail on nonexistent pytest")
+    test.Errorf("Prepare function did not fail correctly on nonexistent pytest")
   }
 
   // test nonexistent testfile
@@ -114,7 +117,7 @@ func TestProvisionerPrepareNonExistFiles(test *testing.T) {
 
   err = provisioner.Prepare(noTestFileTestinfraConfig)
   if !(errors.Is(err, os.ErrNotExist)) {
-    test.Errorf("Prepare function did not fail on nonexistent testfile")
+    test.Errorf("Prepare function did not fail correctly on nonexistent testfile")
   }
 }
 
@@ -142,7 +145,7 @@ func TestProvisionerCmdExec(test *testing.T) {
   if err != nil {
     test.Errorf("determineExecCmd function failed to determine execution command for basic config with SSH communicator: %s", err)
   }
-  if execCmd.String() != "/usr/local/bin/py.test -v --hosts=me@192.168.0.1:22 --ssh-identity-file=/path/to/sshprivatekeyfile --ssh-extra-args=\"-o StrictHostKeyChecking=no\" fixtures/test.py -m fast -n 4 --sudo" {
+  if execCmd.String() != fmt.Sprintf("%s -v --hosts=%s@%s:%d --ssh-identity-file=%s --ssh-extra-args=\"-o StrictHostKeyChecking=no\" %s -m %s -n %d --sudo", provisioner.config.PytestPath, generatedData["User"], generatedData["Host"], generatedData["Port"], generatedData["SSHPrivateKeyFile"], strings.Join(provisioner.config.TestFiles, ""), provisioner.config.Marker, provisioner.config.Processes) {
     test.Errorf("determineExecCmd function failed to properly determine execution command for basic config with SSH communicator: %s", execCmd.String())
   }
 }
@@ -169,7 +172,7 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
   if err != nil {
     test.Errorf("determineCommunication function failed to determine ssh: %s", err)
   }
-  if communication != "--hosts=me@192.168.0.1:22 --ssh-identity-file=/path/to/sshprivatekeyfile --ssh-extra-args=\"-o StrictHostKeyChecking=no\"" {
+  if communication != fmt.Sprintf("--hosts=%s@%s:%d --ssh-identity-file=%s --ssh-extra-args=\"-o StrictHostKeyChecking=no\"", generatedData["User"], generatedData["Host"], generatedData["Port"], generatedData["SSHPrivateKeyFile"]) {
     test.Errorf("Communication string incorrectly determined: %s", communication)
   }
 
@@ -190,7 +193,7 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
   if err != nil {
     test.Errorf("determineCommunication function failed to determine winrm: %s", err)
   }
-  if communication != "--hosts=winrm://me:password@192.168.0.1:5986" {
+  if communication != fmt.Sprintf("--hosts=winrm://%s:%s@%s", generatedData["User"], generatedData["Password"], generatedData["PackerHTTPAddr"]) {
     test.Errorf("Communication string incorrectly determined: %s", communication)
   }
 
@@ -210,7 +213,7 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
   if err != nil {
     test.Errorf("determineCommunication function failed to determine docker: %s", err)
   }
-  if communication != "--hosts=docker://1234567890abcdefg" {
+  if communication != fmt.Sprintf("--hosts=docker://%s", generatedData["ID"]) {
     test.Errorf("Communication string incorrectly determined: %s", communication)
   }
 
@@ -230,7 +233,7 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
   if err != nil {
     test.Errorf("determineCommunication function failed to determine podman: %s", err)
   }
-  if communication != "--hosts=podman://1234567890abcdefg" {
+  if communication != fmt.Sprintf("--hosts=podman://%s", generatedData["ID"]) {
     test.Errorf("Communication string incorrectly determined: %s", communication)
   }
 
@@ -250,7 +253,7 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
   if err != nil {
     test.Errorf("determineCommunication function failed to determine lxc: %s", err)
   }
-  if communication != "--hosts=lxc://1234567890abcdefg" {
+  if communication != fmt.Sprintf("--hosts=lxc://%s", generatedData["ID"]) {
     test.Errorf("Communication string incorrectly determined: %s", communication)
   }
 
@@ -280,15 +283,16 @@ func TestProvisionerDetermineSSHAuth(test *testing.T) {
   generatedData := map[string]interface{}{
     "SSHPrivateKey": "abcdefg12345",
   }
+  sshPrivateKeyFileInput := "/tmp/sshprivatekeyfile"
 
   provisioner.generatedData = generatedData
 
   // test successfully returns ssh private key file location
-  sshPrivateKeyFile, err := provisioner.determineSSHAuth("/tmp/sshprivatekeyfile", false)
+  sshPrivateKeyFile, err := provisioner.determineSSHAuth(sshPrivateKeyFileInput, false)
   if err != nil {
     test.Errorf("determineSSHAuth failed to determine ssh private key file location: %s", err)
   }
-  if sshPrivateKeyFile != "/tmp/sshprivatekeyfile" {
+  if sshPrivateKeyFile != sshPrivateKeyFileInput {
     test.Errorf("ssh private key file location incorrectly determined: %s", sshPrivateKeyFile)
   }
 
