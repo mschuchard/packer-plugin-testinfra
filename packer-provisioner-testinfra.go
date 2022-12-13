@@ -236,8 +236,16 @@ func (provisioner *TestinfraProvisioner) determineCommunication() (string, error
 
     communication = fmt.Sprintf("--hosts=%s@%s --ssh-identity-file=%s --ssh-extra-args=\"-o StrictHostKeyChecking=no\"", user, httpAddr, sshPrivateKeyFile)
   case "winrm":
-    // assign winrm password
-    winRMPassword := provisioner.generatedData["Password"]
+    // assign winrm password preferably from winrmpassword
+    winRMPassword, ok := provisioner.generatedData["WinRMPassword"].(string)
+    // otherwise retry with general password
+    if !ok {
+      winRMPassword, ok = provisioner.generatedData["Password"].(string)
+    }
+    // no winrm password available
+    if !ok {
+      return "", fmt.Errorf("WinRM communicator password could not be determined from available Packer data.")
+    }
 
     communication = fmt.Sprintf("--hosts=winrm://%s:%s@%s", user, winRMPassword, httpAddr)
   case "docker":

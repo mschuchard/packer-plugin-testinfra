@@ -1,4 +1,5 @@
 ### 1.1.1 (Next)
+- Improve WinRM password determination.
 
 ### 1.1.0
 - Support multiple TestInfra `test_files`.
