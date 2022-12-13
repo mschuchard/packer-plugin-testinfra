@@ -65,7 +65,6 @@ func (provisioner *TestinfraProvisioner) Prepare(raws ...interface{}) error {
     log.Print("Testinfra will not execute with sudo.")
   }
 
-
   // set default executable path for py.test
   if provisioner.config.PytestPath == "" {
     log.Print("Setting PytestPath to default 'py.test'")
@@ -77,10 +76,10 @@ func (provisioner *TestinfraProvisioner) Prepare(raws ...interface{}) error {
     }
   }
 
-  // verify testinfra file exists
+  // verify testinfra files are specified as inputs
   if len(provisioner.config.TestFiles) == 0 {
     return fmt.Errorf("The Testinfra test_files were not specified")
-  } else {
+  } else { // verify testinfra files exist
     for _, testFile := range provisioner.config.TestFiles {
       if _, err := os.Stat(testFile); errors.Is(err, os.ErrNotExist) {
         log.Printf("The Testinfra test_file does not exist at: %s", testFile)
@@ -218,10 +217,7 @@ func (provisioner *TestinfraProvisioner) determineCommunication() (string, error
 
   // parse generated data for optional values
   //uuid := provisioner.generatedData["PackerRunUUID"].(string)
-  //password := provisioner.generatedData["Password"].(string)
-  //sshPubKey := provisioner.generatedData["SSHPublicKey"].(string)
-  //sshPrivKey := provisioner.generatedData["SSHPrivateKey"].(string)
-  //winRMPassword := provisioner.generatedData["WinRMPassword"].(string)
+  //sshPassword := provisioner.generatedData["SSHPassword"].(string)
 
   // determine communication string by packer connection type
   log.Printf("Testinfra communicating via %s connection type", connectionType)
