@@ -232,11 +232,13 @@ func (provisioner *TestinfraProvisioner) determineCommunication() (string, error
     }
 
     // use ssh private key file if it exists
+    sshIdentity := " "
     if len(sshPrivateKeyFile) > 0 {
       log.Printf("SSH private key filesystem location is: %s", sshPrivateKeyFile)
+      sshIdentity = fmt.Sprintf(" --ssh-identity-file=%s ", sshPrivateKeyFile)
     }
 
-    communication = fmt.Sprintf("--hosts=%s@%s --ssh-identity-file=%s --ssh-extra-args=\"-o StrictHostKeyChecking=no\"", user, httpAddr, sshPrivateKeyFile)
+    communication = fmt.Sprintf("--hosts=%s@%s%s--ssh-extra-args=\"-o StrictHostKeyChecking=no\"", user, httpAddr, sshIdentity)
   case "winrm":
     // assign winrm password preferably from winrmpassword
     winRMPassword, ok := provisioner.generatedData["WinRMPassword"].(string)

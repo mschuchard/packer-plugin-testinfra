@@ -159,7 +159,7 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
     "ConnType": "ssh",
     "User": "me",
     "SSHPrivateKeyFile": "/path/to/sshprivatekeyfile",
-    "SSHAgentAuth": true,
+    "SSHAgentAuth": false,
     "Host": "192.168.0.1",
     "Port": int64(22),
     "PackerHTTPAddr": "192.168.0.1:8200",
@@ -173,6 +173,20 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
     test.Errorf("determineCommunication function failed to determine ssh: %s", err)
   }
   if communication != fmt.Sprintf("--hosts=%s@%s:%d --ssh-identity-file=%s --ssh-extra-args=\"-o StrictHostKeyChecking=no\"", generatedData["User"], generatedData["Host"], generatedData["Port"], generatedData["SSHPrivateKeyFile"]) {
+    test.Errorf("Communication string incorrectly determined: %s", communication)
+  }
+
+  // test ssh with no private key but with agent auth
+  generatedData["SSHPrivateKeyFile"] = ""
+  generatedData["SSHAgentAuth"] =  true
+
+  provisioner.generatedData = generatedData
+
+  communication, err = provisioner.determineCommunication()
+  if err != nil {
+    test.Errorf("determineCommunication function failed to determine ssh: %s", err)
+  }
+  if communication != fmt.Sprintf("--hosts=%s@%s:%d --ssh-extra-args=\"-o StrictHostKeyChecking=no\"", generatedData["User"], generatedData["Host"], generatedData["Port"]) {
     test.Errorf("Communication string incorrectly determined: %s", communication)
   }
 
