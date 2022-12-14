@@ -176,7 +176,7 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
     test.Errorf("Communication string incorrectly determined: %s", communication)
   }
 
-  // test winrm with empty host and port
+  // test winrm with empty host, port, and winrmpassword
   generatedData = map[string]interface{}{
     "ConnType": "winrm",
     "User": "me",
@@ -195,6 +195,15 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
   }
   if communication != fmt.Sprintf("--hosts=winrm://%s:%s@%s", generatedData["User"], generatedData["Password"], generatedData["PackerHTTPAddr"]) {
     test.Errorf("Communication string incorrectly determined: %s", communication)
+  }
+
+  // test fails on no winrmpassword or password
+  delete(generatedData, "Password")
+  provisioner.generatedData = generatedData
+
+  _, err = provisioner.determineCommunication()
+  if err == nil {
+    test.Errorf("DetermineCommunication function did not fail on no available password")
   }
 
   // test docker
