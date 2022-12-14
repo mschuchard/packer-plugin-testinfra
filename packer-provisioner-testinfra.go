@@ -53,7 +53,7 @@ func (provisioner *TestinfraProvisioner) Prepare(raws ...interface{}) error {
   }
 
   // log optional arguments
-  if provisioner.config.Marker != "" {
+  if len(provisioner.config.Marker) > 0 {
     log.Printf("Executing tests with marker expression: %s", provisioner.config.Marker)
   }
 
@@ -66,7 +66,7 @@ func (provisioner *TestinfraProvisioner) Prepare(raws ...interface{}) error {
   }
 
   // set default executable path for py.test
-  if provisioner.config.PytestPath == "" {
+  if len(provisioner.config.PytestPath) == 0 {
     log.Print("Setting PytestPath to default 'py.test'")
     provisioner.config.PytestPath = "py.test"
   } else { // verify py.test exists at supplied path
@@ -187,7 +187,7 @@ func (provisioner *TestinfraProvisioner) determineExecCmd() (*exec.Cmd, error) {
     log.Printf("Error parsing config for Marker: %v", err.Error())
     return nil, err
   }
-  if marker != "" {
+  if len(marker) > 0 {
     args = append(args, "-m", marker)
   }
   // processes
@@ -226,13 +226,15 @@ func (provisioner *TestinfraProvisioner) determineCommunication() (string, error
   switch connectionType {
   case "ssh":
     // assign ssh private key file
-    sshPrivateKeyFile := provisioner.generatedData["SSHPrivateKeyFile"].(string)
-    sshAgentAuth := provisioner.generatedData["SSHAgentAuth"].(bool)
-    sshPrivateKeyFile, err := provisioner.determineSSHAuth(sshPrivateKeyFile, sshAgentAuth)
+    sshPrivateKeyFile, err := provisioner.determineSSHAuth()
     if err != nil {
       return "", err
     }
-    log.Printf("SSH private key filesystem location is: %s", sshPrivateKeyFile)
+
+    // use ssh private key file if it exists
+    if len(sshPrivateKeyFile) > 0 {
+      log.Printf("SSH private key filesystem location is: %s", sshPrivateKeyFile)
+    }
 
     communication = fmt.Sprintf("--hosts=%s@%s --ssh-identity-file=%s --ssh-extra-args=\"-o StrictHostKeyChecking=no\"", user, httpAddr, sshPrivateKeyFile)
   case "winrm":
@@ -263,8 +265,12 @@ func (provisioner *TestinfraProvisioner) determineCommunication() (string, error
 }
 
 // determine and return ssh authentication
-func (provisioner *TestinfraProvisioner) determineSSHAuth(sshPrivateKeyFile string, sshAgentAuth bool) (string, error) {
-  if sshPrivateKeyFile != "" || sshAgentAuth {
+func (provisioner *TestinfraProvisioner) determineSSHAuth() (string, error) {
+  // parse generated data for ssh auth info
+  sshPrivateKeyFile := provisioner.generatedData["SSHPrivateKeyFile"].(string)
+  sshAgentAuth := provisioner.generatedData["SSHAgentAuth"].(bool)
+
+  if len(sshPrivateKeyFile) > 0 || sshAgentAuth {
     // we have a legitimate private key file, so use that
     return sshPrivateKeyFile, nil
   } else {

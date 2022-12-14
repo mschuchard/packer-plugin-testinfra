@@ -64,7 +64,7 @@ func TestProvisionerPrepareMinimal(test *testing.T) {
     test.Errorf("Prepare function failed with minimal Testinfra Packer config")
   }
 
-  if provisioner.config.Marker != "" {
+  if len(provisioner.config.Marker) > 0 {
     test.Errorf("Default empty setting for Marker is incorrect: %s", provisioner.config.Marker)
   }
 
@@ -290,32 +290,44 @@ func TestProvisionerDetermineSSHAuth(test *testing.T) {
 
   // dummy up fake ssh private key
   generatedData := map[string]interface{}{
-    "SSHPrivateKey": "abcdefg12345",
+    "SSHPrivateKey":     "abcdefg12345",
+    "SSHPrivateKeyFile": "/tmp/sshprivatekeyfile",
+    "SSHAgentAuth":      false,
   }
-  sshPrivateKeyFileInput := "/tmp/sshprivatekeyfile"
 
   provisioner.generatedData = generatedData
 
   // test successfully returns ssh private key file location
-  sshPrivateKeyFile, err := provisioner.determineSSHAuth(sshPrivateKeyFileInput, false)
+  sshPrivateKeyFile, err := provisioner.determineSSHAuth()
   if err != nil {
     test.Errorf("determineSSHAuth failed to determine ssh private key file location: %s", err)
   }
-  if sshPrivateKeyFile != sshPrivateKeyFileInput {
+  if sshPrivateKeyFile != generatedData["SSHPrivateKeyFile"] {
     test.Errorf("ssh private key file location incorrectly determined: %s", sshPrivateKeyFile)
   }
 
+  // modify to empty ssh key and yes to ssh agent auth
+  generatedData["SSHPrivateKeyFile"] = ""
+  generatedData["SSHAgentAuth"] = true
+
+  provisioner.generatedData = generatedData
+
   // test successfully uses empty ssh private key file
-  sshPrivateKeyFile, err = provisioner.determineSSHAuth("", true)
+  sshPrivateKeyFile, err = provisioner.determineSSHAuth()
   if err != nil {
     test.Errorf("determineSSHAuth failed to determine keyless ssh: %s", err)
   }
-  if sshPrivateKeyFile != "" {
+  if len(sshPrivateKeyFile) > 0 {
     test.Errorf("ssh private key file empty location incorrectly determined: %s", sshPrivateKeyFile)
   }
 
+  // modify to no ssh agent auth
+  generatedData["SSHAgentAuth"] = false
+
+  provisioner.generatedData = generatedData
+
   // test successfully creates tmpfile with expected content for private key
-  sshPrivateKeyFile, err = provisioner.determineSSHAuth("", false)
+  sshPrivateKeyFile, err = provisioner.determineSSHAuth()
   if err != nil {
     test.Errorf("determineSSHAuth failed to create tmpfile and return location of written ssh private key: %s", err)
   }
