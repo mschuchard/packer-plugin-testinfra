@@ -16,7 +16,7 @@ packer {
 }
 ```
 
-Afterwards, `packer init` can automatically manage your plugin as per normal. Note that this plugin currently does not manage your Testinfra installation, and you will need to install that as a prerequisite for this plguin to function correctly.
+Afterwards, `packer init` can automatically manage your plugin as per normal. Note that this plugin currently does not manage your Testinfra installation, and you will need to install that as a prerequisite for this plugin to function correctly.
 
 ## Usage
 
@@ -37,14 +37,13 @@ build {
 
 ### Arguments
 
-- **processes**: The number of parallel processes for Testinfra test execution.  
-default: `null`
-- **pytest_path**: The path to the installed `py.test` executable for initiating the Testinfra tests.  
-default: `py.test`
-- **sudo**: Whether or not to execute the tests with `sudo` elevated permissions.  
-default: false
-- **test_files**: The paths to the files containing the Testinfra tests for execution and validation of the machine image artifact.  
-default: `null`
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| **marker** | Marker expression for test execution. | string | "" | no |
+| **processes** | The number of parallel processes for Testinfra test execution. | number | 0 | no |
+| **pytest_path** | The path to the installed `py.test` executable for initiating the Testinfra tests. | string | "py.test" | no |
+| **sudo** | Whether or not to execute the tests with `sudo` elevated permissions. | bool | false | no |
+| **test_files** | The paths to the files containing the Testinfra tests for execution and validation of the machine image artifact. | list(string) | [] | yes |
 
 ### Communicators
 

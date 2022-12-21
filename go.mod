@@ -3,6 +3,7 @@ module github.com/mschuchard/packer-provisioner-testinfra/v2
 go 1.18
 
 require (
+	// cannot be updated because of go-cty incompat
 	github.com/hashicorp/hcl/v2 v2.14.1
 	github.com/hashicorp/packer-plugin-sdk v0.3.2
 	// https://github.com/hashicorp/packer-plugin-sdk/issues/131, https://github.com/zclconf/go-cty/issues/134
