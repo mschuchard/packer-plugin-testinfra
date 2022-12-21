@@ -35,6 +35,15 @@ type TestinfraProvisioner struct{
   generatedData map[string]interface{}
 }
 
+// ssh auth type
+type SSHAuth string
+
+const (
+  passwordSSHAuth   SSHAuth = "password"
+  agentSSHAuth      SSHAuth = "agent"
+  privateKeySSHAuth SSHAuth = "privateKey"
+)
+
 // implements configspec with hcl2spec helper function
 func (provisioner *TestinfraProvisioner) ConfigSpec() hcldec.ObjectSpec {
   return provisioner.config.FlatMapstructure().HCL2Spec()
@@ -225,7 +234,7 @@ func (provisioner *TestinfraProvisioner) determineCommunication() (string, error
   switch connectionType {
   case "ssh":
     // assign ssh private key file
-    sshPrivateKeyFile, err := provisioner.determineSSHAuth()
+    sshAuthType, sshPrivateKeyFile, err := provisioner.determineSSHAuth()
     if err != nil {
       return "", err
     }
@@ -266,7 +275,7 @@ func (provisioner *TestinfraProvisioner) determineCommunication() (string, error
 }
 
 // determine and return ssh authentication
-func (provisioner *TestinfraProvisioner) determineSSHAuth() (string, error) {
+func (provisioner *TestinfraProvisioner) determineSSHAuth() (SSHAuth, string, error) {
   // assign ssh password preferably from sshpassword
   sshPassword, ok := provisioner.generatedData["SSHPassword"].(string)
 
@@ -277,20 +286,23 @@ func (provisioner *TestinfraProvisioner) determineSSHAuth() (string, error) {
 
   // ssh is being used with password auth and we have a password
   if ok {
-    return sshPassword, nil
+    return passwordSSHAuth, sshPassword, nil
   } else { // ssh is being used with private key or agent auth so determine that instead
     // parse generated data for ssh private key and agent auth info
     sshPrivateKeyFile := provisioner.generatedData["SSHPrivateKeyFile"].(string)
     sshAgentAuth := provisioner.generatedData["SSHAgentAuth"].(bool)
 
-    // we have a legitimate private key file, so use that
-    if len(sshPrivateKeyFile) > 0 || sshAgentAuth {
-      return sshPrivateKeyFile, nil
+    if len(sshPrivateKeyFile) > 0 {
+      // we have a legitimate private key file so use that
+      return privateKeySSHAuth, sshPrivateKeyFile, nil
+    } else if sshAgentAuth {
+      // we can use an empty private key with ssh agent auth
+      return agentSSHAuth, sshPrivateKeyFile, nil
     } else { // create a private key file instead
       // write a tmpfile for storing a private key
       tmpSSHPrivateKey, err := tmp.File("testinfra-key")
       if err != nil {
-        return "", fmt.Errorf("Error creating a temp file for the ssh private key: %v", err)
+        return "", "", fmt.Errorf("Error creating a temp file for the ssh private key: %v", err)
       }
 
       // attempt to obtain a private key
@@ -299,16 +311,16 @@ func (provisioner *TestinfraProvisioner) determineSSHAuth() (string, error) {
       // write the private key to the tmpfile
       _, err = tmpSSHPrivateKey.WriteString(SSHPrivateKey)
       if err != nil {
-        return "", fmt.Errorf("Failed to write ssh private key to temp file")
+        return "", "", fmt.Errorf("Failed to write ssh private key to temp file")
       }
 
       // and then close the tmpfile storing the private key
       err = tmpSSHPrivateKey.Close()
       if err != nil {
-        return "", fmt.Errorf("Failed to close ssh private key temp file")
+        return "", "", fmt.Errorf("Failed to close ssh private key temp file")
       }
 
-      return tmpSSHPrivateKey.Name(), nil
+      return privateKeySSHAuth, tmpSSHPrivateKey.Name(), nil
     }
   }
 }
