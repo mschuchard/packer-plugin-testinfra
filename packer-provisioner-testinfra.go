@@ -217,7 +217,6 @@ func (provisioner *TestinfraProvisioner) determineCommunication() (string, error
 
   // parse generated data for optional values
   //uuid := provisioner.generatedData["PackerRunUUID"].(string)
-  //sshPassword := provisioner.generatedData["SSHPassword"].(string)
 
   // determine communication string by packer connection type
   log.Printf("Testinfra communicating via %s connection type", connectionType)
@@ -268,31 +267,48 @@ func (provisioner *TestinfraProvisioner) determineCommunication() (string, error
 
 // determine and return ssh authentication
 func (provisioner *TestinfraProvisioner) determineSSHAuth() (string, error) {
-  // parse generated data for ssh auth info
-  sshPrivateKeyFile := provisioner.generatedData["SSHPrivateKeyFile"].(string)
-  sshAgentAuth := provisioner.generatedData["SSHAgentAuth"].(bool)
+  // assign ssh password preferably from sshpassword
+  sshPassword, ok := provisioner.generatedData["SSHPassword"].(string)
 
-  if len(sshPrivateKeyFile) > 0 || sshAgentAuth {
+  // otherwise retry with general password
+  if !ok {
+    sshPassword, ok = provisioner.generatedData["Password"].(string)
+  }
+
+  // ssh is being used with password auth and we have a password
+  if ok {
+    return sshPassword, nil
+  } else { // ssh is being used with private key or agent auth so determine that instead
+    // parse generated data for ssh private key and agent auth info
+    sshPrivateKeyFile := provisioner.generatedData["SSHPrivateKeyFile"].(string)
+    sshAgentAuth := provisioner.generatedData["SSHAgentAuth"].(bool)
+
     // we have a legitimate private key file, so use that
-    return sshPrivateKeyFile, nil
-  } else {
-    // write a tmpfile for storing a private key
-    tmpSSHPrivateKey, err := tmp.File("testinfra-key")
-    if err != nil {
-      return "", fmt.Errorf("Error creating a temp file for the ssh private key: %v", err)
+    if len(sshPrivateKeyFile) > 0 || sshAgentAuth {
+      return sshPrivateKeyFile, nil
+    } else { // create a private key file instead
+      // write a tmpfile for storing a private key
+      tmpSSHPrivateKey, err := tmp.File("testinfra-key")
+      if err != nil {
+        return "", fmt.Errorf("Error creating a temp file for the ssh private key: %v", err)
+      }
+
+      // attempt to obtain a private key
+      SSHPrivateKey := provisioner.generatedData["SSHPrivateKey"].(string)
+
+      // write the private key to the tmpfile
+      _, err = tmpSSHPrivateKey.WriteString(SSHPrivateKey)
+      if err != nil {
+        return "", fmt.Errorf("Failed to write ssh private key to temp file")
+      }
+
+      // and then close the tmpfile storing the private key
+      err = tmpSSHPrivateKey.Close()
+      if err != nil {
+        return "", fmt.Errorf("Failed to close ssh private key temp file")
+      }
+
+      return tmpSSHPrivateKey.Name(), nil
     }
-    // attempt to obtain a private key
-    SSHPrivateKey := provisioner.generatedData["SSHPrivateKey"].(string)
-    // write the private key to the tmpfile
-    _, err = tmpSSHPrivateKey.WriteString(SSHPrivateKey)
-    if err != nil {
-      return "", fmt.Errorf("Failed to write ssh private key to temp file")
-    }
-    // and then close the tmpfile storing the private key
-    err = tmpSSHPrivateKey.Close()
-    if err != nil {
-      return "", fmt.Errorf("Failed to close ssh private key temp file")
-    }
-    return tmpSSHPrivateKey.Name(), nil
   }
 }
