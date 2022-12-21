@@ -233,17 +233,22 @@ func (provisioner *TestinfraProvisioner) determineCommunication() (string, error
 
   switch connectionType {
   case "ssh":
-    // assign ssh private key file
-    sshAuthType, sshPrivateKeyFile, err := provisioner.determineSSHAuth()
+    // assign ssh auth type and string (key file path or password)
+    sshAuthType, sshAuthString, err := provisioner.determineSSHAuth()
     if err != nil {
       return "", err
     }
 
-    // use ssh private key file if it exists
+    // initialize whitespace string as default arg (implied for sshAgentAuth type)
     sshIdentity := " "
-    if len(sshPrivateKeyFile) > 0 {
-      log.Printf("SSH private key filesystem location is: %s", sshPrivateKeyFile)
-      sshIdentity = fmt.Sprintf(" --ssh-identity-file=%s ", sshPrivateKeyFile)
+    // use ssh private key file
+    if sshAuthType == privateKeySSHAuth {
+      log.Printf("SSH private key filesystem location is: %s", sshAuthString)
+      sshIdentity = fmt.Sprintf(" --ssh-identity-file=%s ", sshAuthString)
+    } else if sshAuthType == passwordSSHAuth { // use ssh password
+      log.Printf("Utilizing SSH password for communicator authentication.")
+      // modify user string to also include password
+      user = fmt.Sprintf("%s:%s", user, sshAuthString)
     }
 
     communication = fmt.Sprintf("--hosts=%s@%s%s--ssh-extra-args=\"-o StrictHostKeyChecking=no\"", user, httpAddr, sshIdentity)
