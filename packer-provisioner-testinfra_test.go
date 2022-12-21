@@ -312,12 +312,15 @@ func TestProvisionerDetermineSSHAuth(test *testing.T) {
   provisioner.generatedData = generatedData
 
   // test successfully returns ssh private key file location
-  sshPrivateKeyFile, err := provisioner.determineSSHAuth()
+  sshAuthType, sshAuthString, err := provisioner.determineSSHAuth()
   if err != nil {
     test.Errorf("determineSSHAuth failed to determine ssh private key file location: %s", err)
   }
-  if sshPrivateKeyFile != generatedData["SSHPrivateKeyFile"] {
-    test.Errorf("ssh private key file location incorrectly determined: %s", sshPrivateKeyFile)
+  if sshAuthType != "privateKey" {
+    test.Errorf("ssh authentication type incorrectly determined: %s", sshAuthType)
+  }
+  if sshAuthString != generatedData["SSHPrivateKeyFile"] {
+    test.Errorf("ssh private key file location incorrectly determined: %s", sshAuthString)
   }
 
   // modify to empty ssh key and yes to ssh agent auth
@@ -327,12 +330,15 @@ func TestProvisionerDetermineSSHAuth(test *testing.T) {
   provisioner.generatedData = generatedData
 
   // test successfully uses empty ssh private key file
-  sshPrivateKeyFile, err = provisioner.determineSSHAuth()
+  sshAuthType, sshAuthString, err = provisioner.determineSSHAuth()
   if err != nil {
     test.Errorf("determineSSHAuth failed to determine keyless ssh: %s", err)
   }
-  if len(sshPrivateKeyFile) > 0 {
-    test.Errorf("ssh private key file empty location incorrectly determined: %s", sshPrivateKeyFile)
+  if sshAuthType != "agent" {
+    test.Errorf("ssh authentication type incorrectly determined: %s", sshAuthType)
+  }
+  if len(sshAuthString) > 0 {
+    test.Errorf("ssh private key file empty location incorrectly determined: %s", sshAuthString)
   }
 
   // modify to no ssh agent auth
@@ -341,14 +347,17 @@ func TestProvisionerDetermineSSHAuth(test *testing.T) {
   provisioner.generatedData = generatedData
 
   // test successfully creates tmpfile with expected content for private key
-  sshPrivateKeyFile, err = provisioner.determineSSHAuth()
+  sshAuthType, sshAuthString, err = provisioner.determineSSHAuth()
   if err != nil {
     test.Errorf("determineSSHAuth failed to create tmpfile and return location of written ssh private key: %s", err)
   }
-  if matched, _ := regexp.Match(`/tmp/testinfra-key\d+`, []byte(sshPrivateKeyFile)); !matched {
-    test.Errorf("temporary ssh private key file was not created in the expected location: %s", sshPrivateKeyFile)
+  if sshAuthType != "privateKey" {
+    test.Errorf("ssh authentication type incorrectly determined: %s", sshAuthType)
   }
-  if sshPrivateKey, _ := os.ReadFile(sshPrivateKeyFile); string(sshPrivateKey) != generatedData["SSHPrivateKey"] {
+  if matched, _ := regexp.Match(`/tmp/testinfra-key\d+`, []byte(sshAuthString)); !matched {
+    test.Errorf("temporary ssh private key file was not created in the expected location: %s", sshAuthString)
+  }
+  if sshPrivateKey, _ := os.ReadFile(sshAuthString); string(sshPrivateKey) != generatedData["SSHPrivateKey"] {
     test.Errorf("temporary ssh key file content is not the ssh private key: %s", sshPrivateKey)
   }
 }
