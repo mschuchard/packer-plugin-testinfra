@@ -2,6 +2,7 @@
 - Improve WinRM password determination.
 - Ignore empty SSH private key in SSH backend arguments.
 - Utilize SSH Password for authentication when provided.
+- Prefer SSHPort and SSHUsername Data when communicator is SSH.
 
 ### 1.1.0
 - Support multiple TestInfra `test_files`.

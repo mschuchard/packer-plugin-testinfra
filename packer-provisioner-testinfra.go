@@ -215,9 +215,15 @@ func (provisioner *TestinfraProvisioner) determineExecCmd() (*exec.Cmd, error) {
 func (provisioner *TestinfraProvisioner) determineCommunication() (string, error) {
   // parse generated data for required values
   connectionType := provisioner.generatedData["ConnType"].(string)
-  user := provisioner.generatedData["User"].(string)
+  user, ok := provisioner.generatedData["SSHUsername"].(string)
+  if !ok {
+    user = provisioner.generatedData["User"].(string)
+  }
   ipaddress := provisioner.generatedData["Host"].(string)
-  port := provisioner.generatedData["Port"].(int64)
+  port, ok := provisioner.generatedData["SSHPort"].(int64)
+  if !ok {
+    port = provisioner.generatedData["Port"].(int64)
+  }
   httpAddr := fmt.Sprintf("%s:%d", ipaddress, port)
   if len(ipaddress) == 0 {
     httpAddr = provisioner.generatedData["PackerHTTPAddr"].(string)
