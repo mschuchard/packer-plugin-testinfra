@@ -154,10 +154,11 @@ func TestProvisionerCmdExec(test *testing.T) {
 func TestProvisionerDetermineCommunication(test *testing.T) {
   var provisioner TestinfraProvisioner
 
-  // test ssh with httpaddr
+  // test ssh with httpaddr and password
   generatedData := map[string]interface{}{
     "ConnType": "ssh",
     "User": "me",
+    "Password": "password",
     "SSHPrivateKeyFile": "/path/to/sshprivatekeyfile",
     "SSHAgentAuth": false,
     "Host": "192.168.0.1",
@@ -169,6 +170,18 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
   provisioner.generatedData = generatedData
 
   communication, err := provisioner.determineCommunication()
+  if err != nil {
+    test.Errorf("determineCommunication function failed to determine ssh: %s", err)
+  }
+  if communication != fmt.Sprintf("--hosts=%s:%s@%s:%d --ssh-extra-args=\"-o StrictHostKeyChecking=no\"", generatedData["User"], generatedData["Password"], generatedData["Host"], generatedData["Port"]) {
+    test.Errorf("Communication string incorrectly determined: %s", communication)
+  }
+
+  // test ssh with private key file
+  delete(generatedData, "Password")
+  provisioner.generatedData = generatedData
+
+  communication, err = provisioner.determineCommunication()
   if err != nil {
     test.Errorf("determineCommunication function failed to determine ssh: %s", err)
   }
@@ -302,8 +315,9 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
 func TestProvisionerDetermineSSHAuth(test *testing.T) {
   var provisioner TestinfraProvisioner
 
-  // dummy up fake ssh private key
+  // dummy up fake ssh data
   generatedData := map[string]interface{}{
+    "Password":          "password",
     "SSHPrivateKey":     "abcdefg12345",
     "SSHPrivateKeyFile": "/tmp/sshprivatekeyfile",
     "SSHAgentAuth":      false,
@@ -311,8 +325,24 @@ func TestProvisionerDetermineSSHAuth(test *testing.T) {
 
   provisioner.generatedData = generatedData
 
-  // test successfully returns ssh private key file location
+  // test successfully uses password for ssh auth
   sshAuthType, sshAuthString, err := provisioner.determineSSHAuth()
+  if err != nil {
+    test.Errorf("determineSSHAuth failed to determine authentication password: %s", err)
+  }
+  if sshAuthType != "password" {
+    test.Errorf("ssh authentication type incorrectly determined: %s", sshAuthType)
+  }
+  if sshAuthString != generatedData["Password"] {
+    test.Errorf("password content incorrectly determined: %s", sshAuthString)
+  }
+
+  // remove password from data
+  delete(generatedData, "Password")
+  provisioner.generatedData = generatedData
+
+  // test successfully returns ssh private key file location
+  sshAuthType, sshAuthString, err = provisioner.determineSSHAuth()
   if err != nil {
     test.Errorf("determineSSHAuth failed to determine ssh private key file location: %s", err)
   }
