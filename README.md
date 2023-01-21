@@ -16,7 +16,7 @@ packer {
 }
 ```
 
-Afterwards, `packer init` can automatically manage your plugin as per normal. Note that this plugin currently does not manage your Testinfra installation, and you will need to install that as a prerequisite for this plugin to function correctly.
+Afterwards, `packer init` can automatically manage your plugin as per normal. Note that this plugin currently does not manage your Testinfra installation, and you will need to install that as a prerequisite for this plugin to function correctly. The minimum supported version of Testinfra is `6.7.0`, but a lower version may be possible if you are not using the SSH communicator.
 
 ## Usage
 
