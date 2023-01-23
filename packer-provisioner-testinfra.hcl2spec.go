@@ -10,6 +10,7 @@ import (
 // FlatTestinfraConfig is an auto-generated flat version of TestinfraConfig.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatTestinfraConfig struct {
+	Keyword    *string  `mapstructure:"keyword" cty:"keyword" hcl:"keyword"`
 	Marker     *string  `mapstructure:"marker" cty:"marker" hcl:"marker"`
 	Processes  *int     `mapstructure:"processes" cty:"processes" hcl:"processes"`
 	PytestPath *string  `mapstructure:"pytest_path" cty:"pytest_path" hcl:"pytest_path"`
@@ -29,6 +30,7 @@ func (*TestinfraConfig) FlatMapstructure() interface{ HCL2Spec() map[string]hcld
 // The decoded values from this spec will then be applied to a FlatTestinfraConfig.
 func (*FlatTestinfraConfig) HCL2Spec() map[string]hcldec.Spec {
 	s := map[string]hcldec.Spec{
+		"keyword":     &hcldec.AttrSpec{Name: "keyword", Type: cty.String, Required: false},
 		"marker":      &hcldec.AttrSpec{Name: "marker", Type: cty.String, Required: false},
 		"processes":   &hcldec.AttrSpec{Name: "processes", Type: cty.Number, Required: false},
 		"pytest_path": &hcldec.AttrSpec{Name: "pytest_path", Type: cty.String, Required: false},

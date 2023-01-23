@@ -1,4 +1,6 @@
-### 1.1.1 (Next)
+### 1.2.0
+
+### 1.1.1
 - Improve WinRM password determination.
 - Ignore empty SSH private key in SSH backend arguments.
 - Utilize SSH Password for authentication when provided.

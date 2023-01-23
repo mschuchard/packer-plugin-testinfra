@@ -20,6 +20,7 @@ import (
 
 // config data from packer template/config
 type TestinfraConfig struct {
+  Keyword    string   `mapstructure:"keyword"`
   Marker     string   `mapstructure:"marker"`
   Processes  int      `mapstructure:"processes"`
   PytestPath string   `mapstructure:"pytest_path"`
