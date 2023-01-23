@@ -14,6 +14,7 @@ import (
 
 // global helper vars for tests
 var basicTestinfraConfig = &TestinfraConfig{
+  Keyword:    "not slow",
   Marker:     "fast",
   Processes:  4,
   PytestPath: "/usr/local/bin/py.test",
@@ -32,7 +33,7 @@ func TestProvisionerConfig(test *testing.T) {
   }
   configInput := *basicTestinfraConfig
 
-  if provisioner.config.PytestPath != configInput.PytestPath || !(reflect.DeepEqual(provisioner.config.TestFiles, configInput.TestFiles)) || provisioner.config.Marker != configInput.Marker || provisioner.config.Processes != configInput.Processes || provisioner.config.Sudo != configInput.Sudo {
+  if provisioner.config.PytestPath != configInput.PytestPath || !(reflect.DeepEqual(provisioner.config.TestFiles, configInput.TestFiles)) || provisioner.config.Keyword != configInput.Keyword || provisioner.config.Marker != configInput.Marker || provisioner.config.Processes != configInput.Processes || provisioner.config.Sudo != configInput.Sudo {
     test.Errorf("Provisioner config struct not initialized correctly")
   }
 }
@@ -62,6 +63,10 @@ func TestProvisionerPrepareMinimal(test *testing.T) {
   err := provisioner.Prepare(minTestinfraConfig)
   if err != nil {
     test.Errorf("Prepare function failed with minimal Testinfra Packer config")
+  }
+
+  if len(provisioner.config.Keyword) > 0 {
+    test.Errorf("Default empty setting for Keyword is incorrect: %s", provisioner.config.Keyword)
   }
 
   if len(provisioner.config.Marker) > 0 {
@@ -145,7 +150,7 @@ func TestProvisionerCmdExec(test *testing.T) {
   if err != nil {
     test.Errorf("determineExecCmd function failed to determine execution command for basic config with SSH communicator: %s", err)
   }
-  if execCmd.String() != fmt.Sprintf("%s -v --hosts=%s@%s:%d --ssh-identity-file=%s --ssh-extra-args=\"-o StrictHostKeyChecking=no\" %s -m %s -n %d --sudo", provisioner.config.PytestPath, generatedData["User"], generatedData["Host"], generatedData["Port"], generatedData["SSHPrivateKeyFile"], strings.Join(provisioner.config.TestFiles, ""), provisioner.config.Marker, provisioner.config.Processes) {
+  if execCmd.String() != fmt.Sprintf("%s -v --hosts=%s@%s:%d --ssh-identity-file=%s --ssh-extra-args=\"-o StrictHostKeyChecking=no\" %s -k %s -m %s -n %d --sudo", provisioner.config.PytestPath, generatedData["User"], generatedData["Host"], generatedData["Port"], generatedData["SSHPrivateKeyFile"], strings.Join(provisioner.config.TestFiles, ""), provisioner.config.Keyword, provisioner.config.Marker, provisioner.config.Processes) {
     test.Errorf("determineExecCmd function failed to properly determine execution command for basic config with SSH communicator: %s", execCmd.String())
   }
 }

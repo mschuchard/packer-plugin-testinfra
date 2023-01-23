@@ -1,4 +1,5 @@
 ### 1.2.0
+- Support executing tests by keyword substring expression.
 
 ### 1.1.1
 - Improve WinRM password determination.
