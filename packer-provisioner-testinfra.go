@@ -67,6 +67,10 @@ func (provisioner *TestinfraProvisioner) Prepare(raws ...interface{}) error {
     log.Printf("Executing tests with marker expression: %s", provisioner.config.Marker)
   }
 
+  if len(provisioner.config.Keyword) > 0 {
+    log.Printf("Executing tests with keyword substring expression: %s", provisioner.config.Keyword)
+  }
+
   log.Printf("Number of Testinfra processes: %d.", provisioner.config.Processes)
 
   if provisioner.config.Sudo {
@@ -199,6 +203,15 @@ func (provisioner *TestinfraProvisioner) determineExecCmd() (*exec.Cmd, error) {
   }
   if len(marker) > 0 {
     args = append(args, "-m", marker)
+  }
+  // keyword
+  keyword, err := interpolate.Render(provisioner.config.Keyword, &provisioner.config.ctx)
+  if err != nil {
+    log.Printf("Error parsing config for Keyword: %v", err.Error())
+    return nil, err
+  }
+  if len(keyword) > 0 {
+    args = append(args, "-k", keyword)
   }
   // processes
   if provisioner.config.Processes != 0 {
