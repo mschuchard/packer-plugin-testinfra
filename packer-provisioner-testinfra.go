@@ -92,7 +92,7 @@ func (provisioner *TestinfraProvisioner) Prepare(raws ...interface{}) error {
 
   // verify testinfra files are specified as inputs
   if len(provisioner.config.TestFiles) == 0 {
-    return fmt.Errorf("The Testinfra test_files were not specified")
+    log.Print("All files prefixed with 'test_' recursively discovered from the current working directory will be considered Testinfra test files")
   } else { // verify testinfra files exist
     for _, testFile := range provisioner.config.TestFiles {
       if _, err := os.Stat(testFile); errors.Is(err, os.ErrNotExist) {

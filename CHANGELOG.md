@@ -1,5 +1,6 @@
 ### 1.2.0
 - Support executing tests by keyword substring expression.
+- Allow empty `test_files` for default PyTest behavior.
 
 ### 1.1.1
 - Improve WinRM password determination.

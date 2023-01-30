@@ -86,7 +86,7 @@ func TestProvisionerPrepareMinimal(test *testing.T) {
   }
 }
 
-// test provisioner prepare errors on unspecified test file
+// test provisioner prepare defaults to empty slice for test files
 func TestProvisionerPrepareEmptyTestFile(test *testing.T) {
   var provisioner TestinfraProvisioner
   var emptyTestFileTestinfraConfig = &TestinfraConfig{
@@ -94,8 +94,12 @@ func TestProvisionerPrepareEmptyTestFile(test *testing.T) {
   }
 
   err := provisioner.Prepare(emptyTestFileTestinfraConfig)
-  if err == nil {
-    test.Errorf("Prepare function did not fail on unspecified testfile")
+  if err != nil {
+    test.Errorf("Prepare function failed with no test_files minimal Testinfra Packer config")
+  }
+
+  if len(provisioner.config.TestFiles) > 0 {
+    test.Errorf("Default setting for TestFiles is incorrect: %s", strings.Join(provisioner.config.TestFiles, ""))
   }
 }
 
