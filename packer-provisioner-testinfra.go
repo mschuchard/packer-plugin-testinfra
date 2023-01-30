@@ -21,6 +21,7 @@ import (
 // config data from packer template/config
 type TestinfraConfig struct {
   Keyword    string   `mapstructure:"keyword"`
+  Local      bool     `mapstructure:"local"`
   Marker     string   `mapstructure:"marker"`
   Processes  int      `mapstructure:"processes"`
   PytestPath string   `mapstructure:"pytest_path"`
@@ -65,6 +66,10 @@ func (provisioner *TestinfraProvisioner) Prepare(raws ...interface{}) error {
   // log optional arguments
   if len(provisioner.config.Keyword) > 0 {
     log.Printf("Executing tests with keyword substring expression: %s", provisioner.config.Keyword)
+  }
+
+  if provisioner.config.Local {
+    log.Print("Test execution will occur on the temporary Packer instance used for building the machine image artifact")
   }
 
   if len(provisioner.config.Marker) > 0 {

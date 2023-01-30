@@ -69,6 +69,10 @@ func TestProvisionerPrepareMinimal(test *testing.T) {
     test.Errorf("Default empty setting for Keyword is incorrect: %s", provisioner.config.Keyword)
   }
 
+  if provisioner.config.Local != false {
+    test.Errorf("Default false setting for Local is incorrect: %t", provisioner.config.Local)
+  }
+
   if len(provisioner.config.Marker) > 0 {
     test.Errorf("Default empty setting for Marker is incorrect: %s", provisioner.config.Marker)
   }
