@@ -183,11 +183,13 @@ func (provisioner *TestinfraProvisioner) determineExecCmd() (*exec.Cmd, error) {
   args := []string{"-v"}
 
   // assign determined communication string
-  communication, err := provisioner.determineCommunication()
-  if err != nil {
-    return nil, err
+  if localExec := provisioner.config.Local; localExec == false {
+    communication, err := provisioner.determineCommunication()
+    if err != nil {
+      return nil, err
+    }
+    args = append(args, communication)
   }
-  args = append(args, communication)
 
   // assign mandatory populated values
   // pytest path
@@ -196,10 +198,10 @@ func (provisioner *TestinfraProvisioner) determineExecCmd() (*exec.Cmd, error) {
     log.Printf("Error parsing config for PytestPath: %v", err.Error())
     return nil, err
   }
-  // testfiles
-  args = append(args, provisioner.config.TestFiles...)
 
   // assign optional populated values
+  // testfiles
+  args = append(args, provisioner.config.TestFiles...)
   // keyword
   keyword, err := interpolate.Render(provisioner.config.Keyword, &provisioner.config.ctx)
   if err != nil {

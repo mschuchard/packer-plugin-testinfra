@@ -135,9 +135,25 @@ func TestProvisionerPrepareNonExistFiles(test *testing.T) {
 }
 
 // test provisioner determineExecCmd properly determines execution command
-func TestProvisionerCmdExec(test *testing.T) {
-  // test basic config with ssh generated data
+func TestProvisionerDetermineExecCmd(test *testing.T) {
+  // test minimal config with local execution
   var provisioner = &TestinfraProvisioner{
+    config: TestinfraConfig{
+      PytestPath: "/usr/local/bin/py.test",
+      Local:      true,
+    },
+  }
+
+  execCmd, err := provisioner.determineExecCmd()
+  if err != nil {
+    test.Errorf("determineExecCmd function failed to determine execution command for minimal config with local execution: %s", err)
+  }
+  if execCmd.String() != fmt.Sprintf("%s -v", provisioner.config.PytestPath) {
+    test.Errorf("determineExecCmd function failed to properly determine execution command for minimal config with local execution: %s", execCmd.String())
+  }
+
+  // test basic config with ssh generated data
+  provisioner = &TestinfraProvisioner{
     config: *basicTestinfraConfig,
   }
 
@@ -154,7 +170,7 @@ func TestProvisionerCmdExec(test *testing.T) {
 
   provisioner.generatedData = generatedData
 
-  execCmd, err := provisioner.determineExecCmd()
+  execCmd, err = provisioner.determineExecCmd()
   if err != nil {
     test.Errorf("determineExecCmd function failed to determine execution command for basic config with SSH communicator: %s", err)
   }
