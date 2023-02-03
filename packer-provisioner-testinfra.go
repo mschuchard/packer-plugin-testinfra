@@ -5,6 +5,7 @@ import (
   "os"
   "os/exec"
   "strconv"
+  "strings"
   "io"
   "fmt"
   "log"
@@ -184,7 +185,8 @@ func (provisioner *TestinfraProvisioner) determineExecCmd() (*exec.Cmd, packer.R
   args := []string{"-v"}
 
   // assign determined communication string
-  if localExec := provisioner.config.Local; localExec == false {
+  localExec := provisioner.config.Local
+  if localExec == false {
     communication, err := provisioner.determineCommunication()
     if err != nil {
       return nil, packer.RemoteCmd{}, err
@@ -230,7 +232,11 @@ func (provisioner *TestinfraProvisioner) determineExecCmd() (*exec.Cmd, packer.R
     args = append(args, "--sudo")
   }
 
-  return exec.Command(pytestPath, args...), packer.RemoteCmd{Command: "foo"}, nil
+  if localExec == true {
+    return nil, packer.RemoteCmd{Command: fmt.Sprintf("%s %s", pytestPath, strings.Join(args, " "))}, nil
+  } else {
+    return exec.Command(pytestPath, args...), packer.RemoteCmd{Command: ""}, nil
+  }
 }
 
 // determine and return appropriate communication string for pytest/testinfra
