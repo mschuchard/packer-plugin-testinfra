@@ -119,11 +119,12 @@ func (provisioner *TestinfraProvisioner) Provision(ctx context.Context, ui packe
   provisioner.config.ctx.Data = generatedData
 
   // prepare testinfra test command
-  cmd, err := provisioner.determineExecCmd()
+  cmd, localCmd, err := provisioner.determineExecCmd()
   if err != nil {
     return err
   }
   log.Printf("Complete Testinfra command is: %s", cmd.String())
+  log.Printf("Complete Testinfra local command is: %s", localCmd.Command)
   cmd.Env = os.Environ()
 
   // prepare stdout and stderr pipes
@@ -178,7 +179,7 @@ func (provisioner *TestinfraProvisioner) Provision(ctx context.Context, ui packe
 }
 
 // determine and return execution command for testinfra
-func (provisioner *TestinfraProvisioner) determineExecCmd() (*exec.Cmd, error) {
+func (provisioner *TestinfraProvisioner) determineExecCmd() (*exec.Cmd, packer.RemoteCmd, error) {
   // initialize args with base argument
   args := []string{"-v"}
 
@@ -186,7 +187,7 @@ func (provisioner *TestinfraProvisioner) determineExecCmd() (*exec.Cmd, error) {
   if localExec := provisioner.config.Local; localExec == false {
     communication, err := provisioner.determineCommunication()
     if err != nil {
-      return nil, err
+      return nil, packer.RemoteCmd{}, err
     }
     args = append(args, communication)
   }
@@ -196,7 +197,7 @@ func (provisioner *TestinfraProvisioner) determineExecCmd() (*exec.Cmd, error) {
   pytestPath, err := interpolate.Render(provisioner.config.PytestPath, &provisioner.config.ctx)
   if err != nil {
     log.Printf("Error parsing config for PytestPath: %v", err.Error())
-    return nil, err
+    return nil, packer.RemoteCmd{}, err
   }
 
   // assign optional populated values
@@ -206,7 +207,7 @@ func (provisioner *TestinfraProvisioner) determineExecCmd() (*exec.Cmd, error) {
   keyword, err := interpolate.Render(provisioner.config.Keyword, &provisioner.config.ctx)
   if err != nil {
     log.Printf("Error parsing config for Keyword: %v", err.Error())
-    return nil, err
+    return nil, packer.RemoteCmd{}, err
   }
   if len(keyword) > 0 {
     args = append(args, "-k", keyword)
@@ -215,7 +216,7 @@ func (provisioner *TestinfraProvisioner) determineExecCmd() (*exec.Cmd, error) {
   marker, err := interpolate.Render(provisioner.config.Marker, &provisioner.config.ctx)
   if err != nil {
     log.Printf("Error parsing config for Marker: %v", err.Error())
-    return nil, err
+    return nil, packer.RemoteCmd{}, err
   }
   if len(marker) > 0 {
     args = append(args, "-m", marker)
@@ -229,7 +230,7 @@ func (provisioner *TestinfraProvisioner) determineExecCmd() (*exec.Cmd, error) {
     args = append(args, "--sudo")
   }
 
-  return exec.Command(pytestPath, args...), nil
+  return exec.Command(pytestPath, args...), packer.RemoteCmd{Command: "foo"}, nil
 }
 
 // determine and return appropriate communication string for pytest/testinfra
