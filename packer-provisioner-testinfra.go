@@ -38,7 +38,7 @@ type TestinfraProvisioner struct{
   generatedData map[string]interface{}
 }
 
-// ssh auth type
+// ssh auth type with pseudo-enum
 type SSHAuth string
 
 const (
@@ -124,9 +124,22 @@ func (provisioner *TestinfraProvisioner) Provision(ctx context.Context, ui packe
   if err != nil {
     return err
   }
-  log.Printf("Complete Testinfra command is: %s", cmd.String())
   log.Printf("Complete Testinfra local command is: %s", localCmd.Command)
+
+  // execute testinfra remotely with *exec.Cmd
+  err = execCmdTestinfra(cmd, ui)
+  if err != nil {
+    return err
+  }
+
+  return nil
+}
+
+// execute testinfra remotely with *exec.Cmd
+func execCmdTestinfra(cmd *exec.Cmd, ui packer.Ui) error {
+  // merge in env settings
   cmd.Env = os.Environ()
+  log.Printf("Complete Testinfra remote command is: %s", cmd.String())
 
   // prepare stdout and stderr pipes
   stdout, err := cmd.StdoutPipe()
@@ -154,6 +167,7 @@ func (provisioner *TestinfraProvisioner) Provision(ctx context.Context, ui packe
     return err
   }
   if len(outSlurp) > 0 {
+    ui.Say("Testinfra results include the following:")
     ui.Message(string(outSlurp))
   }
 
@@ -163,6 +177,7 @@ func (provisioner *TestinfraProvisioner) Provision(ctx context.Context, ui packe
     return err
   }
   if len(errSlurp) > 0 {
+    ui.Error("Testinfra errored internally during execution:")
     ui.Error(string(errSlurp))
   }
 
