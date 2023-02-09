@@ -127,7 +127,14 @@ func (provisioner *TestinfraProvisioner) Provision(ctx context.Context, ui packe
   log.Printf("Complete Testinfra local command is: %s", localCmd.Command)
 
   // execute testinfra remotely with *exec.Cmd
-  err = execCmdTestinfra(cmd, ui)
+  if len(localCmd.Command) == 0 && cmd != nil {
+    err = execCmdTestinfra(cmd, ui)
+  } else if len(localCmd.Command) > 0 && cmd == nil {
+    // execute testinfra local to instance with packer.RemoteCmd
+  } else {
+    // somehow we either returned both commands or neither or something really weird for one or both
+    return fmt.Errorf("Incorrectly determined remote command (%s) and/or command local to instance (%s). Please report as bug with this log information.", cmd.String(), localCmd.Command)
+  }
   if err != nil {
     return err
   }
