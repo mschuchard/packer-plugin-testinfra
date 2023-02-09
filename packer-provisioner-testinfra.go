@@ -124,13 +124,13 @@ func (provisioner *TestinfraProvisioner) Provision(ctx context.Context, ui packe
   if err != nil {
     return err
   }
-  log.Printf("Complete Testinfra local command is: %s", localCmd.Command)
 
   // execute testinfra remotely with *exec.Cmd
   if len(localCmd.Command) == 0 && cmd != nil {
     err = execCmdTestinfra(cmd, ui)
   } else if len(localCmd.Command) > 0 && cmd == nil {
     // execute testinfra local to instance with packer.RemoteCmd
+    err = packerRemoteCmdTestinfra(localCmd, comm, ui)
   } else {
     // somehow we either returned both commands or neither or something really weird for one or both
     return fmt.Errorf("Incorrectly determined remote command (%s) and/or command local to instance (%s). Please report as bug with this log information.", cmd.String(), localCmd.Command)
@@ -201,8 +201,14 @@ func execCmdTestinfra(cmd *exec.Cmd, ui packer.Ui) error {
   return nil
 }
 
+// execute testinfra local to temp packer instance with packer.RemoteCmd
+func packerRemoteCmdTestinfra(localCmd *packer.RemoteCmd, comm packer.Communicator, ui packer.Ui) error {
+  log.Printf("Complete Testinfra local command is: %s", localCmd.Command)
+  return nil
+}
+
 // determine and return execution command for testinfra
-func (provisioner *TestinfraProvisioner) determineExecCmd() (*exec.Cmd, packer.RemoteCmd, error) {
+func (provisioner *TestinfraProvisioner) determineExecCmd() (*exec.Cmd, *packer.RemoteCmd, error) {
   // initialize args with base argument
   args := []string{"-v"}
 
@@ -211,7 +217,7 @@ func (provisioner *TestinfraProvisioner) determineExecCmd() (*exec.Cmd, packer.R
   if localExec == false {
     communication, err := provisioner.determineCommunication()
     if err != nil {
-      return nil, packer.RemoteCmd{}, err
+      return nil, &packer.RemoteCmd{}, err
     }
     args = append(args, communication)
   }
@@ -221,7 +227,7 @@ func (provisioner *TestinfraProvisioner) determineExecCmd() (*exec.Cmd, packer.R
   pytestPath, err := interpolate.Render(provisioner.config.PytestPath, &provisioner.config.ctx)
   if err != nil {
     log.Printf("Error parsing config for PytestPath: %v", err.Error())
-    return nil, packer.RemoteCmd{}, err
+    return nil, &packer.RemoteCmd{}, err
   }
 
   // assign optional populated values
@@ -231,7 +237,7 @@ func (provisioner *TestinfraProvisioner) determineExecCmd() (*exec.Cmd, packer.R
   keyword, err := interpolate.Render(provisioner.config.Keyword, &provisioner.config.ctx)
   if err != nil {
     log.Printf("Error parsing config for Keyword: %v", err.Error())
-    return nil, packer.RemoteCmd{}, err
+    return nil, &packer.RemoteCmd{}, err
   }
   if len(keyword) > 0 {
     args = append(args, "-k", keyword)
@@ -240,7 +246,7 @@ func (provisioner *TestinfraProvisioner) determineExecCmd() (*exec.Cmd, packer.R
   marker, err := interpolate.Render(provisioner.config.Marker, &provisioner.config.ctx)
   if err != nil {
     log.Printf("Error parsing config for Marker: %v", err.Error())
-    return nil, packer.RemoteCmd{}, err
+    return nil, &packer.RemoteCmd{}, err
   }
   if len(marker) > 0 {
     args = append(args, "-m", marker)
@@ -255,9 +261,9 @@ func (provisioner *TestinfraProvisioner) determineExecCmd() (*exec.Cmd, packer.R
   }
 
   if localExec == true {
-    return nil, packer.RemoteCmd{Command: fmt.Sprintf("%s %s", pytestPath, strings.Join(args, " "))}, nil
+    return nil, &packer.RemoteCmd{Command: fmt.Sprintf("%s %s", pytestPath, strings.Join(args, " "))}, nil
   } else {
-    return exec.Command(pytestPath, args...), packer.RemoteCmd{Command: ""}, nil
+    return exec.Command(pytestPath, args...), &packer.RemoteCmd{Command: ""}, nil
   }
 }
 
