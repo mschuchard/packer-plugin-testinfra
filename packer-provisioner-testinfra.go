@@ -6,6 +6,7 @@ import (
   "os/exec"
   "strconv"
   "strings"
+  "bytes"
   "io"
   "fmt"
   "log"
@@ -203,7 +204,39 @@ func execCmdTestinfra(cmd *exec.Cmd, ui packer.Ui) error {
 
 // execute testinfra local to temp packer instance with packer.RemoteCmd
 func packerRemoteCmdTestinfra(localCmd *packer.RemoteCmd, comm packer.Communicator, ui packer.Ui) error {
+  // log command
   log.Printf("Complete Testinfra local command is: %s", localCmd.Command)
+
+  // initialize stdout and stderr
+  var stdout bytes.Buffer
+  localCmd.Stdout = &stdout
+  var stderr bytes.Buffer
+  localCmd.Stderr = &stderr
+
+  // initialize testinfra tests
+  ui.Say("Beginning Testinfra validation of machine image")
+  if err := comm.Start(localCmd); err != nil {
+    log.Printf("Initialization of Testinfra py.test command execution returned non-zero exit status: %s", err)
+    return err
+  }
+
+  // wait for testinfra to complete and flush buffers
+  localCmd.Wait()
+
+  // capture and display testinfra output
+  if len(stdout.String()) > 0 {
+    ui.Say("Testinfra results include the following:")
+    ui.Message(stdout.String())
+  }
+
+  if len(stderr.String()) > 0 {
+    ui.Error("Testinfra errored internally during execution:")
+    ui.Error(stderr.String())
+  }
+
+  // finish and return
+  ui.Say("Testinfra machine image testing is complete")
+
   return nil
 }
 
