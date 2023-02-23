@@ -204,7 +204,8 @@ func execCmdTestinfra(cmd *exec.Cmd, ui packer.Ui) error {
 
 // execute testinfra local to temp packer instance with packer.RemoteCmd
 func packerRemoteCmdTestinfra(localCmd *packer.RemoteCmd, comm packer.Communicator, ui packer.Ui) error {
-  // log command
+  // initialize context and log command
+  ctx := context.TODO()
   log.Printf("Complete Testinfra local command is: %s", localCmd.Command)
 
   // initialize stdout and stderr
@@ -215,13 +216,16 @@ func packerRemoteCmdTestinfra(localCmd *packer.RemoteCmd, comm packer.Communicat
 
   // initialize testinfra tests
   ui.Say("Beginning Testinfra validation of machine image")
-  if err := comm.Start(localCmd); err != nil {
+  if err := comm.Start(ctx, localCmd); err != nil {
     log.Printf("Initialization of Testinfra py.test command execution returned non-zero exit status: %s", err)
     return err
   }
 
   // wait for testinfra to complete and flush buffers
-  localCmd.Wait()
+  exitStatus := localCmd.Wait()
+  if exitStatus > 0 {
+    return fmt.Errorf("Testinfra returned non-zero exit status: %d", exitStatus)
+  }
 
   // capture and display testinfra output
   if len(stdout.String()) > 0 {
