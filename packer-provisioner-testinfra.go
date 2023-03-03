@@ -22,6 +22,7 @@ import (
 
 // config data from packer template/config
 type TestinfraConfig struct {
+  InstallCmd []string `mapstructure:"install_cmd"`
   Keyword    string   `mapstructure:"keyword"`
   Local      bool     `mapstructure:"local"`
   Marker     string   `mapstructure:"marker"`
@@ -72,6 +73,10 @@ func (provisioner *TestinfraProvisioner) Prepare(raws ...interface{}) error {
 
   if provisioner.config.Local {
     log.Print("Test execution will occur on the temporary Packer instance used for building the machine image artifact")
+
+    if len(provisioner.config.InstallCmd) > 0 {
+      log.Printf("Installation command on the temporary Packer instance prior to Testinfra test execution is: %s", strings.Join(provisioner.config.InstallCmd, " "))
+    }
   }
 
   if len(provisioner.config.Marker) > 0 {
@@ -297,9 +302,10 @@ func (provisioner *TestinfraProvisioner) determineExecCmd() (*exec.Cmd, *packer.
     args = append(args, "--sudo")
   }
 
+  // return packer remote command for local testing on instance
   if localExec == true {
     return nil, &packer.RemoteCmd{Command: fmt.Sprintf("%s %s", pytestPath, strings.Join(args, " "))}, nil
-  } else {
+  } else { // return exec command for remote testing against instance
     return exec.Command(pytestPath, args...), &packer.RemoteCmd{Command: ""}, nil
   }
 }
