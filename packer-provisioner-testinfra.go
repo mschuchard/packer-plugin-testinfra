@@ -136,7 +136,7 @@ func (provisioner *TestinfraProvisioner) Provision(ctx context.Context, ui packe
     err = execCmdTestinfra(cmd, ui)
   } else if len(localCmd.Command) > 0 && cmd == nil {
     // execute testinfra local to instance with packer.RemoteCmd
-    err = packerRemoteCmdTestinfra(localCmd, comm, ui)
+    err = packerRemoteCmdTestinfra(localCmd, provisioner.config.InstallCmd, comm, ui)
   } else {
     // somehow we either returned both commands or neither or something really weird for one or both
     return fmt.Errorf("Incorrectly determined remote command (%s) and/or command local to instance (%s). Please report as bug with this log information.", cmd.String(), localCmd.Command)
@@ -208,10 +208,21 @@ func execCmdTestinfra(cmd *exec.Cmd, ui packer.Ui) error {
 }
 
 // execute testinfra local to temp packer instance with packer.RemoteCmd
-func packerRemoteCmdTestinfra(localCmd *packer.RemoteCmd, comm packer.Communicator, ui packer.Ui) error {
+func packerRemoteCmdTestinfra(localCmd *packer.RemoteCmd, installCmd []string, comm packer.Communicator, ui packer.Ui) error {
   // initialize context and log command
   ctx := context.TODO()
   log.Printf("Complete Testinfra local command is: %s", localCmd.Command)
+
+  // install testinfra on temp packer instance
+  if len(installCmd) > 0 {
+    ui.Say("Installing Testinfra on instance")
+    localInstallCmd := &packer.RemoteCmd{Command: strings.Join(installCmd, " ")}
+
+    if err := comm.Start(ctx, localInstallCmd); err != nil {
+      log.Printf("Testinfra install command execution returned non-zero exit status: %s", err)
+      return err
+    }
+  }
 
   // initialize stdout and stderr
   var stdout bytes.Buffer
