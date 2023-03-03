@@ -2,6 +2,7 @@
 - Support executing tests by keyword substring expression.
 - Allow empty `test_files` for default PyTest behavior.
 - Temporary Packer instance local execution support (beta).
+- Intrinsic support for Testinfra installation on Packer instance (beta).
 
 ### 1.1.1
 - Improve WinRM password determination.

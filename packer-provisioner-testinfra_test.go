@@ -65,6 +65,10 @@ func TestProvisionerPrepareMinimal(test *testing.T) {
     test.Errorf("Prepare function failed with minimal Testinfra Packer config")
   }
 
+  if len(provisioner.config.InstallCmd) > 0 {
+    test.Errorf("Default empty setting for InstallCmd is incorrect: %s", provisioner.config.InstallCmd)
+  }
+
   if len(provisioner.config.Keyword) > 0 {
     test.Errorf("Default empty setting for Keyword is incorrect: %s", provisioner.config.Keyword)
   }
@@ -140,6 +144,7 @@ func TestProvisionerDetermineExecCmd(test *testing.T) {
   var provisioner = &TestinfraProvisioner{
     config: TestinfraConfig{
       PytestPath: "/usr/local/bin/py.test",
+      InstallCmd: []string{"pip", "install", "pytest-testinfra"},
       Local:      true,
     },
   }
