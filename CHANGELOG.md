@@ -1,3 +1,6 @@
+### 1.2.1 (Next)
+- Pass marker and keyword expressions as singular strings to command executors.
+
 ### 1.2.0
 - Support executing tests by keyword substring expression.
 - Allow empty `test_files` for default PyTest behavior.

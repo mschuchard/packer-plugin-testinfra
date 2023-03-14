@@ -293,7 +293,7 @@ func (provisioner *TestinfraProvisioner) determineExecCmd() (*exec.Cmd, *packer.
     return nil, &packer.RemoteCmd{}, err
   }
   if len(keyword) > 0 {
-    args = append(args, "-k", keyword)
+    args = append(args, "-k", fmt.Sprintf("\"%s\"", keyword))
   }
   // marker
   marker, err := interpolate.Render(provisioner.config.Marker, &provisioner.config.ctx)
@@ -302,7 +302,7 @@ func (provisioner *TestinfraProvisioner) determineExecCmd() (*exec.Cmd, *packer.
     return nil, &packer.RemoteCmd{}, err
   }
   if len(marker) > 0 {
-    args = append(args, "-m", marker)
+    args = append(args, "-m", fmt.Sprintf("\"%s\"", marker))
   }
   // processes
   if provisioner.config.Processes != 0 {

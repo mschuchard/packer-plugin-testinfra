@@ -6,7 +6,7 @@ tidy:
 build: tidy
 	@go build -o packer-plugin-testinfra
 
-unit: tidy
+unit:
 	@go test -v
 
 acceptance: build
