@@ -215,9 +215,13 @@ func packerRemoteCmdTestinfra(localCmd *packer.RemoteCmd, installCmd []string, c
 
   // install testinfra on temp packer instance
   if len(installCmd) > 0 {
+    // cast installCmd to string, log, and init localInstallCmd
+    strInstallCmd := strings.Join(installCmd, " ")
     ui.Say("Installing Testinfra on instance")
-    localInstallCmd := &packer.RemoteCmd{Command: strings.Join(installCmd, " ")}
+    log.Printf("Testinfra installation command is: %s", strInstallCmd)
+    localInstallCmd := &packer.RemoteCmd{Command: strInstallCmd}
 
+    // install testinfra on temp packer instance
     if err := comm.Start(ctx, localInstallCmd); err != nil {
       log.Printf("Testinfra install command execution returned non-zero exit status: %s", err)
       return err
@@ -238,20 +242,17 @@ func packerRemoteCmdTestinfra(localCmd *packer.RemoteCmd, installCmd []string, c
   }
 
   // wait for testinfra to complete and flush buffers
-  exitStatus := localCmd.Wait()
-  if exitStatus > 0 {
-    return fmt.Errorf("Testinfra returned non-zero exit status: %d", exitStatus)
+  // then check for pytest/testinfra execution issues
+  if exitStatus := localCmd.Wait(); exitStatus > 0 || len(stderr.String()) > 0 {
+    ui.Error("Testinfra errored internally during execution:")
+    ui.Error(stderr.String())
+    return fmt.Errorf("Testinfra returned exit status: %d", exitStatus)
   }
 
   // capture and display testinfra output
   if len(stdout.String()) > 0 {
     ui.Say("Testinfra results include the following:")
     ui.Message(stdout.String())
-  }
-
-  if len(stderr.String()) > 0 {
-    ui.Error("Testinfra errored internally during execution:")
-    ui.Error(stderr.String())
   }
 
   // finish and return
