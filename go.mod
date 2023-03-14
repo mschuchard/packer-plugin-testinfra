@@ -1,4 +1,4 @@
-module github.com/mschuchard/packer-provisioner-testinfra/v2
+module github.com/mschuchard/packer-plugin-testinfra
 
 go 1.18
 
