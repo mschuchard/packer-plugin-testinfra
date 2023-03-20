@@ -7,14 +7,15 @@ build: tidy
 	@go build -o packer-plugin-testinfra
 
 unit:
-	@go test -v
+	@go test -v ./...
 
-acceptance: build
+accept: build
 	# vagrant up and vagrant suspend one-time in fixtures dir
 	@mkdir -p ~/.packer.d/plugins/
 	# https://github.com/hashicorp/packer/issues/11972
 	@cp packer-plugin-testinfra ~/.config/packer/plugins/packer-plugin-testinfra
-	@PACKER_ACC=1 go test -v packer-provisioner-testinfra_acceptance_test.go -timeout=5m
+	@cp packer-plugin-testinfra ./provisioner/packer-plugin-testinfra
+	@PACKER_ACC=1 go test -v ./provisioner/testinfra_acceptance_test.go -timeout=5m
 
 install-packer-sdc:
 	@go install github.com/hashicorp/packer-plugin-sdk/cmd/packer-sdc@latest
@@ -32,4 +33,4 @@ generate: install-packer-sdc
 	@go generate ./...
 	#packer-sdc renderdocs -src ./docs -dst ./.docs -partials ./docs-partials
 
-test: unit acceptance plugin-check
+test: unit accept plugin-check

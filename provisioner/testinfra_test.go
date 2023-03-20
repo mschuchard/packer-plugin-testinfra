@@ -1,4 +1,4 @@
-package main
+package testinfra
 
 import (
   "fmt"
@@ -13,7 +13,7 @@ import (
 )
 
 // global helper vars for tests
-var basicTestinfraConfig = &TestinfraConfig{
+var basicConfig = &Config{
   Keyword:    "not slow",
   Marker:     "fast",
   Processes:  4,
@@ -22,16 +22,16 @@ var basicTestinfraConfig = &TestinfraConfig{
   TestFiles:  []string{"fixtures/test.py"},
 }
 
-var minTestinfraConfig = &TestinfraConfig{
+var minConfig = &Config{
   TestFiles: []string{"fixtures/test.py"},
 }
 
 // test basic config for packer template/config data
 func TestProvisionerConfig(test *testing.T) {
-  var provisioner = &TestinfraProvisioner{
-    config: *basicTestinfraConfig,
+  var provisioner = &Provisioner{
+    config: *basicConfig,
   }
-  configInput := *basicTestinfraConfig
+  configInput := *basicConfig
 
   if provisioner.config.PytestPath != configInput.PytestPath || !(reflect.DeepEqual(provisioner.config.TestFiles, configInput.TestFiles)) || provisioner.config.Keyword != configInput.Keyword || provisioner.config.Marker != configInput.Marker || provisioner.config.Processes != configInput.Processes || provisioner.config.Sudo != configInput.Sudo {
     test.Errorf("Provisioner config struct not initialized correctly")
@@ -40,7 +40,7 @@ func TestProvisionerConfig(test *testing.T) {
 
 // test struct for provisioner interface
 func TestProvisionerInterface(test *testing.T) {
-  var raw interface{} = &TestinfraProvisioner{}
+  var raw interface{} = &Provisioner{}
   if _, ok := raw.(packer.Provisioner); !ok {
     test.Errorf("Testinfra config struct must be a Provisioner")
   }
@@ -48,9 +48,9 @@ func TestProvisionerInterface(test *testing.T) {
 
 // test provisioner prepare with basic config
 func TestProvisionerPrepareBasic(test *testing.T) {
-  var provisioner TestinfraProvisioner
+  var provisioner Provisioner
 
-  err := provisioner.Prepare(basicTestinfraConfig)
+  err := provisioner.Prepare(basicConfig)
   if err != nil {
     test.Errorf("Prepare function failed with basic Testinfra Packer config")
   }
@@ -58,9 +58,9 @@ func TestProvisionerPrepareBasic(test *testing.T) {
 
 // test provisioner prepare with minimal config
 func TestProvisionerPrepareMinimal(test *testing.T) {
-  var provisioner TestinfraProvisioner
+  var provisioner Provisioner
 
-  err := provisioner.Prepare(minTestinfraConfig)
+  err := provisioner.Prepare(minConfig)
   if err != nil {
     test.Errorf("Prepare function failed with minimal Testinfra Packer config")
   }
@@ -96,12 +96,12 @@ func TestProvisionerPrepareMinimal(test *testing.T) {
 
 // test provisioner prepare defaults to empty slice for test files
 func TestProvisionerPrepareEmptyTestFile(test *testing.T) {
-  var provisioner TestinfraProvisioner
-  var emptyTestFileTestinfraConfig = &TestinfraConfig{
+  var provisioner Provisioner
+  var emptyTestFileConfig = &Config{
     PytestPath: "/usr/local/bin/py.test",
   }
 
-  err := provisioner.Prepare(emptyTestFileTestinfraConfig)
+  err := provisioner.Prepare(emptyTestFileConfig)
   if err != nil {
     test.Errorf("Prepare function failed with no test_files minimal Testinfra Packer config")
   }
@@ -113,26 +113,26 @@ func TestProvisionerPrepareEmptyTestFile(test *testing.T) {
 
 // test provisioner prepare errors on nonexistent files
 func TestProvisionerPrepareNonExistFiles(test *testing.T) {
-  var provisioner TestinfraProvisioner
+  var provisioner Provisioner
 
   // test no pytest
-  var noPytestTestinfraConfig = &TestinfraConfig{
+  var noPytestConfig = &Config{
     PytestPath: "/home/foo/py.test",
     TestFiles:  []string{"fixtures/test.py"},
   }
 
-  err := provisioner.Prepare(noPytestTestinfraConfig)
+  err := provisioner.Prepare(noPytestConfig)
   if !(errors.Is(err, os.ErrNotExist)) {
     test.Errorf("Prepare function did not fail correctly on nonexistent pytest")
   }
 
   // test nonexistent testfile
-  var noTestFileTestinfraConfig = &TestinfraConfig{
+  var noTestFileConfig = &Config{
     PytestPath: "/usr/local/bin/py.test",
     TestFiles:  []string{"fixtures/test.py", "/home/foo/test.py"},
   }
 
-  err = provisioner.Prepare(noTestFileTestinfraConfig)
+  err = provisioner.Prepare(noTestFileConfig)
   if !(errors.Is(err, os.ErrNotExist)) {
     test.Errorf("Prepare function did not fail correctly on nonexistent testfile")
   }
@@ -141,8 +141,8 @@ func TestProvisionerPrepareNonExistFiles(test *testing.T) {
 // test provisioner determineExecCmd properly determines execution command
 func TestProvisionerDetermineExecCmd(test *testing.T) {
   // test minimal config with local execution
-  var provisioner = &TestinfraProvisioner{
-    config: TestinfraConfig{
+  var provisioner = &Provisioner{
+    config: Config{
       PytestPath: "/usr/local/bin/py.test",
       InstallCmd: []string{"pip", "install", "pytest-testinfra"},
       Local:      true,
@@ -161,8 +161,8 @@ func TestProvisionerDetermineExecCmd(test *testing.T) {
   }
 
   // test basic config with ssh generated data
-  provisioner = &TestinfraProvisioner{
-    config: *basicTestinfraConfig,
+  provisioner = &Provisioner{
+    config: *basicConfig,
   }
 
   generatedData := map[string]interface{}{
@@ -192,7 +192,7 @@ func TestProvisionerDetermineExecCmd(test *testing.T) {
 
 // test provisioner determineCommunication properly determines communication strings
 func TestProvisionerDetermineCommunication(test *testing.T) {
-  var provisioner TestinfraProvisioner
+  var provisioner Provisioner
 
   // test ssh with httpaddr and password
   generatedData := map[string]interface{}{
@@ -353,7 +353,7 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
 
 // test provisioner determineSSHAuth properly determines ssh private key file location
 func TestProvisionerDetermineSSHAuth(test *testing.T) {
-  var provisioner TestinfraProvisioner
+  var provisioner Provisioner
 
   // dummy up fake ssh data
   generatedData := map[string]interface{}{

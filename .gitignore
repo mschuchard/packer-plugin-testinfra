@@ -1,6 +1,6 @@
 packer_*_test.txt
-fixtures/__pycache__
-fixtures/.vagrant
+__pycache__
+.vagrant
 .pytest_cache
 packer-plugin-testinfra
 *_test.pkr.hcl

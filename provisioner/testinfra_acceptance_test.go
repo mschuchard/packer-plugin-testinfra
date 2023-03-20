@@ -1,4 +1,4 @@
-package main
+package testinfra
 
 import (
   _ "embed"
@@ -16,7 +16,7 @@ import (
 var testTemplate string
 
 // testinfra basic acceptance testing function
-func TestTestinfraProvisioner(test *testing.T) {
+func TestProvisioner(test *testing.T) {
   // initialize acceptance test config struct
   testCase := &acctest.PluginTestCase{
 		Name:     "testinfra_provisioner_test",

@@ -1,5 +1,5 @@
-//go:generate packer-sdc mapstructure-to-hcl2 -type TestinfraConfig
-package main
+//go:generate packer-sdc mapstructure-to-hcl2 -type Config
+package testinfra
 
 import (
   "os"
@@ -21,7 +21,7 @@ import (
 )
 
 // config data from packer template/config
-type TestinfraConfig struct {
+type Config struct {
   InstallCmd []string `mapstructure:"install_cmd"`
   Keyword    string   `mapstructure:"keyword"`
   Local      bool     `mapstructure:"local"`
@@ -35,8 +35,8 @@ type TestinfraConfig struct {
 }
 
 // implements the packer.Provisioner interface
-type TestinfraProvisioner struct{
-  config        TestinfraConfig
+type Provisioner struct{
+  config        Config
   generatedData map[string]interface{}
 }
 
@@ -50,12 +50,12 @@ const (
 )
 
 // implements configspec with hcl2spec helper function
-func (provisioner *TestinfraProvisioner) ConfigSpec() hcldec.ObjectSpec {
+func (provisioner *Provisioner) ConfigSpec() hcldec.ObjectSpec {
   return provisioner.config.FlatMapstructure().HCL2Spec()
 }
 
 // prepares the provisioner plugin
-func (provisioner *TestinfraProvisioner) Prepare(raws ...interface{}) error {
+func (provisioner *Provisioner) Prepare(raws ...interface{}) error {
   // parse testinfra provisioner config
   err := config.Decode(&provisioner.config, &config.DecodeOpts{
     Interpolate:        true,
@@ -118,7 +118,7 @@ func (provisioner *TestinfraProvisioner) Prepare(raws ...interface{}) error {
 }
 
 // executes the provisioner plugin
-func (provisioner *TestinfraProvisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator, generatedData map[string]interface{}) error {
+func (provisioner *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator, generatedData map[string]interface{}) error {
   ui.Say("Testing machine image with Testinfra")
 
   // prepare generated data and context
@@ -133,10 +133,10 @@ func (provisioner *TestinfraProvisioner) Provision(ctx context.Context, ui packe
 
   // execute testinfra remotely with *exec.Cmd
   if len(localCmd.Command) == 0 && cmd != nil {
-    err = execCmdTestinfra(cmd, ui)
+    err = execCmd(cmd, ui)
   } else if len(localCmd.Command) > 0 && cmd == nil {
     // execute testinfra local to instance with packer.RemoteCmd
-    err = packerRemoteCmdTestinfra(localCmd, provisioner.config.InstallCmd, comm, ui)
+    err = packerRemoteCmd(localCmd, provisioner.config.InstallCmd, comm, ui)
   } else {
     // somehow we either returned both commands or neither or something really weird for one or both
     return fmt.Errorf("Incorrectly determined remote command (%s) and/or command local to instance (%s). Please report as bug with this log information.", cmd.String(), localCmd.Command)
@@ -149,7 +149,7 @@ func (provisioner *TestinfraProvisioner) Provision(ctx context.Context, ui packe
 }
 
 // execute testinfra remotely with *exec.Cmd
-func execCmdTestinfra(cmd *exec.Cmd, ui packer.Ui) error {
+func execCmd(cmd *exec.Cmd, ui packer.Ui) error {
   // merge in env settings
   cmd.Env = os.Environ()
   log.Printf("Complete Testinfra remote command is: %s", cmd.String())
@@ -208,7 +208,7 @@ func execCmdTestinfra(cmd *exec.Cmd, ui packer.Ui) error {
 }
 
 // execute testinfra local to temp packer instance with packer.RemoteCmd
-func packerRemoteCmdTestinfra(localCmd *packer.RemoteCmd, installCmd []string, comm packer.Communicator, ui packer.Ui) error {
+func packerRemoteCmd(localCmd *packer.RemoteCmd, installCmd []string, comm packer.Communicator, ui packer.Ui) error {
   // initialize context and log command
   ctx := context.TODO()
   log.Printf("Complete Testinfra local command is: %s", localCmd.Command)
@@ -262,7 +262,7 @@ func packerRemoteCmdTestinfra(localCmd *packer.RemoteCmd, installCmd []string, c
 }
 
 // determine and return execution command for testinfra
-func (provisioner *TestinfraProvisioner) determineExecCmd() (*exec.Cmd, *packer.RemoteCmd, error) {
+func (provisioner *Provisioner) determineExecCmd() (*exec.Cmd, *packer.RemoteCmd, error) {
   // initialize args with base argument
   args := []string{"-v"}
 
@@ -323,7 +323,7 @@ func (provisioner *TestinfraProvisioner) determineExecCmd() (*exec.Cmd, *packer.
 }
 
 // determine and return appropriate communication string for pytest/testinfra
-func (provisioner *TestinfraProvisioner) determineCommunication() (string, error) {
+func (provisioner *Provisioner) determineCommunication() (string, error) {
   // parse generated data for required values
   connectionType := provisioner.generatedData["ConnType"].(string)
   user, ok := provisioner.generatedData["SSHUsername"].(string)
@@ -397,7 +397,7 @@ func (provisioner *TestinfraProvisioner) determineCommunication() (string, error
 }
 
 // determine and return ssh authentication
-func (provisioner *TestinfraProvisioner) determineSSHAuth() (SSHAuth, string, error) {
+func (provisioner *Provisioner) determineSSHAuth() (SSHAuth, string, error) {
   // assign ssh password preferably from sshpassword
   sshPassword, ok := provisioner.generatedData["SSHPassword"].(string)
 
