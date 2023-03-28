@@ -78,7 +78,7 @@ func (provisioner *Provisioner) Prepare(raws ...interface{}) error {
     }
   } else { // verify testinfra installed
     // initialize testinfra --help command
-    cmd := exec.Command(provisioner.config.PytestPath, []string{"--help"}...)
+    cmd := exec.Command(provisioner.config.PytestPath, []string{"-h"}...)
 
     // prepare stdout pipe
     stdout, err := cmd.StdoutPipe()
@@ -89,7 +89,7 @@ func (provisioner *Provisioner) Prepare(raws ...interface{}) error {
 
     // initialize testinfra installed check
     if err := cmd.Start(); err != nil {
-      log.Printf("Initialization of Testinfra 'py.test --help' command execution returned non-zero exit status: %s", err)
+      log.Printf("Initialization of Testinfra 'py.test -h' command execution returned non-zero exit status: %s", err)
       return err
     }
 
@@ -103,8 +103,14 @@ func (provisioner *Provisioner) Prepare(raws ...interface{}) error {
     // examine pytest stdout
     if len(outSlurp) > 0 {
       // check for testinfra in stdout
+      if strings.Contains(string(outSlurp), "testinfra") {
+        log.Print("Testinfra installation existence verified")
+      } else {
+        return fmt.Errorf("Testinfra installation not found by specified Pytest installation")
+      }
     } else {
       // pytest returned no stdout
+      return fmt.Errorf("Pytest help command returned no stdout; this indicates an issue with the specified Pytest installation")
     }
   }
 
