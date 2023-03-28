@@ -3,6 +3,8 @@ package testinfra
 
 import (
   "os"
+  "os/exec"
+  "io"
   "strings"
   "fmt"
   "log"
@@ -52,6 +54,17 @@ func (provisioner *Provisioner) Prepare(raws ...interface{}) error {
     return err
   }
 
+  // set default executable path for py.test
+  if len(provisioner.config.PytestPath) == 0 {
+    log.Print("Setting PytestPath to default 'py.test'")
+    provisioner.config.PytestPath = "py.test"
+  } else { // verify py.test exists at supplied path
+    if _, err := os.Stat(provisioner.config.PytestPath); errors.Is(err, os.ErrNotExist) {
+      log.Printf("The Pytest executable does not exist at: %s", provisioner.config.PytestPath)
+      return err
+    }
+  }
+
   // log optional arguments
   if len(provisioner.config.Keyword) > 0 {
     log.Printf("Executing tests with keyword substring expression: %s", provisioner.config.Keyword)
@@ -62,6 +75,36 @@ func (provisioner *Provisioner) Prepare(raws ...interface{}) error {
 
     if len(provisioner.config.InstallCmd) > 0 {
       log.Printf("Installation command on the temporary Packer instance prior to Testinfra test execution is: %s", strings.Join(provisioner.config.InstallCmd, " "))
+    }
+  } else { // verify testinfra installed
+    // initialize testinfra --help command
+    cmd := exec.Command(provisioner.config.PytestPath, []string{"--help"}...)
+
+    // prepare stdout pipe
+    stdout, err := cmd.StdoutPipe()
+    if err != nil {
+      log.Print(err)
+      return err
+    }
+
+    // initialize testinfra installed check
+    if err := cmd.Start(); err != nil {
+      log.Printf("Initialization of Testinfra 'py.test --help' command execution returned non-zero exit status: %s", err)
+      return err
+    }
+
+    // capture pytest stdout
+    outSlurp, err := io.ReadAll(stdout)
+    if err != nil {
+      log.Printf("Unable to read stdout from Pytest: %s", err)
+      return err
+    }
+
+    // examine pytest stdout
+    if len(outSlurp) > 0 {
+      // check for testinfra in stdout
+    } else {
+      // pytest returned no stdout
     }
   }
 
@@ -75,17 +118,6 @@ func (provisioner *Provisioner) Prepare(raws ...interface{}) error {
     log.Print("Testinfra will execute with sudo.")
   } else {
     log.Print("Testinfra will not execute with sudo.")
-  }
-
-  // set default executable path for py.test
-  if len(provisioner.config.PytestPath) == 0 {
-    log.Print("Setting PytestPath to default 'py.test'")
-    provisioner.config.PytestPath = "py.test"
-  } else { // verify py.test exists at supplied path
-    if _, err := os.Stat(provisioner.config.PytestPath); errors.Is(err, os.ErrNotExist) {
-      log.Printf("The Pytest executable does not exist at: %s", provisioner.config.PytestPath)
-      return err
-    }
   }
 
   // verify testinfra files are specified as inputs
