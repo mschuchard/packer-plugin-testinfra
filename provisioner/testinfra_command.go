@@ -49,6 +49,8 @@ func execCmd(cmd *exec.Cmd, ui packer.Ui) error {
   if len(outSlurp) > 0 {
     ui.Say("Testinfra results include the following:")
     ui.Message(string(outSlurp))
+  } else {
+    ui.Say("Testinfra produced no stdout. It is likely something unintended occurred during execution.")
   }
 
   errSlurp, err := io.ReadAll(stderr)
@@ -120,6 +122,8 @@ func packerRemoteCmd(localCmd *packer.RemoteCmd, installCmd []string, comm packe
   if len(stdout.String()) > 0 {
     ui.Say("Testinfra results include the following:")
     ui.Message(stdout.String())
+  } else {
+    ui.Say("Testinfra produced no stdout. It is likely something unintended occurred during execution.")
   }
 
   // finish and return

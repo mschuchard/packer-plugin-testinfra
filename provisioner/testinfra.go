@@ -77,7 +77,7 @@ func (provisioner *Provisioner) Prepare(raws ...interface{}) error {
       log.Printf("Installation command on the temporary Packer instance prior to Testinfra test execution is: %s", strings.Join(provisioner.config.InstallCmd, " "))
     }
   } else { // verify testinfra installed
-    // initialize testinfra --help command
+    // initialize testinfra -h command
     cmd := exec.Command(provisioner.config.PytestPath, []string{"-h"}...)
 
     // prepare stdout pipe
