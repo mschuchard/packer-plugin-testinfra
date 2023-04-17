@@ -89,14 +89,14 @@ func (provisioner *Provisioner) Prepare(raws ...interface{}) error {
 
     // initialize testinfra installed check
     if err := cmd.Start(); err != nil {
-      log.Printf("Initialization of Testinfra 'py.test -h' command execution returned non-zero exit status: %s", err)
+      log.Printf("Initialization of Testinfra 'py.test -h' command execution returned non-zero exit status: %s", err.Error())
       return err
     }
 
     // capture pytest stdout
     outSlurp, err := io.ReadAll(stdout)
     if err != nil {
-      log.Printf("Unable to read stdout from Pytest: %s", err)
+      log.Printf("Unable to read stdout from Pytest: %s", err.Error())
       return err
     }
 

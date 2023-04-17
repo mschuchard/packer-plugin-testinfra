@@ -36,14 +36,14 @@ func execCmd(cmd *exec.Cmd, ui packer.Ui) error {
   // initialize testinfra tests
   ui.Say("Beginning Testinfra validation of machine image")
   if err := cmd.Start(); err != nil {
-    log.Printf("Initialization of Testinfra py.test command execution returned non-zero exit status: %s", err)
+    log.Printf("Initialization of Testinfra py.test command execution returned non-zero exit status: %s", err.Error())
     return err
   }
 
   // capture and display testinfra output
   outSlurp, err := io.ReadAll(stdout)
   if err != nil {
-    log.Printf("Unable to read stdout from Testinfra: %s", err)
+    log.Printf("Unable to read stdout from Testinfra: %s", err.Error())
     return err
   }
   if len(outSlurp) > 0 {
@@ -55,7 +55,7 @@ func execCmd(cmd *exec.Cmd, ui packer.Ui) error {
 
   errSlurp, err := io.ReadAll(stderr)
   if err != nil {
-    log.Printf("Unable to read stderr from Testinfra: %s", err)
+    log.Printf("Unable to read stderr from Testinfra: %s", err.Error())
     return err
   }
   if len(errSlurp) > 0 {
@@ -66,7 +66,7 @@ func execCmd(cmd *exec.Cmd, ui packer.Ui) error {
   // wait for testinfra to complete and flush buffers
   err = cmd.Wait()
   if err != nil {
-    log.Printf("Testinfra returned non-zero exit status: %s", err)
+    log.Printf("Testinfra returned non-zero exit status: %s", err.Error())
     return err
   }
 
@@ -92,7 +92,7 @@ func packerRemoteCmd(localCmd *packer.RemoteCmd, installCmd []string, comm packe
 
     // install testinfra on temp packer instance
     if err := comm.Start(ctx, localInstallCmd); err != nil {
-      log.Printf("Testinfra install command execution returned non-zero exit status: %s", err)
+      log.Printf("Testinfra install command execution returned non-zero exit status: %s", err.Error())
       return err
     }
   }
@@ -106,7 +106,7 @@ func packerRemoteCmd(localCmd *packer.RemoteCmd, installCmd []string, comm packe
   // initialize testinfra tests
   ui.Say("Beginning Testinfra validation of machine image")
   if err := comm.Start(ctx, localCmd); err != nil {
-    log.Printf("Initialization of Testinfra py.test command execution returned non-zero exit status: %s", err)
+    log.Printf("Initialization of Testinfra py.test command execution returned non-zero exit status: %s", err.Error())
     return err
   }
 

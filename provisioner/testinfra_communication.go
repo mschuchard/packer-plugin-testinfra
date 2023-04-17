@@ -31,12 +31,10 @@ func (provisioner *Provisioner) determineCommunication() (string, error) {
   }
   httpAddr := fmt.Sprintf("%s:%d", ipaddress, port)
   if len(ipaddress) == 0 {
+    // this is more likely to be a file upload staging server, but fallback anyway
     httpAddr = provisioner.generatedData["PackerHTTPAddr"].(string)
   }
   instanceID := provisioner.generatedData["ID"].(string)
-
-  // parse generated data for optional values
-  //uuid := provisioner.generatedData["PackerRunUUID"].(string)
 
   // determine communication string by packer connection type
   log.Printf("Testinfra communicating via %s connection type", connectionType)
@@ -118,7 +116,7 @@ func (provisioner *Provisioner) determineSSHAuth() (SSHAuth, string, error) {
       // write a tmpfile for storing a private key
       tmpSSHPrivateKey, err := tmp.File("testinfra-key")
       if err != nil {
-        return "", "", fmt.Errorf("Error creating a temp file for the ssh private key: %v", err)
+        return "", "", fmt.Errorf("Error creating a temp file for the ssh private key: %v", err.Error())
       }
 
       // attempt to obtain a private key
