@@ -28,9 +28,8 @@ source "virtualbox-vm" "ubuntu" {
   vm_name              = "fixtures_default_1662571353037_70563"
 }
 
+# test remote execution
 build {
-  #TODO: https://github.com/hashicorp/packer-plugin-virtualbox/issues/77
-  #sources = ["source.docker.ubuntu", "source.virtualbox-vm.ubuntu"]
   sources = ["source.docker.ubuntu"]
 
   provisioner "testinfra" {
@@ -38,3 +37,16 @@ build {
     test_files  = ["${path.cwd}/fixtures/test.py", "${path.cwd}/fixtures/test.py"]
   }
 }
+
+# test local execution
+# TODO: https://github.com/hashicorp/packer-plugin-virtualbox/issues/77
+/*build {
+  sources = ["source.virtualbox-vm.ubuntu"]
+
+  provisioner "testinfra" {
+    local       = true
+    install_cmd = "pip install testinfra"
+    # TODO: need file transer feature in 1.3.0 plugin version
+    test_files  = ["${path.cwd}/fixtures/test.py", "${path.cwd}/fixtures/test.py"]
+  }
+}*/
