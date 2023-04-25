@@ -6,10 +6,12 @@ on:
     branches: [master]
     paths:
     - '**.go'
+    - 'go.mod'
   pull_request:
     branches: [master]
     paths:
     - '**.go'
+    - 'go.mod'
 
 jobs:
   go-build:
