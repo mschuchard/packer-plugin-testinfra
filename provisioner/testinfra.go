@@ -31,7 +31,7 @@ type Config struct {
   ctx interpolate.Context
 }
 
-// implements the packer.Provisioner interface
+// implements the packer.Provisioner interface as testinfra.Provisioner
 type Provisioner struct{
   config        Config
   generatedData map[string]interface{}
@@ -46,6 +46,7 @@ func (provisioner *Provisioner) ConfigSpec() hcldec.ObjectSpec {
 func (provisioner *Provisioner) Prepare(raws ...interface{}) error {
   // parse testinfra provisioner config
   err := config.Decode(&provisioner.config, &config.DecodeOpts{
+    PluginType:         "testinfra",
     Interpolate:        true,
     InterpolateContext: &provisioner.config.ctx,
   }, raws...)
