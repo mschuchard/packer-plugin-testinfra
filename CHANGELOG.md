@@ -1,4 +1,4 @@
-### 1.2.1 (Next)
+### 1.2.1
 - Pass marker and keyword expressions as singular strings to command executors.
 - Reorganize module into package.
 - Add testinfra installation verification.

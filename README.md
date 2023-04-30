@@ -16,13 +16,13 @@ packer {
 }
 ```
 
-Afterwards, `packer init` can automatically manage your plugin as per normal. Note that this plugin currently does not manage your local Testinfra installation, and you will need to install that on your local device as a prerequisite for this plugin to function correctly. The minimum supported version of Testinfra is `6.7.0`, but a lower version may be possible if you are not using the SSH communicator. The minimum supported version of Pytest is unknown, but it would be recommended to install a version `>= 7.0.0`.
+Afterwards, `packer init` can automatically manage your plugin as per normal. Note that this plugin currently does not manage your local Testinfra installation, and you will need to install that on your local device as a prerequisite for this plugin to function correctly. If you are using this plugin with `local` enabled, then there is some assistance with managing Testinfra on the temporary Packer instance with `install_cmd`. The minimum supported version of Testinfra is `6.7.0`, but a lower version may be possible if you are not using the SSH communicator. The minimum supported version of Pytest is unknown, but it would be recommended to install a version `>= 7.0.0`.
 
 ## Usage
 
 ### Basic Example
 
-A basic example for usage of this plugin follows below:
+A basic example for usage of this plugin with common optional arguments follows below:
 
 ```hcl
 build {
@@ -30,7 +30,7 @@ build {
     processes   = 2
     pytest_path = "/usr/local/bin/py.test"
     sudo        = false
-    test_files  = ["${path.root}/test.py"]
+    test_files  = ["${path.root}/test.py", "${path.root}/test_other.py"]
   }
 }
 ```
