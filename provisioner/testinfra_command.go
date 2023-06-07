@@ -50,7 +50,7 @@ func execCmd(cmd *exec.Cmd, ui packer.Ui) error {
 		ui.Say("Testinfra results include the following:")
 		ui.Message(string(outSlurp))
 	} else {
-		ui.Say("Testinfra produced no stdout. It is likely something unintended occurred during execution.")
+		ui.Say("Testinfra produced no stdout. It is probable that something unintended occurred during execution.")
 	}
 
 	errSlurp, err := io.ReadAll(stderr)
@@ -79,7 +79,7 @@ func execCmd(cmd *exec.Cmd, ui packer.Ui) error {
 // execute testinfra local to temp packer instance with packer.RemoteCmd
 func packerRemoteCmd(localCmd *packer.RemoteCmd, installCmd []string, comm packer.Communicator, ui packer.Ui) error {
 	// initialize context and log command
-	ctx := context.TODO()
+	ctx := context.Background()
 	log.Printf("Complete Testinfra local command is: %s", localCmd.Command)
 
 	// install testinfra on temp packer instance
@@ -97,7 +97,7 @@ func packerRemoteCmd(localCmd *packer.RemoteCmd, installCmd []string, comm packe
 		}
 	}
 
-	// initialize stdout and stderr
+	// initialize stdout and stderr as bytes
 	var stdout bytes.Buffer
 	localCmd.Stdout = &stdout
 	var stderr bytes.Buffer
@@ -144,6 +144,7 @@ func (provisioner *Provisioner) determineExecCmd() (*exec.Cmd, *packer.RemoteCmd
 		if err != nil {
 			return nil, &packer.RemoteCmd{}, err
 		}
+
 		args = append(args, communication)
 	}
 
@@ -189,6 +190,6 @@ func (provisioner *Provisioner) determineExecCmd() (*exec.Cmd, *packer.RemoteCmd
 	if localExec == true {
 		return nil, &packer.RemoteCmd{Command: fmt.Sprintf("%s %s", pytestPath, strings.Join(args, " "))}, nil
 	} else { // return exec command for remote testing against instance
-		return exec.Command(pytestPath, args...), &packer.RemoteCmd{Command: ""}, nil
+		return exec.Command(pytestPath, args...), nil, nil
 	}
 }

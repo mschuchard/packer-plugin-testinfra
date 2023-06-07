@@ -38,7 +38,7 @@ func (provisioner *Provisioner) determineCommunication() (string, error) {
 
 	// determine communication string by packer connection type
 	log.Printf("Testinfra communicating via %s connection type", connectionType)
-	communication := ""
+	var communication string = ""
 
 	switch connectionType {
 	case "ssh":
@@ -112,7 +112,7 @@ func (provisioner *Provisioner) determineSSHAuth() (SSHAuth, string, error) {
 		} else if sshAgentAuth {
 			// we can use an empty private key with ssh agent auth
 			return agentSSHAuth, sshPrivateKeyFile, nil
-		} else { // create a private key file instead
+		} else { // create a private key file instead from the privatekey data
 			// write a tmpfile for storing a private key
 			tmpSSHPrivateKey, err := tmp.File("testinfra-key")
 			if err != nil {

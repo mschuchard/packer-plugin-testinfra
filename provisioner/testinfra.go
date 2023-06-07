@@ -17,7 +17,7 @@ import (
 	"github.com/hashicorp/packer-plugin-sdk/template/interpolate"
 )
 
-// config data from packer template/config
+// config data unmarshalled from packer template/config
 type Config struct {
 	InstallCmd []string `mapstructure:"install_cmd"`
 	Keyword    string   `mapstructure:"keyword"`
@@ -62,6 +62,9 @@ func (provisioner *Provisioner) Prepare(raws ...interface{}) error {
 	} else { // verify py.test exists at supplied path
 		if _, err := os.Stat(provisioner.config.PytestPath); errors.Is(err, os.ErrNotExist) {
 			log.Printf("The Pytest executable does not exist at: %s", provisioner.config.PytestPath)
+			return err
+		} else if err != nil {
+			log.Print("An unknown error occurred")
 			return err
 		}
 	}
@@ -119,7 +122,9 @@ func (provisioner *Provisioner) Prepare(raws ...interface{}) error {
 		log.Printf("Executing tests with marker expression: %s", provisioner.config.Marker)
 	}
 
-	log.Printf("Number of Testinfra processes: %d.", provisioner.config.Processes)
+	if provisioner.config.Processes > 0 {
+		log.Printf("Number of Testinfra processes: %d.", provisioner.config.Processes)
+	}
 
 	if provisioner.config.Sudo {
 		log.Print("Testinfra will execute with sudo.")
@@ -157,9 +162,9 @@ func (provisioner *Provisioner) Provision(ctx context.Context, ui packer.Ui, com
 	}
 
 	// execute testinfra remotely with *exec.Cmd
-	if len(localCmd.Command) == 0 && cmd != nil {
+	if localCmd == nil && cmd != nil {
 		err = execCmd(cmd, ui)
-	} else if len(localCmd.Command) > 0 && cmd == nil {
+	} else if localCmd != nil && cmd == nil {
 		// execute testinfra local to instance with packer.RemoteCmd
 		err = packerRemoteCmd(localCmd, provisioner.config.InstallCmd, comm, ui)
 	} else {

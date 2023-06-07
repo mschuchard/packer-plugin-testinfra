@@ -131,6 +131,7 @@ func TestProvisionerPrepareNonExistFiles(test *testing.T) {
 	err := provisioner.Prepare(noPytestConfig)
 	if !(errors.Is(err, os.ErrNotExist)) {
 		test.Errorf("Prepare function did not fail correctly on nonexistent pytest")
+		test.Error(err)
 	}
 
 	// test nonexistent testfile
@@ -143,6 +144,7 @@ func TestProvisionerPrepareNonExistFiles(test *testing.T) {
 		err = provisioner.Prepare(noTestFileConfig)
 		if !(errors.Is(err, os.ErrNotExist)) {
 			test.Errorf("Prepare function did not fail correctly on nonexistent testfile")
+			test.Error(err)
 		}
 	}
 }
