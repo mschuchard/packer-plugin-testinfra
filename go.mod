@@ -1,6 +1,6 @@
 module github.com/mschuchard/packer-plugin-testinfra
 
-go 1.18
+go 1.19
 
 require (
 	// cannot be updated because of go-cty incompat
