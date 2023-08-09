@@ -2,12 +2,13 @@ module github.com/mschuchard/packer-plugin-testinfra
 
 go 1.19
 
+replace github.com/zclconf/go-cty => github.com/nywilken/go-cty v1.12.1
+
 require (
-	// cannot be updated because of go-cty incompat
-	github.com/hashicorp/hcl/v2 v2.14.1
-	github.com/hashicorp/packer-plugin-sdk v0.4.0
-	// https://github.com/hashicorp/packer-plugin-sdk/issues/131, https://github.com/zclconf/go-cty/issues/134
-	github.com/zclconf/go-cty v1.10.0
+	// cannot upgrade to >=2.17.0 due to go-cty incompatibility
+	github.com/hashicorp/hcl/v2 v2.16.2
+	github.com/hashicorp/packer-plugin-sdk v0.5.1
+	github.com/zclconf/go-cty v1.13.2
 )
 
 require (
