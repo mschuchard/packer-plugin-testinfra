@@ -5,13 +5,13 @@ jobs:
   test:
     working_directory: /tmp/project
     docker:
-    - image: golang:1.19-alpine
+    - image: golang:1.20-alpine
     resource_class: small
     steps:
     - checkout
     - restore_cache:
         keys:
-        - packer-provisioner-testinfra
+        - packer-plugin-testinfra
     - run:
         name: install prereqs
         command: apk add --no-cache --update build-base && touch /usr/local/bin/py.test
@@ -24,7 +24,7 @@ jobs:
     - save_cache:
         paths:
         - ~/go/pkg
-        key: packer-provisioner-testinfra
+        key: packer-plugin-testinfra
 
 workflows:
   execute_tests:
