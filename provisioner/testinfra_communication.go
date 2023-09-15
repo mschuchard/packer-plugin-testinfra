@@ -37,7 +37,7 @@ func (provisioner *Provisioner) determineCommunication() (string, error) {
 	instanceID := provisioner.generatedData["ID"].(string)
 
 	// determine communication string by packer connection type
-	log.Printf("Testinfra communicating via %s connection type", connectionType)
+	log.Printf("testinfra communicating via %s connection type", connectionType)
 	var communication string = ""
 
 	switch connectionType {
@@ -55,7 +55,7 @@ func (provisioner *Provisioner) determineCommunication() (string, error) {
 			log.Printf("SSH private key filesystem location is: %s", sshAuthString)
 			sshIdentity = fmt.Sprintf(" --ssh-identity-file=%s ", sshAuthString)
 		} else if sshAuthType == passwordSSHAuth { // use ssh password
-			log.Printf("Utilizing SSH password for communicator authentication.")
+			log.Print("utilizing SSH password for communicator authentication")
 			// modify user string to also include password
 			user = fmt.Sprintf("%s:%s", user, sshAuthString)
 		}

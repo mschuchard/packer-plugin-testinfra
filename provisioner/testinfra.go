@@ -50,34 +50,31 @@ func (provisioner *Provisioner) Prepare(raws ...interface{}) error {
 		InterpolateContext: &provisioner.config.ctx,
 	}, raws...)
 	if err != nil {
-		log.Print("Error decoding the supplied Packer config.")
+		log.Print("error decoding the supplied Packer config")
 		return err
 	}
 
 	// set default executable path for py.test
 	if len(provisioner.config.PytestPath) == 0 {
-		log.Print("Setting PytestPath to default 'py.test'")
+		log.Print("setting PytestPath to default 'py.test'")
 		provisioner.config.PytestPath = "py.test"
 	} else { // verify py.test exists at supplied path
 		if _, err := os.Stat(provisioner.config.PytestPath); err != nil {
-			log.Printf("The Pytest executable does not exist at: %s", provisioner.config.PytestPath)
-			return err
-		} else if err != nil {
-			log.Print("An unknown error occurred")
+			log.Printf("the Pytest executable does not exist at: %s", provisioner.config.PytestPath)
 			return err
 		}
 	}
 
 	// log optional arguments
 	if len(provisioner.config.Keyword) > 0 {
-		log.Printf("Executing tests with keyword substring expression: %s", provisioner.config.Keyword)
+		log.Printf("executing tests with keyword substring expression: %s", provisioner.config.Keyword)
 	}
 
 	if provisioner.config.Local {
-		log.Print("Test execution will occur on the temporary Packer instance used for building the machine image artifact")
+		log.Print("test execution will occur on the temporary Packer instance used for building the machine image artifact")
 
 		if len(provisioner.config.InstallCmd) > 0 {
-			log.Printf("Installation command on the temporary Packer instance prior to Testinfra test execution is: %s", strings.Join(provisioner.config.InstallCmd, " "))
+			log.Printf("installation command on the temporary Packer instance prior to Testinfra test execution is: %s", strings.Join(provisioner.config.InstallCmd, " "))
 		}
 	} else { // verify testinfra installed
 		// initialize testinfra -h command
@@ -92,14 +89,14 @@ func (provisioner *Provisioner) Prepare(raws ...interface{}) error {
 
 		// initialize testinfra installed check
 		if err := cmd.Start(); err != nil {
-			log.Printf("Initialization of Testinfra 'py.test -h' command execution returned non-zero exit status: %s", err.Error())
+			log.Printf("initialization of Testinfra 'py.test -h' command execution returned non-zero exit status: %s", err.Error())
 			return err
 		}
 
 		// capture pytest stdout
 		outSlurp, err := io.ReadAll(stdout)
 		if err != nil {
-			log.Printf("Unable to read stdout from Pytest: %s", err.Error())
+			log.Printf("unable to read stdout from Pytest: %s", err.Error())
 			return err
 		}
 
@@ -107,7 +104,7 @@ func (provisioner *Provisioner) Prepare(raws ...interface{}) error {
 		if len(outSlurp) > 0 {
 			// check for testinfra in stdout
 			if strings.Contains(string(outSlurp), "testinfra") {
-				log.Print("Testinfra installation existence verified")
+				log.Print("testinfra installation existence verified")
 			} else {
 				return fmt.Errorf("testinfra installation not found by specified Pytest installation")
 			}
@@ -118,26 +115,26 @@ func (provisioner *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	if len(provisioner.config.Marker) > 0 {
-		log.Printf("Executing tests with marker expression: %s", provisioner.config.Marker)
+		log.Printf("executing tests with marker expression: %s", provisioner.config.Marker)
 	}
 
 	if provisioner.config.Processes > 0 {
-		log.Printf("Number of Testinfra processes: %d.", provisioner.config.Processes)
+		log.Printf("number of Testinfra processes: %d", provisioner.config.Processes)
 	}
 
 	if provisioner.config.Sudo {
-		log.Print("Testinfra will execute with sudo.")
+		log.Print("testinfra will execute with sudo")
 	} else {
-		log.Print("Testinfra will not execute with sudo.")
+		log.Print("testinfra will not execute with sudo")
 	}
 
 	// verify testinfra files are specified as inputs
 	if len(provisioner.config.TestFiles) == 0 {
-		log.Print("All files prefixed with 'test_' recursively discovered from the current working directory will be considered Testinfra test files")
+		log.Print("all files prefixed with 'test_' recursively discovered from the current working directory will be considered Testinfra test files")
 	} else { // verify testinfra files exist
 		for _, testFile := range provisioner.config.TestFiles {
 			if _, err := os.Stat(testFile); err != nil {
-				log.Printf("The Testinfra test_file does not exist at: %s", testFile)
+				log.Printf("the Testinfra test_file does not exist at: %s", testFile)
 				return err
 			}
 		}
@@ -148,7 +145,7 @@ func (provisioner *Provisioner) Prepare(raws ...interface{}) error {
 
 // executes the provisioner plugin
 func (provisioner *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator, generatedData map[string]interface{}) error {
-	ui.Say("Testing machine image with Testinfra")
+	ui.Say("testing machine image with Testinfra")
 
 	// prepare generated data and context
 	provisioner.generatedData = generatedData

@@ -19,7 +19,7 @@ import (
 func execCmd(cmd *exec.Cmd, ui packer.Ui) error {
 	// merge in env settings
 	cmd.Env = os.Environ()
-	log.Printf("Complete Testinfra remote command is: %s", cmd.String())
+	log.Printf("complete Testinfra remote command is: %s", cmd.String())
 
 	// prepare stdout and stderr pipes
 	stdout, err := cmd.StdoutPipe()
@@ -36,26 +36,26 @@ func execCmd(cmd *exec.Cmd, ui packer.Ui) error {
 	// initialize testinfra tests
 	ui.Say("Beginning Testinfra validation of machine image")
 	if err := cmd.Start(); err != nil {
-		log.Printf("Initialization of Testinfra py.test command execution returned non-zero exit status: %s", err.Error())
+		log.Printf("initialization of Testinfra py.test command execution returned non-zero exit status: %s", err.Error())
 		return err
 	}
 
 	// capture and display testinfra output
 	outSlurp, err := io.ReadAll(stdout)
 	if err != nil {
-		log.Printf("Unable to read stdout from Testinfra: %s", err.Error())
+		log.Printf("unable to read stdout from Testinfra: %s", err.Error())
 		return err
 	}
 	if len(outSlurp) > 0 {
 		ui.Say("Testinfra results include the following:")
 		ui.Message(string(outSlurp))
 	} else {
-		ui.Say("Testinfra produced no stdout. It is probable that something unintended occurred during execution.")
+		ui.Say("Testinfra produced no stdout; it is probable that something unintended occurred during execution")
 	}
 
 	errSlurp, err := io.ReadAll(stderr)
 	if err != nil {
-		log.Printf("Unable to read stderr from Testinfra: %s", err.Error())
+		log.Printf("unable to read stderr from Testinfra: %s", err.Error())
 		return err
 	}
 	if len(errSlurp) > 0 {
@@ -80,13 +80,13 @@ func execCmd(cmd *exec.Cmd, ui packer.Ui) error {
 func packerRemoteCmd(localCmd *packer.RemoteCmd, installCmd []string, comm packer.Communicator, ui packer.Ui) error {
 	// initialize context and log command
 	ctx := context.Background()
-	log.Printf("Complete Testinfra local command is: %s", localCmd.Command)
+	log.Printf("complete Testinfra local command is: %s", localCmd.Command)
 
 	// install testinfra on temp packer instance
 	if len(installCmd) > 0 {
 		// cast installCmd to string, log, and init localInstallCmd
 		strInstallCmd := strings.Join(installCmd, " ")
-		ui.Say("Installing Testinfra on instance")
+		ui.Say("installing Testinfra on instance")
 		log.Printf("Testinfra installation command is: %s", strInstallCmd)
 		localInstallCmd := &packer.RemoteCmd{Command: strInstallCmd}
 
@@ -104,9 +104,9 @@ func packerRemoteCmd(localCmd *packer.RemoteCmd, installCmd []string, comm packe
 	localCmd.Stderr = &stderr
 
 	// initialize testinfra tests
-	ui.Say("Beginning Testinfra validation of machine image")
+	ui.Say("beginning Testinfra validation of machine image")
 	if err := comm.Start(ctx, localCmd); err != nil {
-		log.Printf("Initialization of Testinfra py.test command execution returned non-zero exit status: %s", err.Error())
+		log.Printf("initialization of Testinfra py.test command execution returned non-zero exit status: %s", err.Error())
 		return err
 	}
 
@@ -115,7 +115,7 @@ func packerRemoteCmd(localCmd *packer.RemoteCmd, installCmd []string, comm packe
 	if exitStatus := localCmd.Wait(); exitStatus > 0 || len(stderr.String()) > 0 {
 		ui.Error("Testinfra errored internally during execution:")
 		ui.Error(stderr.String())
-		return fmt.Errorf("testinfra returned exit status: %d", exitStatus)
+		return fmt.Errorf("Testinfra returned exit status: %d", exitStatus)
 	}
 
 	// capture and display testinfra output
@@ -123,7 +123,7 @@ func packerRemoteCmd(localCmd *packer.RemoteCmd, installCmd []string, comm packe
 		ui.Say("Testinfra results include the following:")
 		ui.Message(stdout.String())
 	} else {
-		ui.Say("Testinfra produced no stdout. It is likely something unintended occurred during execution.")
+		ui.Say("Testinfra produced no stdout; it is likely something unintended occurred during execution")
 	}
 
 	// finish and return
@@ -152,7 +152,7 @@ func (provisioner *Provisioner) determineExecCmd() (*exec.Cmd, *packer.RemoteCmd
 	// pytest path
 	pytestPath, err := interpolate.Render(provisioner.config.PytestPath, &provisioner.config.ctx)
 	if err != nil {
-		log.Printf("Error parsing config for PytestPath: %v", err.Error())
+		log.Printf("error parsing config for PytestPath: %v", err.Error())
 		return nil, &packer.RemoteCmd{}, err
 	}
 
@@ -162,7 +162,7 @@ func (provisioner *Provisioner) determineExecCmd() (*exec.Cmd, *packer.RemoteCmd
 	// keyword
 	keyword, err := interpolate.Render(provisioner.config.Keyword, &provisioner.config.ctx)
 	if err != nil {
-		log.Printf("Error parsing config for Keyword: %v", err.Error())
+		log.Printf("error parsing config for Keyword: %v", err.Error())
 		return nil, &packer.RemoteCmd{}, err
 	}
 	if len(keyword) > 0 {
@@ -171,7 +171,7 @@ func (provisioner *Provisioner) determineExecCmd() (*exec.Cmd, *packer.RemoteCmd
 	// marker
 	marker, err := interpolate.Render(provisioner.config.Marker, &provisioner.config.ctx)
 	if err != nil {
-		log.Printf("Error parsing config for Marker: %v", err.Error())
+		log.Printf("error parsing config for Marker: %v", err.Error())
 		return nil, &packer.RemoteCmd{}, err
 	}
 	if len(marker) > 0 {
