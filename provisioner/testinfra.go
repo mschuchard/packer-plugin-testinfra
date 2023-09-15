@@ -3,7 +3,6 @@ package testinfra
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -60,7 +59,7 @@ func (provisioner *Provisioner) Prepare(raws ...interface{}) error {
 		log.Print("Setting PytestPath to default 'py.test'")
 		provisioner.config.PytestPath = "py.test"
 	} else { // verify py.test exists at supplied path
-		if _, err := os.Stat(provisioner.config.PytestPath); errors.Is(err, os.ErrNotExist) {
+		if _, err := os.Stat(provisioner.config.PytestPath); err != nil {
 			log.Printf("The Pytest executable does not exist at: %s", provisioner.config.PytestPath)
 			return err
 		} else if err != nil {
@@ -110,11 +109,11 @@ func (provisioner *Provisioner) Prepare(raws ...interface{}) error {
 			if strings.Contains(string(outSlurp), "testinfra") {
 				log.Print("Testinfra installation existence verified")
 			} else {
-				return fmt.Errorf("Testinfra installation not found by specified Pytest installation")
+				return fmt.Errorf("testinfra installation not found by specified Pytest installation")
 			}
 		} else {
 			// pytest returned no stdout
-			return fmt.Errorf("Pytest help command returned no stdout; this indicates an issue with the specified Pytest installation")
+			return fmt.Errorf("pytest help command returned no stdout; this indicates an issue with the specified Pytest installation")
 		}
 	}
 
@@ -137,7 +136,7 @@ func (provisioner *Provisioner) Prepare(raws ...interface{}) error {
 		log.Print("All files prefixed with 'test_' recursively discovered from the current working directory will be considered Testinfra test files")
 	} else { // verify testinfra files exist
 		for _, testFile := range provisioner.config.TestFiles {
-			if _, err := os.Stat(testFile); errors.Is(err, os.ErrNotExist) {
+			if _, err := os.Stat(testFile); err != nil {
 				log.Printf("The Testinfra test_file does not exist at: %s", testFile)
 				return err
 			}
@@ -169,7 +168,7 @@ func (provisioner *Provisioner) Provision(ctx context.Context, ui packer.Ui, com
 		err = packerRemoteCmd(localCmd, provisioner.config.InstallCmd, comm, ui)
 	} else {
 		// somehow we either returned both commands or neither or something really weird for one or both
-		return fmt.Errorf("Incorrectly determined remote command (%s) and/or command local to instance (%s). Please report as bug with this log information.", cmd.String(), localCmd.Command)
+		return fmt.Errorf("incorrectly determined remote command (%s) and/or command local to instance (%s); please report as bug with this log information", cmd.String(), localCmd.Command)
 	}
 	if err != nil {
 		return err

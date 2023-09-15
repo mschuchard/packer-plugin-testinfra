@@ -2,7 +2,6 @@ package testinfra
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -17,7 +16,7 @@ func (provisioner *Provisioner) uploadFiles(comm packer.Communicator, files []st
 	// iterate through files to transfer
 	for _, file := range files {
 		// validate file existence
-		if _, err = os.Stat(file); errors.Is(err, os.ErrNotExist) {
+		if _, err = os.Stat(file); err != nil {
 			log.Printf("the file does not exist at path: %s, and will not be transferred", file)
 			continue
 		}

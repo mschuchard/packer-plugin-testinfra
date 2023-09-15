@@ -70,7 +70,7 @@ func (provisioner *Provisioner) determineCommunication() (string, error) {
 		}
 		// no winrm password available
 		if !ok {
-			return "", fmt.Errorf("WinRM communicator password could not be determined from available Packer data.")
+			return "", fmt.Errorf("WinRM communicator password could not be determined from available Packer data")
 		}
 
 		communication = fmt.Sprintf("--hosts=winrm://%s:%s@%s", user, winRMPassword, httpAddr)
@@ -82,7 +82,7 @@ func (provisioner *Provisioner) determineCommunication() (string, error) {
 		communication = fmt.Sprintf("--hosts=lxc://%s", instanceID)
 	}
 	if len(communication) == 0 {
-		return "", fmt.Errorf("Communication with machine image could not be properly determined")
+		return "", fmt.Errorf("communication with machine image could not be properly determined")
 	}
 
 	return communication, nil
@@ -116,7 +116,7 @@ func (provisioner *Provisioner) determineSSHAuth() (SSHAuth, string, error) {
 			// write a tmpfile for storing a private key
 			tmpSSHPrivateKey, err := tmp.File("testinfra-key")
 			if err != nil {
-				return "", "", fmt.Errorf("Error creating a temp file for the ssh private key: %v", err.Error())
+				return "", "", fmt.Errorf("error creating a temp file for the ssh private key: %v", err.Error())
 			}
 
 			// attempt to obtain a private key
@@ -125,13 +125,13 @@ func (provisioner *Provisioner) determineSSHAuth() (SSHAuth, string, error) {
 			// write the private key to the tmpfile
 			_, err = tmpSSHPrivateKey.WriteString(SSHPrivateKey)
 			if err != nil {
-				return "", "", fmt.Errorf("Failed to write ssh private key to temp file")
+				return "", "", fmt.Errorf("failed to write ssh private key to temp file")
 			}
 
 			// and then close the tmpfile storing the private key
 			err = tmpSSHPrivateKey.Close()
 			if err != nil {
-				return "", "", fmt.Errorf("Failed to close ssh private key temp file")
+				return "", "", fmt.Errorf("failed to close ssh private key temp file")
 			}
 
 			return privateKeySSHAuth, tmpSSHPrivateKey.Name(), nil

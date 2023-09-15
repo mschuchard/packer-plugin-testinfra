@@ -115,7 +115,7 @@ func packerRemoteCmd(localCmd *packer.RemoteCmd, installCmd []string, comm packe
 	if exitStatus := localCmd.Wait(); exitStatus > 0 || len(stderr.String()) > 0 {
 		ui.Error("Testinfra errored internally during execution:")
 		ui.Error(stderr.String())
-		return fmt.Errorf("Testinfra returned exit status: %d", exitStatus)
+		return fmt.Errorf("testinfra returned exit status: %d", exitStatus)
 	}
 
 	// capture and display testinfra output
@@ -139,7 +139,7 @@ func (provisioner *Provisioner) determineExecCmd() (*exec.Cmd, *packer.RemoteCmd
 
 	// assign determined communication string
 	localExec := provisioner.config.Local
-	if localExec == false {
+	if !localExec {
 		communication, err := provisioner.determineCommunication()
 		if err != nil {
 			return nil, &packer.RemoteCmd{}, err
@@ -182,12 +182,12 @@ func (provisioner *Provisioner) determineExecCmd() (*exec.Cmd, *packer.RemoteCmd
 		args = append(args, "-n", strconv.Itoa(provisioner.config.Processes))
 	}
 	// sudo
-	if provisioner.config.Sudo == true {
+	if provisioner.config.Sudo {
 		args = append(args, "--sudo")
 	}
 
 	// return packer remote command for local testing on instance
-	if localExec == true {
+	if localExec {
 		return nil, &packer.RemoteCmd{Command: fmt.Sprintf("%s %s", pytestPath, strings.Join(args, " "))}, nil
 	} else { // return exec command for remote testing against instance
 		return exec.Command(pytestPath, args...), nil, nil
