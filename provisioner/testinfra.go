@@ -77,13 +77,14 @@ func (provisioner *Provisioner) Prepare(raws ...interface{}) error {
 			log.Printf("installation command on the temporary Packer instance prior to Testinfra test execution is: %s", strings.Join(provisioner.config.InstallCmd, " "))
 		}
 	} else { // verify testinfra installed
+		log.Print("beginning Testinfra installation verification")
 		// initialize testinfra -h command
 		cmd := exec.Command(provisioner.config.PytestPath, []string{"-h"}...)
 
 		// prepare stdout pipe
 		stdout, err := cmd.StdoutPipe()
 		if err != nil {
-			log.Print(err)
+			log.Print("unable to prepare the pipe for capturing stdout")
 			return err
 		}
 
@@ -154,6 +155,7 @@ func (provisioner *Provisioner) Provision(ctx context.Context, ui packer.Ui, com
 	// prepare testinfra test command
 	cmd, localCmd, err := provisioner.determineExecCmd()
 	if err != nil {
+		ui.Error("the execution command could not be accurately determined")
 		return err
 	}
 
@@ -168,6 +170,7 @@ func (provisioner *Provisioner) Provision(ctx context.Context, ui packer.Ui, com
 		return fmt.Errorf("incorrectly determined remote command (%s) and/or command local to instance (%s); please report as bug with this log information", cmd.String(), localCmd.Command)
 	}
 	if err != nil {
+		ui.Error("the pytest Testinfra execution failed")
 		return err
 	}
 

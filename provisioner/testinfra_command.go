@@ -24,26 +24,26 @@ func execCmd(cmd *exec.Cmd, ui packer.Ui) error {
 	// prepare stdout and stderr pipes
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
-		log.Print(err)
+		ui.Error("unable to prepare the pipe for capturing stdout")
 		return err
 	}
 	stderr, err := cmd.StderrPipe()
 	if err != nil {
-		log.Print(err)
+		ui.Error("unable to prepare the pipe for capturing stderr")
 		return err
 	}
 
 	// initialize testinfra tests
 	ui.Say("Beginning Testinfra validation of machine image")
 	if err := cmd.Start(); err != nil {
-		log.Printf("initialization of Testinfra py.test command execution returned non-zero exit status: %s", err.Error())
+		ui.Error("initialization of Testinfra py.test command execution returned non-zero exit status")
 		return err
 	}
 
 	// capture and display testinfra output
 	outSlurp, err := io.ReadAll(stdout)
 	if err != nil {
-		log.Printf("unable to read stdout from Testinfra: %s", err.Error())
+		ui.Error("unable to read stdout from Testinfra")
 		return err
 	}
 	if len(outSlurp) > 0 {
@@ -55,7 +55,7 @@ func execCmd(cmd *exec.Cmd, ui packer.Ui) error {
 
 	errSlurp, err := io.ReadAll(stderr)
 	if err != nil {
-		log.Printf("unable to read stderr from Testinfra: %s", err.Error())
+		ui.Error("unable to read stderr from Testinfra")
 		return err
 	}
 	if len(errSlurp) > 0 {
@@ -66,7 +66,7 @@ func execCmd(cmd *exec.Cmd, ui packer.Ui) error {
 	// wait for testinfra to complete and flush buffers
 	err = cmd.Wait()
 	if err != nil {
-		log.Printf("Testinfra returned non-zero exit status: %s", err.Error())
+		ui.Error("Testinfra returned non-zero exit status: %s")
 		return err
 	}
 
@@ -92,7 +92,7 @@ func packerRemoteCmd(localCmd *packer.RemoteCmd, installCmd []string, comm packe
 
 		// install testinfra on temp packer instance
 		if err := comm.Start(ctx, localInstallCmd); err != nil {
-			log.Printf("Testinfra install command execution returned non-zero exit status: %s", err.Error())
+			ui.Error("Testinfra install command execution returned non-zero exit status")
 			return err
 		}
 	}
@@ -106,7 +106,7 @@ func packerRemoteCmd(localCmd *packer.RemoteCmd, installCmd []string, comm packe
 	// initialize testinfra tests
 	ui.Say("beginning Testinfra validation of machine image")
 	if err := comm.Start(ctx, localCmd); err != nil {
-		log.Printf("initialization of Testinfra py.test command execution returned non-zero exit status: %s", err.Error())
+		ui.Error("initialization of Testinfra py.test command execution returned non-zero exit status")
 		return err
 	}
 
