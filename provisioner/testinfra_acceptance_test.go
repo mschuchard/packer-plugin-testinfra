@@ -27,33 +27,34 @@ func TestProvisioner(test *testing.T) {
 		Check: func(buildCommand *exec.Cmd, logfile string) error {
 			// verify good exit code from packer process
 			if buildCommand.ProcessState != nil && buildCommand.ProcessState.ExitCode() != 0 {
-				return fmt.Errorf("Bad exit code from Packer build. Logfile: %s", logfile)
+				test.Errorf("unexpected exit code from Packer build; logfile: %s", logfile)
 			}
 
 			// manage logfile
 			logs, err := os.Open(logfile)
 			if err != nil {
-				return fmt.Errorf("Unable to find logfile at: %s", logfile)
+				return fmt.Errorf("unable to open logfile at: %s", logfile)
 			}
 			defer logs.Close()
 
 			// manage logfile content
 			logsBytes, err := ioutil.ReadAll(logs)
 			if err != nil {
-				return fmt.Errorf("Unable to read logs at: %s", logfile)
+				return fmt.Errorf("unable to read logfile at: %s", logfile)
 			}
+			// convert log byte slice to string
 			logsString := string(logsBytes)
 
 			// verify logfile content
 			if docker_matched, _ := regexp.MatchString("docker.ubuntu: Testing machine image with Testinfra.*", logsString); !docker_matched {
-				test.Fatalf("Logs do not contain expected docker testinfra value %q", logsString)
+				test.Errorf("logs do not contain expected docker testinfra value: %s", logsString)
 			}
 			//TODO: https://github.com/hashicorp/packer-plugin-virtualbox/issues/77
 			/*if vbox_matched, _ := regexp.MatchString("virtualbox-vm.ubuntu: Testing machine image with Testinfra.*", logsString); !vbox_matched {
 			  test.Fatalf("Logs do not contain expected virtualbox testinfra value %q", logsString)
 			}*/
 			if tests_matched, _ := regexp.MatchString("2 passed in.*", logsString); !tests_matched {
-				test.Fatalf("Logs do not contain expected testinfra value %q", logsString)
+				test.Errorf("logs do not contain expected testinfra value: %s", logsString)
 			}
 
 			return nil

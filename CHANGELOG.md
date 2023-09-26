@@ -1,6 +1,9 @@
+### 1.2.2 (Next)
+- Logging updates, code optimization, go version increments, and dependency updates.
+
 ### 1.2.1
 - Pass marker and keyword expressions as singular strings to command executors.
-- Reorganize module into package.
+- Reorganize module into packages.
 - Add testinfra installation verification.
 
 ### 1.2.0
