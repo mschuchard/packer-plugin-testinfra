@@ -5,13 +5,10 @@ jobs:
   test:
     working_directory: /tmp/project
     docker:
-    - image: golang:1.20-alpine
+    - image: matthewschuchard/packer-plugin
     resource_class: small
     steps:
     - checkout
-    - restore_cache:
-        keys:
-        - packer-plugin-testinfra
     - run:
         name: install prereqs
         command: apk add --no-cache --update build-base && touch /usr/local/bin/py.test
@@ -21,10 +18,6 @@ jobs:
     - run:
         name: unit test
         command: make unit
-    - save_cache:
-        paths:
-        - ~/go/pkg
-        key: packer-plugin-testinfra
 
 workflows:
   execute_tests:
