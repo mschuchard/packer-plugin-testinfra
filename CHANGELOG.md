@@ -1,4 +1,4 @@
-### 1.2.2 (Next)
+### 1.2.2
 - Logging updates, code optimization, go version increments, and dependency updates.
 
 ### 1.2.1
