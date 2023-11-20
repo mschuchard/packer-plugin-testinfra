@@ -17,8 +17,7 @@ func main() {
 	packerPluginSet.SetVersion(version.PluginVersion)
 
 	// execute packer plugin for testinfra
-	err := packerPluginSet.Run()
-	if err != nil {
+	if err := packerPluginSet.Run(); err != nil {
 		log.Fatalf("Packer Plugin Testinfra failure: %s", err.Error())
 		os.Exit(1)
 	}

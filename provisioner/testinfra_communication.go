@@ -38,7 +38,7 @@ func (provisioner *Provisioner) determineCommunication() (string, error) {
 
 	// determine communication string by packer connection type
 	log.Printf("testinfra communicating via %s connection type", connectionType)
-	var communication string = ""
+	var communication string
 
 	switch connectionType {
 	case "ssh":

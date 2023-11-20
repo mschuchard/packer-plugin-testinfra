@@ -98,9 +98,8 @@ func packerRemoteCmd(localCmd *packer.RemoteCmd, installCmd []string, comm packe
 	}
 
 	// initialize stdout and stderr as bytes
-	var stdout bytes.Buffer
+	var stdout, stderr bytes.Buffer
 	localCmd.Stdout = &stdout
-	var stderr bytes.Buffer
 	localCmd.Stderr = &stderr
 
 	// initialize testinfra tests

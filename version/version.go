@@ -12,8 +12,5 @@ const (
 	VersionPrerelease = ""
 )
 
-var (
-	// PluginVersion is used by the plugin set to allow Packer to recognize
-	// what version this plugin is.
-	PluginVersion = version.InitializePluginVersion(Version, VersionPrerelease)
-)
+// PluginVersion is used by the plugin set to enable Packer to recognize the plugin version.
+var PluginVersion = version.InitializePluginVersion(Version, VersionPrerelease)
