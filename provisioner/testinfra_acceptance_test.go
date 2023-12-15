@@ -45,7 +45,7 @@ func TestProvisioner(test *testing.T) {
 			logsString := string(logsBytes)
 
 			// verify logfile content
-			if dockerMatches, _ := regexp.MatchString("docker.ubuntu: Testing machine image with Testinfra.*", logsString); !dockerMatches {
+			if dockerMatches, _ := regexp.MatchString("docker.ubuntu: testing machine image with Testinfra.*", logsString); !dockerMatches {
 				test.Errorf("logs do not contain expected docker testinfra value: %s", logsString)
 			}
 			//TODO: https://github.com/hashicorp/packer-plugin-virtualbox/issues/77
