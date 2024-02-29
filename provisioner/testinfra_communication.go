@@ -48,19 +48,19 @@ func (provisioner *Provisioner) determineCommunication() (string, error) {
 			return "", err
 		}
 
-		// initialize whitespace string as default arg (implied for sshAgentAuth type)
-		sshIdentity := " "
+		// initialize sshArgs with no strict host key checking
+		sshArgs := "--ssh-extra-args=\"-o StrictHostKeyChecking=no\""
 		// use ssh private key file
 		if sshAuthType == privateKeySSHAuth {
 			log.Printf("SSH private key filesystem location is: %s", sshAuthString)
-			sshIdentity = fmt.Sprintf(" --ssh-identity-file=%s ", sshAuthString)
+			sshArgs = fmt.Sprintf("--ssh-identity-file=%s %s", sshAuthString, sshArgs)
 		} else if sshAuthType == passwordSSHAuth { // use ssh password
 			log.Print("utilizing SSH password for communicator authentication")
 			// modify user string to also include password
 			user = fmt.Sprintf("%s:%s", user, sshAuthString)
 		}
 
-		communication = fmt.Sprintf("--hosts=%s@%s%s--ssh-extra-args=\"-o StrictHostKeyChecking=no\"", user, httpAddr, sshIdentity)
+		communication = fmt.Sprintf("--hosts=%s@%s %s", user, httpAddr, sshArgs)
 	case "winrm":
 		// assign winrm password preferably from winrmpassword
 		winRMPassword, ok := provisioner.generatedData["WinRMPassword"].(string)

@@ -1,5 +1,5 @@
 ### 1.2.3 (Next)
-
+- Improve communication backend formatting.
 
 ### 1.2.2
 - Logging updates, code optimization, go version increments, and dependency updates.
