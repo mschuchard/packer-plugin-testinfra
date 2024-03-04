@@ -156,8 +156,6 @@ func (provisioner *Provisioner) determineExecCmd() (*exec.Cmd, *packer.RemoteCmd
 	}
 
 	// assign optional populated values
-	// testfiles
-	args = append(args, provisioner.config.TestFiles...)
 	// keyword
 	keyword, err := interpolate.Render(provisioner.config.Keyword, &provisioner.config.ctx)
 	if err != nil {
@@ -177,13 +175,15 @@ func (provisioner *Provisioner) determineExecCmd() (*exec.Cmd, *packer.RemoteCmd
 		args = append(args, "-m", fmt.Sprintf("\"%s\"", marker))
 	}
 	// processes
-	if provisioner.config.Processes != 0 {
+	if provisioner.config.Processes > 0 {
 		args = append(args, "-n", strconv.Itoa(provisioner.config.Processes))
 	}
 	// sudo
 	if provisioner.config.Sudo {
 		args = append(args, "--sudo")
 	}
+	// testfiles
+	args = append(args, provisioner.config.TestFiles...)
 
 	// return packer remote command for local testing on instance
 	if localExec {
