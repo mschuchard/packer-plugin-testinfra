@@ -109,7 +109,7 @@ func TestProvisionerPrepareEmptyTestFile(test *testing.T) {
 	if !CI {
 		err := provisioner.Prepare(emptyTestFileConfig)
 		if err != nil {
-			test.Errorf("Prepare function failed with no test_files minimal Testinfra Packer config")
+			test.Error("prepare function failed with no test_files minimal Testinfra Packer config")
 		}
 
 		if len(provisioner.config.TestFiles) > 0 {
@@ -130,7 +130,7 @@ func TestProvisionerPrepareNonExistFiles(test *testing.T) {
 
 	err := provisioner.Prepare(noPytestConfig)
 	if !(errors.Is(err, os.ErrNotExist)) {
-		test.Errorf("Prepare function did not fail correctly on nonexistent pytest")
+		test.Error("prepare function did not fail correctly on nonexistent pytest")
 		test.Error(err)
 	}
 
@@ -143,8 +143,22 @@ func TestProvisionerPrepareNonExistFiles(test *testing.T) {
 	if !CI {
 		err = provisioner.Prepare(noTestFileConfig)
 		if !(errors.Is(err, os.ErrNotExist)) {
-			test.Errorf("Prepare function did not fail correctly on nonexistent testfile")
+			test.Error("prepare function did not fail correctly on nonexistent testfile")
 			test.Error(err)
 		}
+	}
+}
+
+// test provisioner prepare errors on processes with no xdist
+func TestProvisionerPrepareNoXdist(test *testing.T) {
+	var provisioner Provisioner
+
+	// test no xdist with global basic config
+	if err := provisioner.Prepare(basicConfig); err != nil {
+		test.Error("prepare function failed basic config")
+	}
+	if provisioner.config.Processes != 0 {
+		test.Error("prepare function did not revert processes member value to default 0 after determing xdist is not installed")
+		test.Errorf("actual value: %d", provisioner.config.Processes)
 	}
 }
