@@ -76,6 +76,10 @@ func (provisioner *Provisioner) Prepare(raws ...interface{}) error {
 		if len(provisioner.config.InstallCmd) > 0 {
 			log.Printf("installation command on the temporary Packer instance prior to Testinfra test execution is: %s", strings.Join(provisioner.config.InstallCmd, " "))
 		}
+
+		if provisioner.config.Processes > 0 {
+			log.Printf("number of Testinfra processes: %d", provisioner.config.Processes)
+		}
 	} else { // verify testinfra installed
 		log.Print("beginning Testinfra installation verification")
 		// initialize testinfra -h command
@@ -113,14 +117,20 @@ func (provisioner *Provisioner) Prepare(raws ...interface{}) error {
 			// pytest returned no stdout
 			return fmt.Errorf("pytest help command returned no stdout; this indicates an issue with the specified Pytest installation")
 		}
+
+		if provisioner.config.Processes > 0 {
+			// check for xdist in pytest usage stdout
+			if strings.Contains(string(outSlurp), " -n ") {
+				log.Printf("number of Testinfra processes: %d", provisioner.config.Processes)
+			} else {
+				log.Printf("pytest-xdist is not installed, and processes parameter will be reset to default")
+				provisioner.config.Processes = 0
+			}
+		}
 	}
 
 	if len(provisioner.config.Marker) > 0 {
 		log.Printf("executing tests with marker expression: %s", provisioner.config.Marker)
-	}
-
-	if provisioner.config.Processes > 0 {
-		log.Printf("number of Testinfra processes: %d", provisioner.config.Processes)
 	}
 
 	if provisioner.config.Sudo {
