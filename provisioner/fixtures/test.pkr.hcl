@@ -15,10 +15,10 @@ packer {
 
 # use local device with null provider
 source "null" "vbox" {
-  ssh_host     = "127.0.0.1"
-  ssh_port     = "10022"
-  ssh_username = "vagrant"
-  ssh_password = "vagrant"
+  ssh_host       = "127.0.0.1"
+  ssh_port       = "10022"
+  ssh_username   = "vagrant"
+  ssh_agent_auth = true
 }
 
 # use ubuntu:latest docker image with docker provider

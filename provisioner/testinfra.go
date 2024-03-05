@@ -184,7 +184,7 @@ func (provisioner *Provisioner) Provision(ctx context.Context, ui packer.Ui, com
 		return fmt.Errorf("incorrectly determined remote command (%s) and/or command local to instance (%s); please report as bug with this log information", cmd.String(), localCmd.Command)
 	}
 	if err != nil {
-		ui.Error("the pytest Testinfra execution failed")
+		ui.Error("the Pytest Testinfra execution failed")
 		return err
 	}
 

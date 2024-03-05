@@ -50,7 +50,7 @@ func TestProvisionerDetermineExecCmd(test *testing.T) {
 	if err != nil {
 		test.Errorf("determineExecCmd function failed to determine execution command for basic config with SSH communicator: %s", err)
 	}
-	if execCmd.String() != fmt.Sprintf("%s -v --hosts=%s@%s:%d --ssh-identity-file=%s --ssh-extra-args=\"-o StrictHostKeyChecking=no\" -k \"%s\" -m \"%s\" -n %d --sudo %s", provisioner.config.PytestPath, generatedData["User"], generatedData["Host"], generatedData["Port"], generatedData["SSHPrivateKeyFile"], provisioner.config.Keyword, provisioner.config.Marker, provisioner.config.Processes, strings.Join(provisioner.config.TestFiles, "")) {
+	if execCmd.String() != fmt.Sprintf("%s -v --hosts=\"ssh://%s@%s:%d\" --ssh-identity-file=%s --ssh-extra-args=\"-o StrictHostKeyChecking=no\" -k \"%s\" -m \"%s\" -n %d --sudo %s", provisioner.config.PytestPath, generatedData["User"], generatedData["Host"], generatedData["Port"], generatedData["SSHPrivateKeyFile"], provisioner.config.Keyword, provisioner.config.Marker, provisioner.config.Processes, strings.Join(provisioner.config.TestFiles, "")) {
 		test.Errorf("determineExecCmd function failed to properly determine remote execution command for basic config with SSH communicator: %s", execCmd.String())
 	}
 	if localCmd != nil {

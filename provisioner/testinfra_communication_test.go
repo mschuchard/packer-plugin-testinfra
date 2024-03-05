@@ -30,7 +30,7 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
 	if err != nil {
 		test.Errorf("determineCommunication function failed to determine ssh: %s", err)
 	}
-	if communication != fmt.Sprintf("--hosts=%s:%s@%s:%d --ssh-extra-args=\"-o StrictHostKeyChecking=no\"", generatedData["User"], generatedData["Password"], generatedData["Host"], generatedData["Port"]) {
+	if communication != fmt.Sprintf("--hosts=\"ssh://%s:%s@%s:%d\" --ssh-extra-args=\"-o StrictHostKeyChecking=no\"", generatedData["User"], generatedData["Password"], generatedData["Host"], generatedData["Port"]) {
 		test.Errorf("Communication string incorrectly determined: %s", communication)
 	}
 
@@ -42,7 +42,7 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
 	if err != nil {
 		test.Errorf("determineCommunication function failed to determine ssh: %s", err)
 	}
-	if communication != fmt.Sprintf("--hosts=%s@%s:%d --ssh-identity-file=%s --ssh-extra-args=\"-o StrictHostKeyChecking=no\"", generatedData["User"], generatedData["Host"], generatedData["Port"], generatedData["SSHPrivateKeyFile"]) {
+	if communication != fmt.Sprintf("--hosts=\"ssh://%s@%s:%d\" --ssh-identity-file=%s --ssh-extra-args=\"-o StrictHostKeyChecking=no\"", generatedData["User"], generatedData["Host"], generatedData["Port"], generatedData["SSHPrivateKeyFile"]) {
 		test.Errorf("Communication string incorrectly determined: %s", communication)
 	}
 
@@ -56,7 +56,7 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
 	if err != nil {
 		test.Errorf("determineCommunication function failed to determine ssh: %s", err)
 	}
-	if communication != fmt.Sprintf("--hosts=%s@%s:%d --ssh-extra-args=\"-o StrictHostKeyChecking=no\"", generatedData["User"], generatedData["Host"], generatedData["Port"]) {
+	if communication != fmt.Sprintf("--hosts=\"ssh://%s@%s:%d\" --ssh-extra-args=\"-o StrictHostKeyChecking=no\"", generatedData["User"], generatedData["Host"], generatedData["Port"]) {
 		test.Errorf("Communication string incorrectly determined: %s", communication)
 	}
 

@@ -60,7 +60,7 @@ func (provisioner *Provisioner) determineCommunication() (string, error) {
 			user = fmt.Sprintf("%s:%s", user, sshAuthString)
 		}
 
-		communication = fmt.Sprintf("--hosts=%s@%s %s", user, httpAddr, sshArgs)
+		communication = fmt.Sprintf("--hosts=\"ssh://%s@%s\" %s", user, httpAddr, sshArgs)
 	case "winrm":
 		// assign winrm password preferably from winrmpassword
 		winRMPassword, ok := provisioner.generatedData["WinRMPassword"].(string)

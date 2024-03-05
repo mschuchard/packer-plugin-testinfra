@@ -1,6 +1,7 @@
 ### 1.2.3 (Next)
 - Improve communication backend formatting.
 - Only allow `processes` input parameter if `pytest-xdist` installed.
+- Switch paramiko connection backend to pure ssh.
 
 ### 1.2.2
 - Logging updates, code optimization, go version increments, and dependency updates.
