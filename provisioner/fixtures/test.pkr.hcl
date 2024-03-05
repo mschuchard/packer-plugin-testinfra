@@ -13,9 +13,28 @@ packer {
   }
 }
 
+# use local device with null provider
+source "null" "vbox" {
+  ssh_host     = "127.0.0.1"
+  ssh_port     = "10022"
+  ssh_username = "vagrant"
+  ssh_password = "vagrant"
+}
+
+# use ubuntu:latest docker image with docker provider
 source "docker" "ubuntu" {
   discard = true
   image   = "ubuntu:latest"
+}
+
+# test remote execution docker and ssh communicators
+build {
+  sources = ["source.docker.ubuntu", "source.null.vbox"]
+
+  provisioner "testinfra" {
+    pytest_path = "/usr/local/bin/py.test"
+    test_files  = ["${path.cwd}/fixtures/test.py", "${path.cwd}/fixtures/test.py"]
+  }
 }
 
 # use ubuntu/jammy64 vagrant box with vbox provider
@@ -28,17 +47,7 @@ source "virtualbox-vm" "ubuntu" {
   vm_name              = "fixtures_default_1662571353037_70563"
 }
 
-# test remote execution
-build {
-  sources = ["source.docker.ubuntu"]
-
-  provisioner "testinfra" {
-    pytest_path = "/usr/local/bin/py.test"
-    test_files  = ["${path.cwd}/fixtures/test.py", "${path.cwd}/fixtures/test.py"]
-  }
-}
-
-# test local execution
+# test local execution ssh communicator
 # TODO: https://github.com/hashicorp/packer-plugin-virtualbox/issues/77
 /*build {
   sources = ["source.virtualbox-vm.ubuntu"]
@@ -46,7 +55,7 @@ build {
   provisioner "testinfra" {
     local       = true
     install_cmd = "pip install testinfra"
-    # TODO: need file transer feature in 1.3.0 plugin version
+    # TODO: need file transfer feature in 1.3.0 plugin version
     test_files  = ["${path.cwd}/fixtures/test.py", "${path.cwd}/fixtures/test.py"]
   }
 }*/
