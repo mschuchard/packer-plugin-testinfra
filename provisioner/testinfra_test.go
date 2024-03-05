@@ -32,10 +32,9 @@ func TestProvisionerConfig(test *testing.T) {
 	var provisioner = &Provisioner{
 		config: *basicConfig,
 	}
-	configInput := *basicConfig
 
-	if provisioner.config.PytestPath != configInput.PytestPath || !(reflect.DeepEqual(provisioner.config.TestFiles, configInput.TestFiles)) || provisioner.config.Keyword != configInput.Keyword || provisioner.config.Marker != configInput.Marker || provisioner.config.Processes != configInput.Processes || provisioner.config.Sudo != configInput.Sudo {
-		test.Errorf("Provisioner config struct not initialized correctly")
+	if provisioner.config.PytestPath != basicConfig.PytestPath || !(reflect.DeepEqual(provisioner.config.TestFiles, basicConfig.TestFiles)) || provisioner.config.Keyword != basicConfig.Keyword || provisioner.config.Marker != basicConfig.Marker || provisioner.config.Processes != basicConfig.Processes || provisioner.config.Sudo != basicConfig.Sudo {
+		test.Errorf("provisioner config struct not initialized correctly")
 	}
 }
 
@@ -54,7 +53,7 @@ func TestProvisionerPrepareBasic(test *testing.T) {
 	if !CI {
 		err := provisioner.Prepare(basicConfig)
 		if err != nil {
-			test.Errorf("Prepare function failed with basic Testinfra Packer config")
+			test.Errorf("prepare function failed with basic Testinfra Packer config")
 		}
 	}
 }
@@ -63,39 +62,37 @@ func TestProvisionerPrepareBasic(test *testing.T) {
 func TestProvisionerPrepareMinimal(test *testing.T) {
 	var provisioner Provisioner
 
-	if !CI {
-		err := provisioner.Prepare(minConfig)
-		if err != nil {
-			test.Errorf("Prepare function failed with minimal Testinfra Packer config")
-		}
+	err := provisioner.Prepare(minConfig)
+	if err != nil && !CI {
+		test.Errorf("prepare function failed with minimal Testinfra Packer config")
+	}
 
-		if len(provisioner.config.InstallCmd) > 0 {
-			test.Errorf("Default empty setting for InstallCmd is incorrect: %s", provisioner.config.InstallCmd)
-		}
+	if len(provisioner.config.InstallCmd) > 0 {
+		test.Errorf("default empty setting for InstallCmd is incorrect: %s", provisioner.config.InstallCmd)
+	}
 
-		if len(provisioner.config.Keyword) > 0 {
-			test.Errorf("Default empty setting for Keyword is incorrect: %s", provisioner.config.Keyword)
-		}
+	if len(provisioner.config.Keyword) > 0 {
+		test.Errorf("default empty setting for Keyword is incorrect: %s", provisioner.config.Keyword)
+	}
 
-		if provisioner.config.Local != false {
-			test.Errorf("Default false setting for Local is incorrect: %t", provisioner.config.Local)
-		}
+	if provisioner.config.Local != false {
+		test.Errorf("default false setting for Local is incorrect: %t", provisioner.config.Local)
+	}
 
-		if len(provisioner.config.Marker) > 0 {
-			test.Errorf("Default empty setting for Marker is incorrect: %s", provisioner.config.Marker)
-		}
+	if len(provisioner.config.Marker) > 0 {
+		test.Errorf("default empty setting for Marker is incorrect: %s", provisioner.config.Marker)
+	}
 
-		if provisioner.config.Processes != 0 {
-			test.Errorf("Default empty setting for Processes is incorrect: %d", provisioner.config.Processes)
-		}
+	if provisioner.config.Processes != 0 {
+		test.Errorf("default empty setting for Processes is incorrect: %d", provisioner.config.Processes)
+	}
 
-		if provisioner.config.Sudo != false {
-			test.Errorf("Default false setting for Sudo is incorrect: %t", provisioner.config.Sudo)
-		}
+	if provisioner.config.Sudo != false {
+		test.Errorf("default false setting for Sudo is incorrect: %t", provisioner.config.Sudo)
+	}
 
-		if provisioner.config.PytestPath != "py.test" {
-			test.Errorf("Default setting for PytestPath is incorrect: %s", provisioner.config.PytestPath)
-		}
+	if provisioner.config.PytestPath != "py.test" {
+		test.Errorf("default setting for PytestPath is incorrect: %s", provisioner.config.PytestPath)
 	}
 }
 
@@ -113,7 +110,7 @@ func TestProvisionerPrepareEmptyTestFile(test *testing.T) {
 		}
 
 		if len(provisioner.config.TestFiles) > 0 {
-			test.Errorf("Default setting for TestFiles is incorrect: %s", strings.Join(provisioner.config.TestFiles, ""))
+			test.Errorf("default setting for TestFiles is incorrect: %s", strings.Join(provisioner.config.TestFiles, ""))
 		}
 	}
 }
@@ -154,10 +151,14 @@ func TestProvisionerPrepareNoXdist(test *testing.T) {
 	var provisioner Provisioner
 
 	// test no xdist with global basic config
-	if err := provisioner.Prepare(basicConfig); err != nil {
+	if err := provisioner.Prepare(basicConfig); err != nil && !CI {
 		test.Error("prepare function failed basic config")
 	}
-	if provisioner.config.Processes != 0 {
+	if CI && provisioner.config.Processes != basicConfig.Processes {
+		test.Error("prepare function reverted processes member value to default 0 after determing xdist is installed")
+		test.Errorf("actual value: %d", provisioner.config.Processes)
+	}
+	if !CI && provisioner.config.Processes != 0 {
 		test.Error("prepare function did not revert processes member value to default 0 after determing xdist is not installed")
 		test.Errorf("actual value: %d", provisioner.config.Processes)
 	}
