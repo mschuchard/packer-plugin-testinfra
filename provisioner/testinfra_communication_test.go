@@ -31,7 +31,7 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
 	if err != nil {
 		test.Errorf("determineCommunication function failed to determine ssh: %s", err)
 	}
-	if !slices.Equal(communication, []string{fmt.Sprintf("--hosts=\"ssh://%s:%s@%s:%d\"", generatedData["User"], generatedData["Password"], generatedData["Host"], generatedData["Port"]), "--ssh-extra-args=\"-o StrictHostKeyChecking=no\""}) {
+	if !slices.Equal(communication, []string{fmt.Sprintf("--hosts=ssh://%s:%s@%s:%d", generatedData["User"], generatedData["Password"], generatedData["Host"], generatedData["Port"]), "--ssh-extra-args=\"-o StrictHostKeyChecking=no\""}) {
 		test.Errorf("communication string slice for ssh password incorrectly determined: %v", communication)
 	}
 
@@ -43,7 +43,7 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
 	if err != nil {
 		test.Errorf("determineCommunication function failed to determine ssh: %s", err)
 	}
-	if !slices.Equal(communication, []string{fmt.Sprintf("--hosts=\"ssh://%s@%s:%d\"", generatedData["User"], generatedData["Host"], generatedData["Port"]), fmt.Sprintf("--ssh-identity-file=%s", generatedData["SSHPrivateKeyFile"]), "--ssh-extra-args=\"-o StrictHostKeyChecking=no\""}) {
+	if !slices.Equal(communication, []string{fmt.Sprintf("--hosts=ssh://%s@%s:%d", generatedData["User"], generatedData["Host"], generatedData["Port"]), fmt.Sprintf("--ssh-identity-file=%s", generatedData["SSHPrivateKeyFile"]), "--ssh-extra-args=\"-o StrictHostKeyChecking=no\""}) {
 		test.Errorf("communication string slice for ssh private key incorrectly determined: %v", communication)
 	}
 
@@ -57,7 +57,7 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
 	if err != nil {
 		test.Errorf("determineCommunication function failed to determine ssh: %s", err)
 	}
-	if !slices.Equal(communication, []string{fmt.Sprintf("--hosts=\"ssh://%s@%s:%d\"", generatedData["User"], generatedData["Host"], generatedData["Port"]), "--ssh-extra-args=\"-o StrictHostKeyChecking=no\""}) {
+	if !slices.Equal(communication, []string{fmt.Sprintf("--hosts=ssh://%s@%s:%d", generatedData["User"], generatedData["Host"], generatedData["Port"]), "--ssh-extra-args=\"-o StrictHostKeyChecking=no\""}) {
 		test.Errorf("communication string slice for ssh agent auth incorrectly determined: %v", communication)
 	}
 
@@ -78,7 +78,7 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
 	if err != nil {
 		test.Errorf("determineCommunication function failed to determine winrm: %s", err)
 	}
-	if !slices.Equal(communication, []string{fmt.Sprintf("--hosts=\"winrm://%s:%s@%s\"", generatedData["User"], generatedData["Password"], generatedData["PackerHTTPAddr"])}) {
+	if !slices.Equal(communication, []string{fmt.Sprintf("--hosts=winrm://%s:%s@%s", generatedData["User"], generatedData["Password"], generatedData["PackerHTTPAddr"])}) {
 		test.Errorf("communication string slice for winrm incorrectly determined: %v", communication)
 	}
 
@@ -107,7 +107,7 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
 	if err != nil {
 		test.Errorf("determineCommunication function failed to determine docker: %s", err)
 	}
-	if !slices.Equal(communication, []string{fmt.Sprintf("--hosts=\"docker://%s\"", generatedData["ID"])}) {
+	if !slices.Equal(communication, []string{fmt.Sprintf("--hosts=docker://%s", generatedData["ID"])}) {
 		test.Errorf("communication string slice for docker incorrectly determined: %v", communication)
 	}
 
@@ -127,7 +127,7 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
 	if err != nil {
 		test.Errorf("determineCommunication function failed to determine podman: %s", err)
 	}
-	if !slices.Equal(communication, []string{fmt.Sprintf("--hosts=\"podman://%s\"", generatedData["ID"])}) {
+	if !slices.Equal(communication, []string{fmt.Sprintf("--hosts=podman://%s", generatedData["ID"])}) {
 		test.Errorf("communication string slice for podman incorrectly determined: %v", communication)
 	}
 
@@ -147,7 +147,7 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
 	if err != nil {
 		test.Errorf("determineCommunication function failed to determine lxc: %s", err)
 	}
-	if !slices.Equal(communication, []string{fmt.Sprintf("--hosts=\"lxc://%s\"", generatedData["ID"])}) {
+	if !slices.Equal(communication, []string{fmt.Sprintf("--hosts=lxc://%s", generatedData["ID"])}) {
 		test.Errorf("communication string slice for lxc incorrectly determined: %v", communication)
 	}
 

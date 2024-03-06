@@ -49,19 +49,19 @@ func (provisioner *Provisioner) determineCommunication() ([]string, error) {
 			log.Printf("SSH private key filesystem location is: %s", sshAuthString)
 
 			// append args with ssh connection backend information (user, host, port), private key file, and no strict host key checking
-			args = append(args, fmt.Sprintf("--hosts=\"ssh://%s@%s\"", user, httpAddr), fmt.Sprintf("--ssh-identity-file=%s", sshAuthString), "--ssh-extra-args=\"-o StrictHostKeyChecking=no\"")
+			args = append(args, fmt.Sprintf("--hosts=ssh://%s@%s", user, httpAddr), fmt.Sprintf("--ssh-identity-file=%s", sshAuthString), "--ssh-extra-args=\"-o StrictHostKeyChecking=no\"")
 		// use ssh password
 		case passwordSSHAuth:
 			log.Print("utilizing SSH password for communicator authentication")
 
 			// append args with ssh connection backend information (user, password, host, port), and no strict host key checking
-			args = append(args, fmt.Sprintf("--hosts=\"ssh://%s:%s@%s\"", user, sshAuthString, httpAddr), "--ssh-extra-args=\"-o StrictHostKeyChecking=no\"")
+			args = append(args, fmt.Sprintf("--hosts=ssh://%s:%s@%s", user, sshAuthString, httpAddr), "--ssh-extra-args=\"-o StrictHostKeyChecking=no\"")
 		// use ssh agent auth
 		default:
 			log.Print("utilizing SSH Agent auth for communicator authentication")
 
 			// append args with ssh connection backend information (user, host, port), and no strict host key checking
-			args = append(args, fmt.Sprintf("--hosts=\"ssh://%s@%s\"", user, httpAddr), "--ssh-extra-args=\"-o StrictHostKeyChecking=no\"")
+			args = append(args, fmt.Sprintf("--hosts=ssh://%s@%s", user, httpAddr), "--ssh-extra-args=\"-o StrictHostKeyChecking=no\"")
 		}
 	case "winrm":
 		// assign user and host address
@@ -83,7 +83,7 @@ func (provisioner *Provisioner) determineCommunication() ([]string, error) {
 		}
 
 		// append args with winrm connection backend information (user, password, host, port)
-		args = append(args, fmt.Sprintf("--hosts=\"winrm://%s:%s@%s\"", user, winrmPassword, httpAddr))
+		args = append(args, fmt.Sprintf("--hosts=winrm://%s:%s@%s", user, winrmPassword, httpAddr))
 	case "docker", "podman", "lxc":
 		// determine instanceid
 		instanceID, ok := provisioner.generatedData["ID"].(string)
@@ -92,7 +92,7 @@ func (provisioner *Provisioner) determineCommunication() ([]string, error) {
 		}
 
 		// append args with container connection backend information (instanceid)
-		args = append(args, fmt.Sprintf("--hosts=\"%s://%s\"", connectionType, instanceID))
+		args = append(args, fmt.Sprintf("--hosts=%s://%s", connectionType, instanceID))
 	default:
 		return nil, fmt.Errorf("communication backend with machine image is not supported, and was resolved to '%s'", connectionType)
 	}
