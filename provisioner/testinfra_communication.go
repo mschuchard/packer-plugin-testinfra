@@ -17,75 +17,130 @@ const (
 )
 
 // determine and return appropriate communication string for pytest/testinfra
-func (provisioner *Provisioner) determineCommunication() (string, error) {
+func (provisioner *Provisioner) determineCommunication() ([]string, error) {
+	// declare communication args
+	var args []string
+
 	// parse generated data for required values
 	connectionType := provisioner.generatedData["ConnType"].(string)
-	user, ok := provisioner.generatedData["SSHUsername"].(string)
-	if !ok {
-		user = provisioner.generatedData["User"].(string)
-	}
-	ipaddress := provisioner.generatedData["Host"].(string)
-	port, ok := provisioner.generatedData["SSHPort"].(int64)
-	if !ok {
-		port = provisioner.generatedData["Port"].(int64)
-	}
-	httpAddr := fmt.Sprintf("%s:%d", ipaddress, port)
-	if len(ipaddress) == 0 {
-		// this is more likely to be a file upload staging server, but fallback anyway
-		httpAddr = provisioner.generatedData["PackerHTTPAddr"].(string)
-	}
-	instanceID := provisioner.generatedData["ID"].(string)
 
 	// determine communication string by packer connection type
 	log.Printf("testinfra communicating via %s connection type", connectionType)
-	var communication string
 
+	// determine communication based on connection type
 	switch connectionType {
 	case "ssh":
+		// assign user and host address
+		user, httpAddr, err := provisioner.determineUserAddr()
+		if err != nil {
+			return nil, err
+		}
+
 		// assign ssh auth type and string (key file path or password)
 		sshAuthType, sshAuthString, err := provisioner.determineSSHAuth()
 		if err != nil {
-			return "", err
+			return nil, err
 		}
 
-		// initialize sshArgs with no strict host key checking
-		sshArgs := "--ssh-extra-args=\"-o StrictHostKeyChecking=no\""
+		// determine additional args for ssh based on authentication information
+		switch sshAuthType {
 		// use ssh private key file
-		if sshAuthType == privateKeySSHAuth {
+		case privateKeySSHAuth:
 			log.Printf("SSH private key filesystem location is: %s", sshAuthString)
-			sshArgs = fmt.Sprintf("--ssh-identity-file=%s %s", sshAuthString, sshArgs)
-		} else if sshAuthType == passwordSSHAuth { // use ssh password
+
+			// append args with ssh connection backend information (user, host, port), private key file, and no strict host key checking
+			args = append(args, fmt.Sprintf("--hosts=\"ssh://%s@%s\"", user, httpAddr), fmt.Sprintf("--ssh-identity-file=%s", sshAuthString), "--ssh-extra-args=\"-o StrictHostKeyChecking=no\"")
+		// use ssh password
+		case passwordSSHAuth:
 			log.Print("utilizing SSH password for communicator authentication")
-			// modify user string to also include password
-			user = fmt.Sprintf("%s:%s", user, sshAuthString)
-		}
 
-		communication = fmt.Sprintf("--hosts=\"ssh://%s@%s\" %s", user, httpAddr, sshArgs)
+			// append args with ssh connection backend information (user, password, host, port), and no strict host key checking
+			args = append(args, fmt.Sprintf("--hosts=\"ssh://%s:%s@%s\"", user, sshAuthString, httpAddr), "--ssh-extra-args=\"-o StrictHostKeyChecking=no\"")
+		// use ssh agent auth
+		default:
+			log.Print("utilizing SSH Agent auth for communicator authentication")
+
+			// append args with ssh connection backend information (user, host, port), and no strict host key checking
+			args = append(args, fmt.Sprintf("--hosts=\"ssh://%s@%s\"", user, httpAddr), "--ssh-extra-args=\"-o StrictHostKeyChecking=no\"")
+		}
 	case "winrm":
+		// assign user and host address
+		user, httpAddr, err := provisioner.determineUserAddr()
+		if err != nil {
+			return nil, err
+		}
+
 		// assign winrm password preferably from winrmpassword
-		winRMPassword, ok := provisioner.generatedData["WinRMPassword"].(string)
+		winrmPassword, ok := provisioner.generatedData["WinRMPassword"].(string)
 		// otherwise retry with general password
-		if !ok {
-			winRMPassword, ok = provisioner.generatedData["Password"].(string)
-		}
-		// no winrm password available
-		if !ok {
-			return "", fmt.Errorf("WinRM communicator password could not be determined from available Packer data")
+		if !ok || len(winrmPassword) == 0 {
+			winrmPassword, ok = provisioner.generatedData["Password"].(string)
+
+			// no winrm password available
+			if !ok || len(winrmPassword) == 0 {
+				return nil, fmt.Errorf("winrm communicator password could not be determined from available Packer data")
+			}
 		}
 
-		communication = fmt.Sprintf("--hosts=winrm://%s:%s@%s", user, winRMPassword, httpAddr)
-	case "docker":
-		communication = fmt.Sprintf("--hosts=docker://%s", instanceID)
-	case "podman":
-		communication = fmt.Sprintf("--hosts=podman://%s", instanceID)
-	case "lxc":
-		communication = fmt.Sprintf("--hosts=lxc://%s", instanceID)
-	}
-	if len(communication) == 0 {
-		return "", fmt.Errorf("communication with machine image could not be properly determined")
+		// append args with winrm connection backend information (user, password, host, port)
+		args = append(args, fmt.Sprintf("--hosts=\"winrm://%s:%s@%s\"", user, winrmPassword, httpAddr))
+	case "docker", "podman", "lxc":
+		// determine instanceid
+		instanceID, ok := provisioner.generatedData["ID"].(string)
+		if !ok || len(instanceID) == 0 {
+			return nil, fmt.Errorf("instance id could not be determined")
+		}
+
+		// append args with container connection backend information (instanceid)
+		args = append(args, fmt.Sprintf("--hosts=\"%s://%s\"", connectionType, instanceID))
+	default:
+		return nil, fmt.Errorf("communication backend with machine image is not supported, and was resolved to '%s'", connectionType)
 	}
 
-	return communication, nil
+	return args, nil
+}
+
+// determine and return user and host address
+func (provisioner *Provisioner) determineUserAddr() (string, string, error) {
+	// determine user
+	user, ok := provisioner.generatedData["SSHUsername"].(string)
+	if !ok || len(user) == 0 {
+		// fallback to general user (usually packer)
+		user, ok = provisioner.generatedData["User"].(string)
+
+		if !ok || len(user) == 0 {
+			return "", "", fmt.Errorf("remote user could not be determined from available Packer data")
+		}
+	}
+
+	// determine host address and port
+	var httpAddr string
+	ipaddress, ok := provisioner.generatedData["Host"].(string)
+	if !ok || len(ipaddress) == 0 {
+		// this is more likely to be a file upload staging server, but fallback anyway
+		httpAddr, ok = provisioner.generatedData["PackerHTTPAddr"].(string)
+
+		if !ok || len(httpAddr) == 0 {
+			return "", "", fmt.Errorf("host address and port could not be determined")
+		}
+	} else {
+		// valid ip address so now determine port
+		port, ok := provisioner.generatedData["SSHPort"].(int64)
+
+		// fall back to general port
+		if !ok || port == int64(0) {
+			port = provisioner.generatedData["Port"].(int64)
+
+			//if !ok || port == int64(0) {
+			if port == int64(0) {
+				return "", "", fmt.Errorf("host port could not be determined")
+			}
+		}
+
+		httpAddr = fmt.Sprintf("%s:%d", ipaddress, port)
+	}
+
+	return user, httpAddr, nil
 }
 
 // determine and return ssh authentication
@@ -94,12 +149,12 @@ func (provisioner *Provisioner) determineSSHAuth() (SSHAuth, string, error) {
 	sshPassword, ok := provisioner.generatedData["SSHPassword"].(string)
 
 	// otherwise retry with general password
-	if !ok {
+	if !ok || len(sshPassword) == 0 {
 		sshPassword, ok = provisioner.generatedData["Password"].(string)
 	}
 
 	// ssh is being used with password auth and we have a password
-	if ok {
+	if ok && len(sshPassword) > 0 {
 		return passwordSSHAuth, sshPassword, nil
 	} else { // ssh is being used with private key or agent auth so determine that instead
 		// parse generated data for ssh private key and agent auth info
@@ -107,10 +162,10 @@ func (provisioner *Provisioner) determineSSHAuth() (SSHAuth, string, error) {
 		sshAgentAuth := provisioner.generatedData["SSHAgentAuth"].(bool)
 
 		if len(sshPrivateKeyFile) > 0 {
-			// we have a legitimate private key file so use that
+			// we have a specified private key file so use that
 			return privateKeySSHAuth, sshPrivateKeyFile, nil
 		} else if sshAgentAuth {
-			// we can use an empty private key with ssh agent auth
+			// we can use an empty/automatic private key with ssh agent auth
 			return agentSSHAuth, sshPrivateKeyFile, nil
 		} else { // create a private key file instead from the privatekey data
 			// write a tmpfile for storing a private key

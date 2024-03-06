@@ -144,7 +144,7 @@ func (provisioner *Provisioner) determineExecCmd() (*exec.Cmd, *packer.RemoteCmd
 			return nil, &packer.RemoteCmd{}, err
 		}
 
-		args = append(args, communication)
+		args = append(args, communication...)
 	}
 
 	// assign mandatory populated values

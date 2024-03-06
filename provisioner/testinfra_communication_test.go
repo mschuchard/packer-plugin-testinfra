@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"regexp"
+	"slices"
 	"testing"
 )
 
@@ -30,8 +31,8 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
 	if err != nil {
 		test.Errorf("determineCommunication function failed to determine ssh: %s", err)
 	}
-	if communication != fmt.Sprintf("--hosts=\"ssh://%s:%s@%s:%d\" --ssh-extra-args=\"-o StrictHostKeyChecking=no\"", generatedData["User"], generatedData["Password"], generatedData["Host"], generatedData["Port"]) {
-		test.Errorf("Communication string incorrectly determined: %s", communication)
+	if !slices.Equal(communication, []string{fmt.Sprintf("--hosts=\"ssh://%s:%s@%s:%d\"", generatedData["User"], generatedData["Password"], generatedData["Host"], generatedData["Port"]), "--ssh-extra-args=\"-o StrictHostKeyChecking=no\""}) {
+		test.Errorf("communication string slice for ssh password incorrectly determined: %v", communication)
 	}
 
 	// test ssh with private key file
@@ -42,8 +43,8 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
 	if err != nil {
 		test.Errorf("determineCommunication function failed to determine ssh: %s", err)
 	}
-	if communication != fmt.Sprintf("--hosts=\"ssh://%s@%s:%d\" --ssh-identity-file=%s --ssh-extra-args=\"-o StrictHostKeyChecking=no\"", generatedData["User"], generatedData["Host"], generatedData["Port"], generatedData["SSHPrivateKeyFile"]) {
-		test.Errorf("Communication string incorrectly determined: %s", communication)
+	if !slices.Equal(communication, []string{fmt.Sprintf("--hosts=\"ssh://%s@%s:%d\"", generatedData["User"], generatedData["Host"], generatedData["Port"]), fmt.Sprintf("--ssh-identity-file=%s", generatedData["SSHPrivateKeyFile"]), "--ssh-extra-args=\"-o StrictHostKeyChecking=no\""}) {
+		test.Errorf("communication string slice for ssh private key incorrectly determined: %v", communication)
 	}
 
 	// test ssh with no private key but with agent auth
@@ -56,8 +57,8 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
 	if err != nil {
 		test.Errorf("determineCommunication function failed to determine ssh: %s", err)
 	}
-	if communication != fmt.Sprintf("--hosts=\"ssh://%s@%s:%d\" --ssh-extra-args=\"-o StrictHostKeyChecking=no\"", generatedData["User"], generatedData["Host"], generatedData["Port"]) {
-		test.Errorf("Communication string incorrectly determined: %s", communication)
+	if !slices.Equal(communication, []string{fmt.Sprintf("--hosts=\"ssh://%s@%s:%d\"", generatedData["User"], generatedData["Host"], generatedData["Port"]), "--ssh-extra-args=\"-o StrictHostKeyChecking=no\""}) {
+		test.Errorf("communication string slice for ssh agent auth incorrectly determined: %v", communication)
 	}
 
 	// test winrm with empty host, port, and winrmpassword
@@ -66,7 +67,7 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
 		"User":           "me",
 		"Password":       "password",
 		"Host":           "",
-		"Port":           int64(0),
+		"Port":           int64(5986),
 		"PackerHTTPAddr": "192.168.0.1:5986",
 		"ID":             "1234567890",
 	}
@@ -77,8 +78,8 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
 	if err != nil {
 		test.Errorf("determineCommunication function failed to determine winrm: %s", err)
 	}
-	if communication != fmt.Sprintf("--hosts=winrm://%s:%s@%s", generatedData["User"], generatedData["Password"], generatedData["PackerHTTPAddr"]) {
-		test.Errorf("Communication string incorrectly determined: %s", communication)
+	if !slices.Equal(communication, []string{fmt.Sprintf("--hosts=\"winrm://%s:%s@%s\"", generatedData["User"], generatedData["Password"], generatedData["PackerHTTPAddr"])}) {
+		test.Errorf("communication string slice for winrm incorrectly determined: %v", communication)
 	}
 
 	// test fails on no winrmpassword or password
@@ -87,7 +88,7 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
 
 	_, err = provisioner.determineCommunication()
 	if err == nil {
-		test.Errorf("DetermineCommunication function did not fail on no available password")
+		test.Errorf("determineCommunication function did not fail on no available password")
 	}
 
 	// test docker
@@ -106,8 +107,8 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
 	if err != nil {
 		test.Errorf("determineCommunication function failed to determine docker: %s", err)
 	}
-	if communication != fmt.Sprintf("--hosts=docker://%s", generatedData["ID"]) {
-		test.Errorf("Communication string incorrectly determined: %s", communication)
+	if !slices.Equal(communication, []string{fmt.Sprintf("--hosts=\"docker://%s\"", generatedData["ID"])}) {
+		test.Errorf("communication string slice for docker incorrectly determined: %v", communication)
 	}
 
 	// test podman
@@ -126,8 +127,8 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
 	if err != nil {
 		test.Errorf("determineCommunication function failed to determine podman: %s", err)
 	}
-	if communication != fmt.Sprintf("--hosts=podman://%s", generatedData["ID"]) {
-		test.Errorf("Communication string incorrectly determined: %s", communication)
+	if !slices.Equal(communication, []string{fmt.Sprintf("--hosts=\"podman://%s\"", generatedData["ID"])}) {
+		test.Errorf("communication string slice for podman incorrectly determined: %v", communication)
 	}
 
 	// test lxc
@@ -146,8 +147,8 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
 	if err != nil {
 		test.Errorf("determineCommunication function failed to determine lxc: %s", err)
 	}
-	if communication != fmt.Sprintf("--hosts=lxc://%s", generatedData["ID"]) {
-		test.Errorf("Communication string incorrectly determined: %s", communication)
+	if !slices.Equal(communication, []string{fmt.Sprintf("--hosts=\"lxc://%s\"", generatedData["ID"])}) {
+		test.Errorf("communication string slice for lxc incorrectly determined: %v", communication)
 	}
 
 	// test fails on no communication
@@ -164,7 +165,7 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
 
 	_, err = provisioner.determineCommunication()
 	if err == nil {
-		test.Errorf("DetermineCommunication function did not fail on unknown connection type")
+		test.Errorf("determineCommunication function did not fail on unknown connection type")
 	}
 }
 
