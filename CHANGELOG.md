@@ -1,4 +1,4 @@
-### 1.2.3 (Next)
+### 1.2.3
 - Only allow `processes` input parameter if `pytest-xdist` installed.
 - Switch paramiko connection backend to pure ssh.
 - Completely revise remote communication integration.
