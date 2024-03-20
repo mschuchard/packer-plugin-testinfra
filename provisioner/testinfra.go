@@ -16,16 +16,17 @@ import (
 	"github.com/hashicorp/packer-plugin-sdk/template/interpolate"
 )
 
-// config data unmarshalled from packer template/config
+// config data deserialized/unmarshalled from packer template/config
 type Config struct {
-	InstallCmd []string `mapstructure:"install_cmd"`
-	Keyword    string   `mapstructure:"keyword"`
-	Local      bool     `mapstructure:"local"`
-	Marker     string   `mapstructure:"marker"`
-	Processes  int      `mapstructure:"processes"`
-	PytestPath string   `mapstructure:"pytest_path"`
-	Sudo       bool     `mapstructure:"sudo"`
-	TestFiles  []string `mapstructure:"test_files"`
+	Chdir      string   `mapstructure:"chdir" required:"false"`
+	InstallCmd []string `mapstructure:"install_cmd" required:"false"`
+	Keyword    string   `mapstructure:"keyword" required:"false"`
+	Local      bool     `mapstructure:"local" required:"false"`
+	Marker     string   `mapstructure:"marker" required:"false"`
+	Processes  int      `mapstructure:"processes" required:"false"`
+	PytestPath string   `mapstructure:"pytest_path" required:"false"`
+	Sudo       bool     `mapstructure:"sudo" required:"false"`
+	TestFiles  []string `mapstructure:"test_files" required:"false"`
 
 	ctx interpolate.Context
 }
@@ -66,6 +67,10 @@ func (provisioner *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	// log optional arguments
+	if len(provisioner.config.Chdir) > 0 {
+		log.Printf("test execution will occur within the following directory: %s", provisioner.config.Chdir)
+	}
+
 	if len(provisioner.config.Keyword) > 0 {
 		log.Printf("executing tests with keyword substring expression: %s", provisioner.config.Keyword)
 	}

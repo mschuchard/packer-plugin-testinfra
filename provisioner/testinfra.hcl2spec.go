@@ -10,14 +10,15 @@ import (
 // FlatConfig is an auto-generated flat version of Config.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatConfig struct {
-	InstallCmd []string `mapstructure:"install_cmd" cty:"install_cmd" hcl:"install_cmd"`
-	Keyword    *string  `mapstructure:"keyword" cty:"keyword" hcl:"keyword"`
-	Local      *bool    `mapstructure:"local" cty:"local" hcl:"local"`
-	Marker     *string  `mapstructure:"marker" cty:"marker" hcl:"marker"`
-	Processes  *int     `mapstructure:"processes" cty:"processes" hcl:"processes"`
-	PytestPath *string  `mapstructure:"pytest_path" cty:"pytest_path" hcl:"pytest_path"`
-	Sudo       *bool    `mapstructure:"sudo" cty:"sudo" hcl:"sudo"`
-	TestFiles  []string `mapstructure:"test_files" cty:"test_files" hcl:"test_files"`
+	Chdir      *string  `mapstructure:"chdir" required:"false" cty:"chdir" hcl:"chdir"`
+	InstallCmd []string `mapstructure:"install_cmd" required:"false" cty:"install_cmd" hcl:"install_cmd"`
+	Keyword    *string  `mapstructure:"keyword" required:"false" cty:"keyword" hcl:"keyword"`
+	Local      *bool    `mapstructure:"local" required:"false" cty:"local" hcl:"local"`
+	Marker     *string  `mapstructure:"marker" required:"false" cty:"marker" hcl:"marker"`
+	Processes  *int     `mapstructure:"processes" required:"false" cty:"processes" hcl:"processes"`
+	PytestPath *string  `mapstructure:"pytest_path" required:"false" cty:"pytest_path" hcl:"pytest_path"`
+	Sudo       *bool    `mapstructure:"sudo" required:"false" cty:"sudo" hcl:"sudo"`
+	TestFiles  []string `mapstructure:"test_files" required:"false" cty:"test_files" hcl:"test_files"`
 }
 
 // FlatMapstructure returns a new FlatConfig.
@@ -32,6 +33,7 @@ func (*Config) FlatMapstructure() interface{ HCL2Spec() map[string]hcldec.Spec }
 // The decoded values from this spec will then be applied to a FlatConfig.
 func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 	s := map[string]hcldec.Spec{
+		"chdir":       &hcldec.AttrSpec{Name: "chdir", Type: cty.String, Required: false},
 		"install_cmd": &hcldec.AttrSpec{Name: "install_cmd", Type: cty.List(cty.String), Required: false},
 		"keyword":     &hcldec.AttrSpec{Name: "keyword", Type: cty.String, Required: false},
 		"local":       &hcldec.AttrSpec{Name: "local", Type: cty.Bool, Required: false},

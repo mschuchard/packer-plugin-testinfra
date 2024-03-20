@@ -15,6 +15,7 @@ var CI bool = os.Getenv("CIRCLECI") == "true" || os.Getenv("GITHUB_ACTIONS") == 
 
 // global helper vars for tests
 var basicConfig = &Config{
+	Chdir:      "/tmp",
 	Keyword:    "not slow",
 	Marker:     "fast",
 	Processes:  4,
@@ -33,7 +34,7 @@ func TestProvisionerConfig(test *testing.T) {
 		config: *basicConfig,
 	}
 
-	if provisioner.config.PytestPath != basicConfig.PytestPath || !(reflect.DeepEqual(provisioner.config.TestFiles, basicConfig.TestFiles)) || provisioner.config.Keyword != basicConfig.Keyword || provisioner.config.Marker != basicConfig.Marker || provisioner.config.Processes != basicConfig.Processes || provisioner.config.Sudo != basicConfig.Sudo {
+	if provisioner.config.PytestPath != basicConfig.PytestPath || !(reflect.DeepEqual(provisioner.config.TestFiles, basicConfig.TestFiles)) || provisioner.config.Chdir != basicConfig.Chdir || provisioner.config.Keyword != basicConfig.Keyword || provisioner.config.Marker != basicConfig.Marker || provisioner.config.Processes != basicConfig.Processes || provisioner.config.Sudo != basicConfig.Sudo {
 		test.Errorf("provisioner config struct not initialized correctly")
 	}
 }
@@ -65,6 +66,10 @@ func TestProvisionerPrepareMinimal(test *testing.T) {
 	err := provisioner.Prepare(minConfig)
 	if err != nil && !CI {
 		test.Errorf("prepare function failed with minimal Testinfra Packer config")
+	}
+
+	if len(provisioner.config.Chdir) > 0 {
+		test.Errorf("default empty setting for Chdir is incorrect: %s", provisioner.config.Chdir)
 	}
 
 	if len(provisioner.config.InstallCmd) > 0 {
