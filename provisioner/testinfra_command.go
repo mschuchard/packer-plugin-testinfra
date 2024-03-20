@@ -189,6 +189,13 @@ func (provisioner *Provisioner) determineExecCmd() (*exec.Cmd, *packer.RemoteCmd
 	if localExec {
 		return nil, &packer.RemoteCmd{Command: fmt.Sprintf("%s %s", pytestPath, strings.Join(args, " "))}, nil
 	} else { // return exec command for remote testing against instance
-		return exec.Command(pytestPath, args...), nil, nil
+		// initialize cmd
+		cmd := exec.Command(pytestPath, args...)
+		// determine if user requested execution in different directory
+		if len(provisioner.config.Chdir) > 0 {
+			cmd.Dir = provisioner.config.Chdir
+		}
+
+		return cmd, nil, nil
 	}
 }

@@ -1,3 +1,6 @@
+### 1.3.0 (Next)
+- Support changing into other directory for test execution.
+
 ### 1.2.3
 - Only allow `processes` input parameter if `pytest-xdist` installed.
 - Switch paramiko connection backend to pure ssh.
