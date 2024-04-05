@@ -27,6 +27,7 @@ type Config struct {
 	PytestPath string   `mapstructure:"pytest_path" required:"false"`
 	Sudo       bool     `mapstructure:"sudo" required:"false"`
 	TestFiles  []string `mapstructure:"test_files" required:"false"`
+	Verbose    bool     `mapstructure:"verbose" required:"false"`
 
 	ctx interpolate.Context
 }
@@ -67,14 +68,17 @@ func (provisioner *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	// log optional arguments
+	// chdir parameter
 	if len(provisioner.config.Chdir) > 0 {
 		log.Printf("test execution will occur within the following directory: %s", provisioner.config.Chdir)
 	}
 
+	// keyword parameter
 	if len(provisioner.config.Keyword) > 0 {
 		log.Printf("executing tests with keyword substring expression: %s", provisioner.config.Keyword)
 	}
 
+	// local parameter
 	if provisioner.config.Local {
 		// no validation of testinfra installation
 		log.Print("test execution will occur on the temporary Packer instance used for building the machine image artifact")
@@ -148,7 +152,12 @@ func (provisioner *Provisioner) Prepare(raws ...interface{}) error {
 		log.Print("testinfra will not execute with sudo")
 	}
 
-	// verify testinfra files are specified as inputs
+	// verbose parameter
+	if provisioner.config.Verbose {
+		log.Print("pytest will execute with verbosity enabled")
+	}
+
+	// check if testinfra files are specified as inputs
 	if len(provisioner.config.TestFiles) == 0 {
 		log.Print("all files prefixed with 'test_' recursively discovered from the current working directory will be considered Testinfra test files")
 	} else { // verify testinfra files exist

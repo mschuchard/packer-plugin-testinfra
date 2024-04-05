@@ -19,6 +19,7 @@ type FlatConfig struct {
 	PytestPath *string  `mapstructure:"pytest_path" required:"false" cty:"pytest_path" hcl:"pytest_path"`
 	Sudo       *bool    `mapstructure:"sudo" required:"false" cty:"sudo" hcl:"sudo"`
 	TestFiles  []string `mapstructure:"test_files" required:"false" cty:"test_files" hcl:"test_files"`
+	Verbose    *bool    `mapstructure:"verbose" required:"false" cty:"verbose" hcl:"verbose"`
 }
 
 // FlatMapstructure returns a new FlatConfig.
@@ -42,6 +43,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"pytest_path": &hcldec.AttrSpec{Name: "pytest_path", Type: cty.String, Required: false},
 		"sudo":        &hcldec.AttrSpec{Name: "sudo", Type: cty.Bool, Required: false},
 		"test_files":  &hcldec.AttrSpec{Name: "test_files", Type: cty.List(cty.String), Required: false},
+		"verbose":     &hcldec.AttrSpec{Name: "verbose", Type: cty.Bool, Required: false},
 	}
 	return s
 }

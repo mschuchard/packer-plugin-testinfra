@@ -22,6 +22,7 @@ var basicConfig = &Config{
 	PytestPath: "/usr/local/bin/py.test",
 	Sudo:       true,
 	TestFiles:  []string{"fixtures/test.py"},
+	Verbose:    true,
 }
 
 var minConfig = &Config{
@@ -34,7 +35,7 @@ func TestProvisionerConfig(test *testing.T) {
 		config: *basicConfig,
 	}
 
-	if provisioner.config.PytestPath != basicConfig.PytestPath || !(reflect.DeepEqual(provisioner.config.TestFiles, basicConfig.TestFiles)) || provisioner.config.Chdir != basicConfig.Chdir || provisioner.config.Keyword != basicConfig.Keyword || provisioner.config.Marker != basicConfig.Marker || provisioner.config.Processes != basicConfig.Processes || provisioner.config.Sudo != basicConfig.Sudo {
+	if provisioner.config.PytestPath != basicConfig.PytestPath || !(reflect.DeepEqual(provisioner.config.TestFiles, basicConfig.TestFiles)) || provisioner.config.Chdir != basicConfig.Chdir || provisioner.config.Keyword != basicConfig.Keyword || provisioner.config.Marker != basicConfig.Marker || provisioner.config.Processes != basicConfig.Processes || provisioner.config.Sudo != basicConfig.Sudo || provisioner.config.Verbose != basicConfig.Verbose {
 		test.Errorf("provisioner config struct not initialized correctly")
 	}
 }
@@ -92,8 +93,12 @@ func TestProvisionerPrepareMinimal(test *testing.T) {
 		test.Errorf("default empty setting for Processes is incorrect: %d", provisioner.config.Processes)
 	}
 
-	if provisioner.config.Sudo != false {
+	if provisioner.config.Sudo == true {
 		test.Errorf("default false setting for Sudo is incorrect: %t", provisioner.config.Sudo)
+	}
+
+	if provisioner.config.Verbose == true {
+		test.Errorf("default false setting for Verbose is incorrect: %t", provisioner.config.Verbose)
 	}
 
 	if provisioner.config.PytestPath != "py.test" {
