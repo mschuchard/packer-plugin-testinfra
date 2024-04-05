@@ -133,8 +133,8 @@ func packerRemoteCmd(localCmd *packer.RemoteCmd, installCmd []string, comm packe
 
 // determine and return execution command for testinfra
 func (provisioner *Provisioner) determineExecCmd() (*exec.Cmd, *packer.RemoteCmd, error) {
-	// initialize args with base argument
-	args := []string{"-v"}
+	// declare args
+	var args []string
 
 	// assign determined communication string
 	localExec := provisioner.config.Local
@@ -182,12 +182,18 @@ func (provisioner *Provisioner) determineExecCmd() (*exec.Cmd, *packer.RemoteCmd
 	if provisioner.config.Sudo {
 		args = append(args, "--sudo")
 	}
+	// verbose
+	if provisioner.config.Verbose {
+		args = append(args, "-v")
+	}
 	// testfiles
 	args = append(args, provisioner.config.TestFiles...)
 
 	// return packer remote command for local testing on instance
 	if localExec {
-		return nil, &packer.RemoteCmd{Command: fmt.Sprintf("%s %s", pytestPath, strings.Join(args, " "))}, nil
+		// prepend pytest path to args for command string slice
+		command := append([]string{pytestPath}, args...)
+		return nil, &packer.RemoteCmd{Command: strings.Join(command, " ")}, nil
 	} else { // return exec command for remote testing against instance
 		// initialize cmd
 		cmd := exec.Command(pytestPath, args...)
