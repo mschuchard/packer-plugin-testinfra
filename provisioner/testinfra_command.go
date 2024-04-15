@@ -8,6 +8,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -188,11 +189,12 @@ func (provisioner *Provisioner) determineExecCmd() (*exec.Cmd, *packer.RemoteCmd
 	}
 	// testfiles
 	args = append(args, provisioner.config.TestFiles...)
+	// 1.22: args = slices.Concat(args, provisioner.config.TestFiles)
 
 	// return packer remote command for local testing on instance
 	if localExec {
 		// prepend pytest path to args for command string slice
-		command := append([]string{pytestPath}, args...)
+		command := slices.Insert(args, 0, pytestPath)
 		return nil, &packer.RemoteCmd{Command: strings.Join(command, " ")}, nil
 	} else { // return exec command for remote testing against instance
 		// initialize cmd

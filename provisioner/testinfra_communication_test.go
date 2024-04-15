@@ -50,7 +50,6 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
 	// test ssh with no private key but with agent auth
 	generatedData["SSHPrivateKeyFile"] = ""
 	generatedData["SSHAgentAuth"] = true
-
 	provisioner.generatedData = generatedData
 
 	communication, err = provisioner.determineCommunication()
@@ -214,7 +213,6 @@ func TestProvisionerDetermineSSHAuth(test *testing.T) {
 	// modify to empty ssh key and yes to ssh agent auth
 	generatedData["SSHPrivateKeyFile"] = ""
 	generatedData["SSHAgentAuth"] = true
-
 	provisioner.generatedData = generatedData
 
 	// test successfully uses empty ssh private key file
@@ -231,7 +229,6 @@ func TestProvisionerDetermineSSHAuth(test *testing.T) {
 
 	// modify to no ssh agent auth
 	generatedData["SSHAgentAuth"] = false
-
 	provisioner.generatedData = generatedData
 
 	// test successfully creates tmpfile with expected content for private key

@@ -3,7 +3,7 @@ package testinfra
 import (
 	"errors"
 	"os"
-	"reflect"
+	"slices"
 	"strings"
 	"testing"
 
@@ -35,7 +35,7 @@ func TestProvisionerConfig(test *testing.T) {
 		config: *basicConfig,
 	}
 
-	if provisioner.config.PytestPath != basicConfig.PytestPath || !(reflect.DeepEqual(provisioner.config.TestFiles, basicConfig.TestFiles)) || provisioner.config.Chdir != basicConfig.Chdir || provisioner.config.Keyword != basicConfig.Keyword || provisioner.config.Marker != basicConfig.Marker || provisioner.config.Processes != basicConfig.Processes || provisioner.config.Sudo != basicConfig.Sudo || provisioner.config.Verbose != basicConfig.Verbose {
+	if provisioner.config.PytestPath != basicConfig.PytestPath || !slices.Equal(provisioner.config.TestFiles, basicConfig.TestFiles) || provisioner.config.Chdir != basicConfig.Chdir || provisioner.config.Keyword != basicConfig.Keyword || provisioner.config.Marker != basicConfig.Marker || provisioner.config.Processes != basicConfig.Processes || provisioner.config.Sudo != basicConfig.Sudo || provisioner.config.Verbose != basicConfig.Verbose {
 		test.Errorf("provisioner config struct not initialized correctly")
 	}
 }

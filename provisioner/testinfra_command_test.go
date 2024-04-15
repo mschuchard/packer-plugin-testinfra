@@ -2,7 +2,7 @@ package testinfra
 
 import (
 	"fmt"
-	"strings"
+	"slices"
 	"testing"
 )
 
@@ -55,7 +55,8 @@ func TestProvisionerDetermineExecCmd(test *testing.T) {
 		test.Error("determineExecCmd function failed to determine execution directory for basic config")
 		test.Errorf("actual: %s, expected: %s", execCmd.Dir, basicConfig.Chdir)
 	}
-	if execCmd.String() != fmt.Sprintf("%s --hosts=ssh://%s@%s:%d --ssh-identity-file=%s --ssh-extra-args=\"-o StrictHostKeyChecking=no\" -k \"%s\" -m \"%s\" -n %d --sudo -v %s", provisioner.config.PytestPath, generatedData["User"], generatedData["Host"], generatedData["Port"], generatedData["SSHPrivateKeyFile"], provisioner.config.Keyword, provisioner.config.Marker, provisioner.config.Processes, strings.Join(provisioner.config.TestFiles, "")) {
+	// 1.22 slices.Concat( , provisioner.config.TestFiles)
+	if !slices.Equal(execCmd.Args, append([]string{provisioner.config.PytestPath, fmt.Sprintf("--hosts=ssh://%s@%s:%d", generatedData["User"], generatedData["Host"], generatedData["Port"]), fmt.Sprintf("--ssh-identity-file=%s", generatedData["SSHPrivateKeyFile"]), "--ssh-extra-args=\"-o StrictHostKeyChecking=no\"", "-k", fmt.Sprintf("\"%s\"", provisioner.config.Keyword), "-m", fmt.Sprintf("\"%s\"", provisioner.config.Marker), "-n", fmt.Sprint(provisioner.config.Processes), "--sudo", "-v"}, provisioner.config.TestFiles...)) {
 		test.Errorf("determineExecCmd function failed to properly determine remote execution command for basic config with SSH communicator: %s", execCmd.String())
 	}
 	if localCmd != nil {
