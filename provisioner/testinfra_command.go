@@ -182,6 +182,11 @@ func (provisioner *Provisioner) determineExecCmd() (*exec.Cmd, *packer.RemoteCmd
 	// sudo
 	if provisioner.config.Sudo {
 		args = append(args, "--sudo")
+
+		// sudo_user
+		if len(provisioner.config.SudoUser) > 0 {
+			args = append(args, fmt.Sprintf("\"--sudo-user=%s\"", provisioner.config.SudoUser))
+		}
 	}
 	// verbose
 	if provisioner.config.Verbose {

@@ -1,6 +1,7 @@
 ### 1.3.0 (Next)
 - Support changing into other directory for test execution.
 - Support optional Pytest verbose output instead of former mandatory.
+- Support becoming different user after elevated permissions.
 
 ### 1.2.3
 - Only allow `processes` input parameter if `pytest-xdist` installed.
