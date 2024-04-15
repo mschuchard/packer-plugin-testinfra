@@ -26,6 +26,7 @@ type Config struct {
 	Processes  int      `mapstructure:"processes" required:"false"`
 	PytestPath string   `mapstructure:"pytest_path" required:"false"`
 	Sudo       bool     `mapstructure:"sudo" required:"false"`
+	SudoUser   string   `mapstructure:"sudo_user" required:"false"`
 	TestFiles  []string `mapstructure:"test_files" required:"false"`
 	Verbose    bool     `mapstructure:"verbose" required:"false"`
 
@@ -145,11 +146,19 @@ func (provisioner *Provisioner) Prepare(raws ...interface{}) error {
 		log.Printf("executing tests with marker expression: %s", provisioner.config.Marker)
 	}
 
-	// sudo parameter
+	// sudo and sudo_user parameters
 	if provisioner.config.Sudo {
 		log.Print("testinfra will execute with sudo")
+
+		if len(provisioner.config.SudoUser) > 0 {
+			log.Printf("testinfra will execute as user: %s", provisioner.config.SudoUser)
+		}
 	} else {
 		log.Print("testinfra will not execute with sudo")
+
+		if len(provisioner.config.SudoUser) > 0 {
+			log.Print("the 'sudo_user' parameter is ignored when sudo is not enabled")
+		}
 	}
 
 	// verbose parameter
