@@ -150,14 +150,16 @@ func (provisioner *Provisioner) Prepare(raws ...interface{}) error {
 	if provisioner.config.Sudo {
 		log.Print("testinfra will execute with sudo")
 
+		// warn if sudo_user also specified
 		if len(provisioner.config.SudoUser) > 0 {
-			log.Printf("testinfra will execute as user: %s", provisioner.config.SudoUser)
+			log.Print("the 'sudo_user' parameter is ignored when sudo is enabled")
 		}
 	} else {
 		log.Print("testinfra will not execute with sudo")
 
+		// sudo_user mutually exclusive with sudo
 		if len(provisioner.config.SudoUser) > 0 {
-			log.Print("the 'sudo_user' parameter is ignored when sudo is not enabled")
+			log.Printf("testinfra will execute as user: %s", provisioner.config.SudoUser)
 		}
 	}
 
