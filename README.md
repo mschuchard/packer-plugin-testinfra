@@ -9,7 +9,7 @@ This plugin requires Packer version `>= 1.7.0` due to the modern SDK usage. A si
 packer {
   required_plugins {
     testinfra = {
-      version = "~> 1.2.0"
+      version = "~> 1.3.0"
       source  = "github.com/mschuchard/testinfra"
     }
   }
@@ -22,7 +22,7 @@ Afterwards, `packer init` can automatically manage your plugin as per normal. No
 
 ### Basic Example
 
-A basic example for usage of this plugin with common optional arguments follows below:
+A basic example for usage of this plugin with selected optional arguments follows below:
 
 ```hcl
 build {
@@ -39,6 +39,7 @@ build {
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
+| **chdir** | Change into this directory before executing `pytest`. Unsupported with `local` test execution. | string | `cwd` | no |
 | **install_cmd** | Command to execute on the instance used for building the machine image artifact; can be used to install and configure Testinfra prior to a `local` test execution. | list(string) | [] | no |
 | **keyword** | PyTest keyword substring expression for selective test execution. | string | "" | no |
 | **local** | Execute Testinfra tests locally on the instance used for building the machine image artifact. Most plugin validation is skipped with this option. | bool | false | no |
@@ -46,7 +47,9 @@ build {
 | **processes** | The number of parallel processes for Testinfra test execution. This parameter requires installation of the [pytest-xdist](https://pypi.org/project/pytest-xdist/) plugin. | number | 0 | no |
 | **pytest_path** | The path to the installed `py.test` executable for initiating the Testinfra tests. | string | "py.test" | no |
 | **sudo** | Whether or not to execute the tests with `sudo` elevated permissions. | bool | false | no |
+| **sudo_user** | User to become when executing the tests. Mutually exclusive with `sudo`, and therefore ignored when `sudo` is input as `true`. | string | "" | no |
 | **test_files** | The paths to the files containing the Testinfra tests for execution and validation of the machine image artifact. The default empty value will execute default PyTest behavior of all test files prefixed with `test_` recursively discovered from the current working directory. | list(string) | [] | no |
+| **verbose** | Whether or not to execute the tests with Pytest verbosity enabled. | bool | false | no |
 
 ### Communicators
 

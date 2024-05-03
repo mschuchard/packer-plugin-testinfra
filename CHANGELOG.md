@@ -1,4 +1,4 @@
-### 1.3.0 (Next)
+### 1.3.0
 - Support changing into other directory for test execution.
 - Support optional Pytest verbose output instead of former mandatory.
 - Support becoming different user after elevated permissions.
