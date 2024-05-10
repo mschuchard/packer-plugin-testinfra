@@ -3,7 +3,7 @@ package testinfra
 
 import (
 	"context"
-	"fmt"
+	"errors"
 	"io"
 	"log"
 	"os"
@@ -123,7 +123,8 @@ func (provisioner *Provisioner) Prepare(raws ...interface{}) error {
 			if strings.Contains(string(outSlurp), "testinfra") {
 				log.Print("testinfra installation existence verified")
 			} else {
-				return fmt.Errorf("testinfra installation not found by specified Pytest installation")
+				log.Print("testinfra installation not found by specified Pytest installation")
+				return errors.New("testinfra not found")
 			}
 
 			if provisioner.config.Processes > 0 {
@@ -137,7 +138,8 @@ func (provisioner *Provisioner) Prepare(raws ...interface{}) error {
 			}
 		} else {
 			// pytest returned no stdout
-			return fmt.Errorf("pytest help command returned no stdout; this indicates an issue with the specified Pytest installation")
+			log.Print("pytest help command returned no stdout; this indicates an issue with the specified Pytest installation")
+			return errors.New("pytest issue")
 		}
 	}
 
@@ -206,7 +208,8 @@ func (provisioner *Provisioner) Provision(ctx context.Context, ui packer.Ui, com
 		err = packerRemoteCmd(localCmd, provisioner.config.InstallCmd, comm, ui)
 	} else {
 		// somehow we either returned both commands or neither or something really weird for one or both
-		return fmt.Errorf("incorrectly determined remote command (%s) and/or command local to instance (%s); please report as bug with this log information", cmd.String(), localCmd.Command)
+		ui.Errorf("incorrectly determined remote command (%s) and/or command local to instance (%s); please report as bug with this log information", cmd.String(), localCmd.Command)
+		return errors.New("failed command determination")
 	}
 	if err != nil {
 		ui.Error("the Pytest Testinfra execution failed")

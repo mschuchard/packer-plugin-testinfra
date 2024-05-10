@@ -1,3 +1,6 @@
+### 1.3.1 (Next)
+- Improve logging.
+
 ### 1.3.0
 - Support changing into other directory for test execution.
 - Support optional Pytest verbose output instead of former mandatory.

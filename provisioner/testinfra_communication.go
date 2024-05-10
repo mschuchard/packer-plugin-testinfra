@@ -1,6 +1,7 @@
 package testinfra
 
 import (
+	"errors"
 	"fmt"
 	"log"
 
@@ -78,7 +79,8 @@ func (provisioner *Provisioner) determineCommunication() ([]string, error) {
 
 			// no winrm password available
 			if !ok || len(winrmPassword) == 0 {
-				return nil, fmt.Errorf("winrm communicator password could not be determined from available Packer data")
+				log.Print("winrm communicator password could not be determined from available Packer data")
+				return nil, errors.New("unknown winrm password")
 			}
 		}
 
@@ -88,13 +90,15 @@ func (provisioner *Provisioner) determineCommunication() ([]string, error) {
 		// determine instanceid
 		instanceID, ok := provisioner.generatedData["ID"].(string)
 		if !ok || len(instanceID) == 0 {
-			return nil, fmt.Errorf("instance id could not be determined")
+			log.Print("instance id could not be determined")
+			return nil, errors.New("unknown instance id")
 		}
 
 		// append args with container connection backend information (instanceid)
 		args = append(args, fmt.Sprintf("--hosts=%s://%s", connectionType, instanceID))
 	default:
-		return nil, fmt.Errorf("communication backend with machine image is not supported, and was resolved to '%s'", connectionType)
+		log.Printf("communication backend with machine image is not supported, and was resolved to '%s'", connectionType)
+		return nil, errors.New("unsupported communication type")
 	}
 
 	return args, nil
@@ -109,7 +113,8 @@ func (provisioner *Provisioner) determineUserAddr() (string, string, error) {
 		user, ok = provisioner.generatedData["User"].(string)
 
 		if !ok || len(user) == 0 {
-			return "", "", fmt.Errorf("remote user could not be determined from available Packer data")
+			log.Print("remote user could not be determined from available Packer data")
+			return "", "", errors.New("unknown remote user")
 		}
 	}
 
@@ -121,7 +126,8 @@ func (provisioner *Provisioner) determineUserAddr() (string, string, error) {
 		httpAddr, ok = provisioner.generatedData["PackerHTTPAddr"].(string)
 
 		if !ok || len(httpAddr) == 0 {
-			return "", "", fmt.Errorf("host address and port could not be determined")
+			log.Print("host address and port could not be determined")
+			return "", "", errors.New("unknown host")
 		}
 	} else {
 		// valid ip address so now determine port
@@ -133,7 +139,8 @@ func (provisioner *Provisioner) determineUserAddr() (string, string, error) {
 
 			//if !ok || port == int64(0) {
 			if port == int64(0) {
-				return "", "", fmt.Errorf("host port could not be determined")
+				log.Print("host port could not be determined")
+				return "", "", errors.New("unknown host port")
 			}
 		}
 
@@ -171,7 +178,8 @@ func (provisioner *Provisioner) determineSSHAuth() (SSHAuth, string, error) {
 			// write a tmpfile for storing a private key
 			tmpSSHPrivateKey, err := tmp.File("testinfra-key")
 			if err != nil {
-				return "", "", fmt.Errorf("error creating a temp file for the ssh private key: %v", err.Error())
+				log.Print("error creating a temp file for the ssh private key")
+				return "", "", err
 			}
 
 			// attempt to obtain a private key
@@ -180,13 +188,15 @@ func (provisioner *Provisioner) determineSSHAuth() (SSHAuth, string, error) {
 			// write the private key to the tmpfile
 			_, err = tmpSSHPrivateKey.WriteString(SSHPrivateKey)
 			if err != nil {
-				return "", "", fmt.Errorf("failed to write ssh private key to temp file")
+				log.Print("failed to write ssh private key to temp file")
+				return "", "", err
 			}
 
 			// and then close the tmpfile storing the private key
 			err = tmpSSHPrivateKey.Close()
 			if err != nil {
-				return "", "", fmt.Errorf("failed to close ssh private key temp file")
+				log.Print("failed to close ssh private key temp file")
+				return "", "", err
 			}
 
 			return privateKeySSHAuth, tmpSSHPrivateKey.Name(), nil

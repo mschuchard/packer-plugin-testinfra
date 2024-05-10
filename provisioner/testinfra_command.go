@@ -3,6 +3,7 @@ package testinfra
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -49,7 +50,7 @@ func execCmd(cmd *exec.Cmd, ui packer.Ui) error {
 	}
 	if len(outSlurp) > 0 {
 		ui.Say("Testinfra results include the following:")
-		ui.Message(string(outSlurp))
+		ui.Say(string(outSlurp))
 	} else {
 		ui.Say("Testinfra produced no stdout; it is probable that something unintended occurred during execution")
 	}
@@ -115,13 +116,14 @@ func packerRemoteCmd(localCmd *packer.RemoteCmd, installCmd []string, comm packe
 	if exitStatus := localCmd.Wait(); exitStatus > 0 || len(stderr.String()) > 0 {
 		ui.Error("Testinfra errored internally during execution:")
 		ui.Error(stderr.String())
-		return fmt.Errorf("Testinfra returned exit status: %d", exitStatus)
+		ui.Errorf("Testinfra returned exit status: %d", exitStatus)
+		return errors.New("testinfra non-zero exit code")
 	}
 
 	// capture and display testinfra output
 	if len(stdout.String()) > 0 {
 		ui.Say("Testinfra results include the following:")
-		ui.Message(stdout.String())
+		ui.Say(stdout.String())
 	} else {
 		ui.Say("Testinfra produced no stdout; it is likely something unintended occurred during execution")
 	}
