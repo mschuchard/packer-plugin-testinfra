@@ -26,10 +26,6 @@ var basicConfig = &Config{
 	Verbose:    true,
 }
 
-var minConfig = &Config{
-	TestFiles: []string{"fixtures/test.py"},
-}
-
 // test basic config for packer template/config data
 func TestProvisionerConfig(test *testing.T) {
 	var provisioner = &Provisioner{
@@ -61,11 +57,11 @@ func TestProvisionerPrepareBasic(test *testing.T) {
 	}
 }
 
-// test provisioner prepare with minimal config
+// test provisioner prepare with minimal config (essentially default setting)
 func TestProvisionerPrepareMinimal(test *testing.T) {
 	var provisioner Provisioner
 
-	err := provisioner.Prepare(minConfig)
+	err := provisioner.Prepare(&Config{})
 	if err != nil && !CI {
 		test.Errorf("prepare function failed with minimal Testinfra Packer config")
 	}
@@ -108,6 +104,10 @@ func TestProvisionerPrepareMinimal(test *testing.T) {
 
 	if provisioner.config.PytestPath != "py.test" {
 		test.Errorf("default setting for PytestPath is incorrect: %s", provisioner.config.PytestPath)
+	}
+
+	if len(provisioner.config.TestFiles) != 0 {
+		test.Errorf("default setting for TestFiles is incorrect: %+q", provisioner.config.TestFiles)
 	}
 }
 
