@@ -69,11 +69,6 @@ func (provisioner *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	// log optional arguments
-	// chdir parameter
-	if len(provisioner.config.Chdir) > 0 {
-		log.Printf("test execution will occur within the following directory: %s", provisioner.config.Chdir)
-	}
-
 	// keyword parameter
 	if len(provisioner.config.Keyword) > 0 {
 		log.Printf("executing tests with keyword substring expression: %s", provisioner.config.Keyword)
@@ -93,7 +88,19 @@ func (provisioner *Provisioner) Prepare(raws ...interface{}) error {
 			log.Printf("number of Testinfra processes: %d", provisioner.config.Processes)
 		}
 	} else { // verify testinfra installed
+		// chdir parameter
+		if len(provisioner.config.Chdir) > 0 {
+			// verify chdir exists
+			if _, err := os.Stat(provisioner.config.Chdir); err != nil {
+				log.Printf("the chdir does not exist at: %s", provisioner.config.Chdir)
+				return err
+			} else {
+				log.Printf("test execution will occur within the following directory: %s", provisioner.config.Chdir)
+			}
+		}
+
 		log.Print("beginning Testinfra installation verification")
+
 		// initialize testinfra -h command
 		cmd := exec.Command(provisioner.config.PytestPath, []string{"-h"}...)
 
