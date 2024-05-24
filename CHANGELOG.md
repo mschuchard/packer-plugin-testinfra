@@ -1,5 +1,6 @@
 ### 1.3.1 (Next)
 - Improve logging.
+- Fix returns for errors during execution command determination.
 
 ### 1.3.0
 - Support changing into other directory for test execution.

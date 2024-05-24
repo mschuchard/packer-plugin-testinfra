@@ -144,7 +144,8 @@ func (provisioner *Provisioner) determineExecCmd() (*exec.Cmd, *packer.RemoteCmd
 	if !localExec {
 		communication, err := provisioner.determineCommunication()
 		if err != nil {
-			return nil, &packer.RemoteCmd{}, err
+			log.Print("could not accurately determine communication configuration")
+			return nil, nil, err
 		}
 
 		args = append(args, communication...)
@@ -155,7 +156,7 @@ func (provisioner *Provisioner) determineExecCmd() (*exec.Cmd, *packer.RemoteCmd
 	pytestPath, err := interpolate.Render(provisioner.config.PytestPath, &provisioner.config.ctx)
 	if err != nil {
 		log.Printf("error parsing config for PytestPath: %v", err.Error())
-		return nil, &packer.RemoteCmd{}, err
+		return nil, nil, err
 	}
 
 	// assign optional populated values
@@ -163,7 +164,7 @@ func (provisioner *Provisioner) determineExecCmd() (*exec.Cmd, *packer.RemoteCmd
 	keyword, err := interpolate.Render(provisioner.config.Keyword, &provisioner.config.ctx)
 	if err != nil {
 		log.Printf("error parsing config for Keyword: %v", err.Error())
-		return nil, &packer.RemoteCmd{}, err
+		return nil, nil, err
 	}
 	if len(keyword) > 0 {
 		args = append(args, "-k", fmt.Sprintf("\"%s\"", keyword))
@@ -172,7 +173,7 @@ func (provisioner *Provisioner) determineExecCmd() (*exec.Cmd, *packer.RemoteCmd
 	marker, err := interpolate.Render(provisioner.config.Marker, &provisioner.config.ctx)
 	if err != nil {
 		log.Printf("error parsing config for Marker: %v", err.Error())
-		return nil, &packer.RemoteCmd{}, err
+		return nil, nil, err
 	}
 	if len(marker) > 0 {
 		args = append(args, "-m", fmt.Sprintf("\"%s\"", marker))
