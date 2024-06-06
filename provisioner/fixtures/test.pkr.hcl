@@ -47,7 +47,7 @@ source "virtualbox-vm" "ubuntu" {
   vm_name              = "fixtures_default_1662571353037_70563"
 }
 
-# test local execution ssh communicator
+# test local execution
 # TODO: https://github.com/hashicorp/packer-plugin-virtualbox/issues/77
 /*build {
   sources = ["source.virtualbox-vm.ubuntu"]

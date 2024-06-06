@@ -146,9 +146,11 @@ func (provisioner *Provisioner) Prepare(raws ...interface{}) error {
 		} else {
 			// pytest returned no stdout
 			log.Print("pytest help command returned no stdout; this indicates an issue with the specified Pytest installation")
-			return errors.New("pytest issue")
+			return errors.New("pytest installation issue")
 		}
 	}
+
+	log.Print("Testinfra installation verified")
 
 	// marker parameter
 	if len(provisioner.config.Marker) > 0 {
