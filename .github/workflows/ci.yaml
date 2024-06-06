@@ -19,7 +19,7 @@ jobs:
     container: matthewschuchard/packer-plugin
     steps:
     - name: checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
     - name: install prereqs
       run: apk add --no-cache --update build-base && touch /usr/local/bin/py.test
     - name: build

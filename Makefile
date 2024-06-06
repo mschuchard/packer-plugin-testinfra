@@ -9,15 +9,14 @@ tidy:
 build: tidy
 	@go build -o packer-plugin-testinfra
 
+install: build
+	@packer plugins install --path ./packer-plugin-testinfra 'github.com/mschuchard/testinfra'
+
 unit:
 	@go test -v ./...
 
-accept: build
-	# vagrant up and vagrant suspend one-time in fixtures dir
-	@mkdir -p ~/.packer.d/plugins/
-	# https://github.com/hashicorp/packer/issues/11972
-	@cp packer-plugin-testinfra ~/.config/packer/plugins/packer-plugin-testinfra
-	@cp packer-plugin-testinfra ./provisioner/packer-plugin-testinfra
+accept: install
+	# start vbox machine for ssh communicator testing
 	@PACKER_ACC=1 go test -v ./provisioner/testinfra_acceptance_test.go -timeout=5m
 
 install-packer-sdc:
