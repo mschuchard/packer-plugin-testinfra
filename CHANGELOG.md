@@ -1,4 +1,4 @@
-### 1.3.1 (Next)
+### 1.3.1
 - Improve logging.
 - Fix returns for errors during execution command determination.
 - Validate `chdir` parameter and fix logging conditional.
