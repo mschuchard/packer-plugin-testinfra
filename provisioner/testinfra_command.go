@@ -191,11 +191,19 @@ func (provisioner *Provisioner) determineExecCmd() (*exec.Cmd, *packer.RemoteCmd
 			args = append(args, fmt.Sprintf("\"--sudo-user=%s\"", provisioner.config.SudoUser))
 		}
 	}
-
 	// verbose
-	if provisioner.config.Verbose {
-		args = append(args, "-v")
+	if provisioner.config.Verbose > 0 {
+		// initialize arg
+		levelArg := "-"
+
+		// determine number of "v" in arg this way until go 1.23
+		for level := 0; level < provisioner.config.Verbose; level++ {
+			levelArg += "v"
+		}
+
+		args = append(args, levelArg)
 	}
+
 	// testfiles
 	args = append(args, provisioner.config.TestFiles...)
 	// 1.22: args = slices.Concat(args, provisioner.config.TestFiles)

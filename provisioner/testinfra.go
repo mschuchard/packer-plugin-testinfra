@@ -176,7 +176,7 @@ func (provisioner *Provisioner) Prepare(raws ...interface{}) error {
 
 	// verbose parameter
 	if provisioner.config.Verbose > 0 {
-		log.Print("pytest will execute with verbose enabled at level %d", provisioner.config.Verbose)
+		log.Printf("pytest will execute with verbose enabled at level %d", provisioner.config.Verbose)
 	}
 
 	// check if testinfra files are specified as inputs

@@ -1,3 +1,6 @@
+### 1.4.0
+- Support multiple levels of verbose.
+
 ### 1.3.1
 - Improve logging.
 - Fix returns for errors during execution command determination.

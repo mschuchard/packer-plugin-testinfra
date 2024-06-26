@@ -23,7 +23,7 @@ var basicConfig = &Config{
 	Sudo:       true,
 	SudoUser:   "fooman",
 	TestFiles:  []string{"fixtures/test.py"},
-	Verbose:    1,
+	Verbose:    2,
 }
 
 // test basic config for packer template/config data
