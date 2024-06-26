@@ -23,7 +23,7 @@ var basicConfig = &Config{
 	Sudo:       true,
 	SudoUser:   "fooman",
 	TestFiles:  []string{"fixtures/test.py"},
-	Verbose:    true,
+	Verbose:    1,
 }
 
 // test basic config for packer template/config data
@@ -98,8 +98,8 @@ func TestProvisionerPrepareMinimal(test *testing.T) {
 		test.Errorf("default empty setting for SudoUser is incorrect: %s", provisioner.config.SudoUser)
 	}
 
-	if provisioner.config.Verbose == true {
-		test.Errorf("default false setting for Verbose is incorrect: %t", provisioner.config.Verbose)
+	if provisioner.config.Verbose != 0 {
+		test.Errorf("default empty setting for Verbose is incorrect: %d", provisioner.config.Verbose)
 	}
 
 	if provisioner.config.PytestPath != "py.test" {

@@ -28,7 +28,7 @@ type Config struct {
 	Sudo       bool     `mapstructure:"sudo" required:"false"`
 	SudoUser   string   `mapstructure:"sudo_user" required:"false"`
 	TestFiles  []string `mapstructure:"test_files" required:"false"`
-	Verbose    bool     `mapstructure:"verbose" required:"false"`
+	Verbose    int      `mapstructure:"verbose" required:"false"`
 
 	ctx interpolate.Context
 }
@@ -175,8 +175,8 @@ func (provisioner *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	// verbose parameter
-	if provisioner.config.Verbose {
-		log.Print("pytest will execute with verbosity enabled")
+	if provisioner.config.Verbose > 0 {
+		log.Print("pytest will execute with verbose enabled at level %d", provisioner.config.Verbose)
 	}
 
 	// check if testinfra files are specified as inputs
