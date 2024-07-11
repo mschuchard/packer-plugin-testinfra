@@ -18,7 +18,7 @@ var basicConfig = &Config{
 	Chdir:      "/tmp",
 	Keyword:    "not slow",
 	Marker:     "fast",
-	Processes:  4,
+	Parallel:   true,
 	PytestPath: "/usr/local/bin/py.test",
 	Sudo:       true,
 	SudoUser:   "fooman",
@@ -32,7 +32,7 @@ func TestProvisionerConfig(test *testing.T) {
 		config: *basicConfig,
 	}
 
-	if provisioner.config.PytestPath != basicConfig.PytestPath || !slices.Equal(provisioner.config.TestFiles, basicConfig.TestFiles) || provisioner.config.Chdir != basicConfig.Chdir || provisioner.config.Keyword != basicConfig.Keyword || provisioner.config.Marker != basicConfig.Marker || provisioner.config.Processes != basicConfig.Processes || provisioner.config.Sudo != basicConfig.Sudo || provisioner.config.SudoUser != basicConfig.SudoUser || provisioner.config.Verbose != basicConfig.Verbose {
+	if provisioner.config.PytestPath != basicConfig.PytestPath || !slices.Equal(provisioner.config.TestFiles, basicConfig.TestFiles) || provisioner.config.Chdir != basicConfig.Chdir || provisioner.config.Keyword != basicConfig.Keyword || provisioner.config.Marker != basicConfig.Marker || provisioner.config.Parallel != basicConfig.Parallel || provisioner.config.Sudo != basicConfig.Sudo || provisioner.config.SudoUser != basicConfig.SudoUser || provisioner.config.Verbose != basicConfig.Verbose {
 		test.Errorf("provisioner config struct not initialized correctly")
 	}
 }
@@ -86,11 +86,11 @@ func TestProvisionerPrepareMinimal(test *testing.T) {
 		test.Errorf("default empty setting for Marker is incorrect: %s", provisioner.config.Marker)
 	}
 
-	if provisioner.config.Processes != 0 {
-		test.Errorf("default empty setting for Processes is incorrect: %d", provisioner.config.Processes)
+	if provisioner.config.Parallel {
+		test.Errorf("default false setting for Parallel is incorrect: %t", provisioner.config.Parallel)
 	}
 
-	if provisioner.config.Sudo == true {
+	if provisioner.config.Sudo {
 		test.Errorf("default false setting for Sudo is incorrect: %t", provisioner.config.Sudo)
 	}
 
@@ -169,12 +169,12 @@ func TestProvisionerPrepareNoXdist(test *testing.T) {
 	if err := provisioner.Prepare(basicConfig); err != nil && !CI {
 		test.Error("prepare function failed basic config")
 	}
-	if CI && provisioner.config.Processes != basicConfig.Processes {
-		test.Error("prepare function reverted processes member value to default 0 after determing xdist is installed")
-		test.Errorf("actual value: %d", provisioner.config.Processes)
+	if CI && provisioner.config.Parallel != basicConfig.Parallel {
+		test.Error("prepare function did not maintain parallel member value after determing xdist is installed")
+		test.Errorf("actual value: %t", provisioner.config.Parallel)
 	}
-	if !CI && provisioner.config.Processes != 0 {
-		test.Error("prepare function did not revert processes member value to default 0 after determing xdist is not installed")
-		test.Errorf("actual value: %d", provisioner.config.Processes)
+	if !CI && provisioner.config.Parallel {
+		test.Error("prepare function did not revert parallel member value to default 'false' after determing xdist is not installed")
+		test.Errorf("actual value: %t", provisioner.config.Parallel)
 	}
 }

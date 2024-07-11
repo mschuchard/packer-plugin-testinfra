@@ -23,7 +23,7 @@ type Config struct {
 	Keyword    string   `mapstructure:"keyword" required:"false"`
 	Local      bool     `mapstructure:"local" required:"false"`
 	Marker     string   `mapstructure:"marker" required:"false"`
-	Processes  int      `mapstructure:"processes" required:"false"`
+	Parallel   bool     `mapstructure:"parallel" required:"false"`
 	PytestPath string   `mapstructure:"pytest_path" required:"false"`
 	Sudo       bool     `mapstructure:"sudo" required:"false"`
 	SudoUser   string   `mapstructure:"sudo_user" required:"false"`
@@ -84,8 +84,8 @@ func (provisioner *Provisioner) Prepare(raws ...interface{}) error {
 		}
 
 		// no validation of xdist installation
-		if provisioner.config.Processes > 0 {
-			log.Printf("number of Testinfra processes: %d", provisioner.config.Processes)
+		if provisioner.config.Parallel {
+			log.Print("Testinfra tests will execute in parallel across the available physical CPUs")
 		}
 	} else { // verify testinfra installed
 		// chdir parameter
@@ -134,13 +134,13 @@ func (provisioner *Provisioner) Prepare(raws ...interface{}) error {
 				return errors.New("testinfra not found")
 			}
 
-			if provisioner.config.Processes > 0 {
+			if provisioner.config.Parallel {
 				// check for xdist in pytest usage stdout
 				if strings.Contains(string(outSlurp), " -n ") {
-					log.Printf("number of Testinfra processes: %d", provisioner.config.Processes)
+					log.Print("Testinfra tests will execute in parallel across the available physical CPUs")
 				} else {
 					log.Printf("pytest-xdist is not installed, and processes parameter will be reset to default")
-					provisioner.config.Processes = 0
+					provisioner.config.Parallel = false
 				}
 			}
 		} else {

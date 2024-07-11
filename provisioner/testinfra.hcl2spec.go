@@ -15,7 +15,7 @@ type FlatConfig struct {
 	Keyword    *string  `mapstructure:"keyword" required:"false" cty:"keyword" hcl:"keyword"`
 	Local      *bool    `mapstructure:"local" required:"false" cty:"local" hcl:"local"`
 	Marker     *string  `mapstructure:"marker" required:"false" cty:"marker" hcl:"marker"`
-	Processes  *int     `mapstructure:"processes" required:"false" cty:"processes" hcl:"processes"`
+	Parallel   *bool    `mapstructure:"parallel" required:"false" cty:"parallel" hcl:"parallel"`
 	PytestPath *string  `mapstructure:"pytest_path" required:"false" cty:"pytest_path" hcl:"pytest_path"`
 	Sudo       *bool    `mapstructure:"sudo" required:"false" cty:"sudo" hcl:"sudo"`
 	SudoUser   *string  `mapstructure:"sudo_user" required:"false" cty:"sudo_user" hcl:"sudo_user"`
@@ -40,7 +40,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"keyword":     &hcldec.AttrSpec{Name: "keyword", Type: cty.String, Required: false},
 		"local":       &hcldec.AttrSpec{Name: "local", Type: cty.Bool, Required: false},
 		"marker":      &hcldec.AttrSpec{Name: "marker", Type: cty.String, Required: false},
-		"processes":   &hcldec.AttrSpec{Name: "processes", Type: cty.Number, Required: false},
+		"parallel":    &hcldec.AttrSpec{Name: "parallel", Type: cty.Bool, Required: false},
 		"pytest_path": &hcldec.AttrSpec{Name: "pytest_path", Type: cty.String, Required: false},
 		"sudo":        &hcldec.AttrSpec{Name: "sudo", Type: cty.Bool, Required: false},
 		"sudo_user":   &hcldec.AttrSpec{Name: "sudo_user", Type: cty.String, Required: false},
