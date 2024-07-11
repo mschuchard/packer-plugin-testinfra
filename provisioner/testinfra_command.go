@@ -10,7 +10,6 @@ import (
 	"os"
 	"os/exec"
 	"slices"
-	"strconv"
 	"strings"
 
 	"github.com/hashicorp/packer-plugin-sdk/packer"
@@ -178,9 +177,10 @@ func (provisioner *Provisioner) determineExecCmd() (*exec.Cmd, *packer.RemoteCmd
 	if len(marker) > 0 {
 		args = append(args, "-m", fmt.Sprintf("\"%s\"", marker))
 	}
-	// processes
-	if provisioner.config.Processes > 0 {
-		args = append(args, "-n", strconv.Itoa(provisioner.config.Processes))
+	// parallel
+	if provisioner.config.Parallel {
+		// 1.22: args = slices.Concat
+		args = append(args, "-n", "auto")
 	}
 	// sudo
 	if provisioner.config.Sudo {
