@@ -176,6 +176,12 @@ func (provisioner *Provisioner) Prepare(raws ...interface{}) error {
 
 	// verbose parameter
 	if provisioner.config.Verbose > 0 {
+		// validate value does not exceed maximum
+		if provisioner.config.Verbose > 4 {
+			log.Printf("verbose parameter value was set to value higher than 4 and will therefore be reset to the maximum value of 4")
+			provisioner.config.Verbose = 4
+		}
+
 		log.Printf("pytest will execute with verbose enabled at level %d", provisioner.config.Verbose)
 	}
 
