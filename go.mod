@@ -1,8 +1,6 @@
 module github.com/mschuchard/packer-plugin-testinfra
 
-go 1.21.0
-
-toolchain go1.21.8
+go 1.21
 
 replace github.com/zclconf/go-cty => github.com/nywilken/go-cty v1.13.3
 

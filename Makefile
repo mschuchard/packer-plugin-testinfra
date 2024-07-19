@@ -17,7 +17,7 @@ unit:
 
 accept: install
 	# start vbox machine for ssh communicator testing
-	@PACKER_ACC=1 go test -v ./provisioner/testinfra_acceptance_test.go -timeout=5m
+	@PACKER_ACC=1 go test -v ./provisioner/testinfra_acceptance_test.go -timeout=1m
 
 install-packer-sdc:
 	@go install github.com/hashicorp/packer-plugin-sdk/cmd/packer-sdc@latest
@@ -27,8 +27,7 @@ install-packer-sdc:
 #	@/bin/sh -c "[ -d docs ] && zip -r docs.zip docs/"
 
 plugin-check: install-packer-sdc build
-	export PATH="${PATH}:$(shell go env GOPATH)/bin"
-	@packer-sdc plugin-check packer-plugin-testinfra
+	@~/go/bin/packer-sdc plugin-check packer-plugin-testinfra
 
 generate: install-packer-sdc
 	export PATH="${PATH}:$(shell go env GOPATH)/bin"
