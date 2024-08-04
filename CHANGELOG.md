@@ -1,4 +1,4 @@
-### 1.4.0 (Next)
+### 1.4.0
 - Support multiple levels of verbose (argument bool to int).
 - Update parallel execution behavior (argument name change and int to bool).
 

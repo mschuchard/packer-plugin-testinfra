@@ -1,5 +1,6 @@
 before:
   hooks:
+  - go mod tidy
     # As part of the release doc files are included as a separate deliverable for
     # consumption by Packer.io. To include a separate docs.zip uncomment the following command.
     #- make ci-release-docs
