@@ -5,16 +5,19 @@ import (
 	"os"
 
 	"github.com/hashicorp/packer-plugin-sdk/plugin"
+	"github.com/hashicorp/packer-plugin-sdk/version"
 
 	"github.com/mschuchard/packer-plugin-testinfra/provisioner"
-	"github.com/mschuchard/packer-plugin-testinfra/version"
 )
 
 func main() {
+	// initialize plugin version
+	pluginVersion := version.InitializePluginVersion("1.4.0", "")
+
 	// initialize packer plugin set for testinfra
 	packerPluginSet := plugin.NewSet()
 	packerPluginSet.RegisterProvisioner(plugin.DEFAULT_NAME, new(testinfra.Provisioner))
-	packerPluginSet.SetVersion(version.PluginVersion)
+	packerPluginSet.SetVersion(pluginVersion)
 
 	// execute packer plugin for testinfra
 	if err := packerPluginSet.Run(); err != nil {
