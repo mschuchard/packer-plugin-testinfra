@@ -18,7 +18,7 @@ func TestProvisioner(test *testing.T) {
 	// initialize acceptance test config struct
 	testCase := &acctest.PluginTestCase{
 		Name:     "testinfra_provisioner_test",
-		Init:     true,
+		Init:     false,
 		Setup:    func() error { return nil },
 		Template: testTemplate,
 		Type:     "provisioner",

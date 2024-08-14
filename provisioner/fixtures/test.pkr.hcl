@@ -6,10 +6,10 @@ packer {
       source  = "github.com/hashicorp/docker"
       version = "~> 1.0.0"
     }
-    virtualbox = {
+    /*virtualbox = {
       version = "~> 1.0.0"
       source  = "github.com/hashicorp/virtualbox"
-    }
+    }*/
   }
 }
 
@@ -33,12 +33,12 @@ build {
 
   provisioner "testinfra" {
     pytest_path = "/usr/local/bin/py.test"
-    test_files  = ["${path.cwd}/fixtures/test.py", "${path.cwd}/fixtures/test.py"]
+    test_files  = ["${path.root}/fixtures/test.py", "${path.root}/fixtures/test.py"]
   }
 }
 
 # use ubuntu/jammy64 vagrant box with vbox provider
-source "virtualbox-vm" "ubuntu" {
+/*source "virtualbox-vm" "ubuntu" {
   guest_additions_mode = "disable"
   skip_export          = true
   ssh_host             = "127.0.0.1"
@@ -49,7 +49,7 @@ source "virtualbox-vm" "ubuntu" {
 
 # test local execution
 # TODO: https://github.com/hashicorp/packer-plugin-virtualbox/issues/77
-/*build {
+build {
   sources = ["source.virtualbox-vm.ubuntu"]
 
   provisioner "testinfra" {
