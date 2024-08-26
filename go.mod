@@ -1,11 +1,11 @@
 module github.com/mschuchard/packer-plugin-testinfra
 
-go 1.21
+go 1.22
 
 replace github.com/zclconf/go-cty => github.com/nywilken/go-cty v1.13.3
 
 require (
-	github.com/hashicorp/hcl/v2 v2.21.0
+	github.com/hashicorp/hcl/v2 v2.22.0
 	github.com/hashicorp/packer-plugin-sdk v0.5.4
 	github.com/zclconf/go-cty v1.13.3
 )
