@@ -147,7 +147,7 @@ func (provisioner *Provisioner) determineExecCmd() (*exec.Cmd, *packer.RemoteCmd
 			return nil, nil, err
 		}
 
-		args = append(args, communication...)
+		args = slices.Concat(args, communication)
 	}
 
 	// assign mandatory populated values
@@ -179,7 +179,6 @@ func (provisioner *Provisioner) determineExecCmd() (*exec.Cmd, *packer.RemoteCmd
 	}
 	// parallel
 	if provisioner.config.Parallel {
-		// 1.22: args = slices.Concat
 		args = append(args, "-n", "auto")
 	}
 	// sudo
@@ -205,8 +204,7 @@ func (provisioner *Provisioner) determineExecCmd() (*exec.Cmd, *packer.RemoteCmd
 	}
 
 	// testfiles
-	args = append(args, provisioner.config.TestFiles...)
-	// 1.22: args = slices.Concat(args, provisioner.config.TestFiles)
+	args = slices.Concat(args, provisioner.config.TestFiles)
 
 	// return packer remote command for local testing on instance
 	if localExec {
