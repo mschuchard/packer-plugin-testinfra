@@ -209,7 +209,7 @@ func (provisioner *Provisioner) Provision(ctx context.Context, ui packer.Ui, com
 	provisioner.config.ctx.Data = generatedData
 
 	// prepare testinfra test command
-	cmd, localCmd, err := provisioner.determineExecCmd()
+	cmd, localCmd, err := provisioner.determineExecCmd(ui)
 	if err != nil {
 		ui.Error("the execution command could not be accurately determined")
 		return err

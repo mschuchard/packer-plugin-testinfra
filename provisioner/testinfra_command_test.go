@@ -4,10 +4,15 @@ import (
 	"fmt"
 	"slices"
 	"testing"
+
+	"github.com/hashicorp/packer-plugin-sdk/packer"
 )
 
 // test provisioner determineExecCmd properly determines execution command
 func TestProvisionerDetermineExecCmd(test *testing.T) {
+	// initialize simple test ui
+	ui := packer.TestUi(test)
+
 	// test minimal config with local execution
 	var provisioner = &Provisioner{
 		config: Config{
@@ -17,7 +22,7 @@ func TestProvisionerDetermineExecCmd(test *testing.T) {
 		},
 	}
 
-	execCmd, localCmd, err := provisioner.determineExecCmd()
+	execCmd, localCmd, err := provisioner.determineExecCmd(ui)
 	if err != nil {
 		test.Errorf("determineExecCmd function failed to determine execution commands for local execution minimal config: %v", err)
 	}
@@ -47,7 +52,7 @@ func TestProvisionerDetermineExecCmd(test *testing.T) {
 
 	provisioner.generatedData = generatedData
 
-	execCmd, localCmd, err = provisioner.determineExecCmd()
+	execCmd, localCmd, err = provisioner.determineExecCmd(ui)
 	if err != nil {
 		test.Errorf("determineExecCmd function failed to determine execution command for basic config with SSH communicator: %s", err)
 	}

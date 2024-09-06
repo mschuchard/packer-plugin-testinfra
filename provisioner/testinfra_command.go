@@ -134,16 +134,16 @@ func packerRemoteCmd(localCmd *packer.RemoteCmd, installCmd []string, comm packe
 }
 
 // determine and return execution command for testinfra
-func (provisioner *Provisioner) determineExecCmd() (*exec.Cmd, *packer.RemoteCmd, error) {
+func (provisioner *Provisioner) determineExecCmd(ui packer.Ui) (*exec.Cmd, *packer.RemoteCmd, error) {
 	// declare args
 	var args []string
 
 	// assign determined communication string
 	localExec := provisioner.config.Local
 	if !localExec {
-		communication, err := provisioner.determineCommunication()
+		communication, err := provisioner.determineCommunication(ui)
 		if err != nil {
-			log.Print("could not accurately determine communication configuration")
+			ui.Say("could not accurately determine communication configuration")
 			return nil, nil, err
 		}
 
@@ -154,7 +154,7 @@ func (provisioner *Provisioner) determineExecCmd() (*exec.Cmd, *packer.RemoteCmd
 	// pytest path
 	pytestPath, err := interpolate.Render(provisioner.config.PytestPath, &provisioner.config.ctx)
 	if err != nil {
-		log.Printf("error parsing config for PytestPath: %v", err.Error())
+		ui.Sayf("error parsing config for PytestPath: %v", err.Error())
 		return nil, nil, err
 	}
 
@@ -162,7 +162,7 @@ func (provisioner *Provisioner) determineExecCmd() (*exec.Cmd, *packer.RemoteCmd
 	// keyword
 	keyword, err := interpolate.Render(provisioner.config.Keyword, &provisioner.config.ctx)
 	if err != nil {
-		log.Printf("error parsing config for Keyword: %v", err.Error())
+		ui.Sayf("error parsing config for Keyword: %v", err.Error())
 		return nil, nil, err
 	}
 	if len(keyword) > 0 {
@@ -171,7 +171,7 @@ func (provisioner *Provisioner) determineExecCmd() (*exec.Cmd, *packer.RemoteCmd
 	// marker
 	marker, err := interpolate.Render(provisioner.config.Marker, &provisioner.config.ctx)
 	if err != nil {
-		log.Printf("error parsing config for Marker: %v", err.Error())
+		ui.Sayf("error parsing config for Marker: %v", err.Error())
 		return nil, nil, err
 	}
 	if len(marker) > 0 {

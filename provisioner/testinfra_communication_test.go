@@ -6,10 +6,15 @@ import (
 	"regexp"
 	"slices"
 	"testing"
+
+	"github.com/hashicorp/packer-plugin-sdk/packer"
 )
 
 // test provisioner determineCommunication properly determines communication strings
 func TestProvisionerDetermineCommunication(test *testing.T) {
+	// initialize simple test ui
+	ui := packer.TestUi(test)
+
 	var provisioner Provisioner
 
 	// test ssh with httpaddr and password
@@ -27,7 +32,7 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
 
 	provisioner.generatedData = generatedData
 
-	communication, err := provisioner.determineCommunication()
+	communication, err := provisioner.determineCommunication(ui)
 	if err != nil {
 		test.Errorf("determineCommunication function failed to determine ssh: %s", err)
 	}
@@ -39,7 +44,7 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
 	delete(generatedData, "Password")
 	provisioner.generatedData = generatedData
 
-	communication, err = provisioner.determineCommunication()
+	communication, err = provisioner.determineCommunication(ui)
 	if err != nil {
 		test.Errorf("determineCommunication function failed to determine ssh: %s", err)
 	}
@@ -52,7 +57,7 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
 	generatedData["SSHAgentAuth"] = true
 	provisioner.generatedData = generatedData
 
-	communication, err = provisioner.determineCommunication()
+	communication, err = provisioner.determineCommunication(ui)
 	if err != nil {
 		test.Errorf("determineCommunication function failed to determine ssh: %s", err)
 	}
@@ -73,7 +78,7 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
 
 	provisioner.generatedData = generatedData
 
-	communication, err = provisioner.determineCommunication()
+	communication, err = provisioner.determineCommunication(ui)
 	if err != nil {
 		test.Errorf("determineCommunication function failed to determine winrm: %s", err)
 	}
@@ -85,7 +90,7 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
 	delete(generatedData, "Password")
 	provisioner.generatedData = generatedData
 
-	_, err = provisioner.determineCommunication()
+	_, err = provisioner.determineCommunication(ui)
 	if err == nil {
 		test.Errorf("determineCommunication function did not fail on no available password")
 	}
@@ -102,7 +107,7 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
 
 	provisioner.generatedData = generatedData
 
-	communication, err = provisioner.determineCommunication()
+	communication, err = provisioner.determineCommunication(ui)
 	if err != nil {
 		test.Errorf("determineCommunication function failed to determine docker: %s", err)
 	}
@@ -122,7 +127,7 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
 
 	provisioner.generatedData = generatedData
 
-	communication, err = provisioner.determineCommunication()
+	communication, err = provisioner.determineCommunication(ui)
 	if err != nil {
 		test.Errorf("determineCommunication function failed to determine podman: %s", err)
 	}
@@ -142,7 +147,7 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
 
 	provisioner.generatedData = generatedData
 
-	communication, err = provisioner.determineCommunication()
+	communication, err = provisioner.determineCommunication(ui)
 	if err != nil {
 		test.Errorf("determineCommunication function failed to determine lxc: %s", err)
 	}
@@ -162,7 +167,7 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
 
 	provisioner.generatedData = generatedData
 
-	_, err = provisioner.determineCommunication()
+	_, err = provisioner.determineCommunication(ui)
 	if err == nil {
 		test.Errorf("determineCommunication function did not fail on unknown connection type")
 	}

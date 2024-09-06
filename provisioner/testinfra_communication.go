@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer-plugin-sdk/tmp"
 )
 
@@ -18,7 +19,7 @@ const (
 )
 
 // determine and return appropriate communication string for pytest/testinfra
-func (provisioner *Provisioner) determineCommunication() ([]string, error) {
+func (provisioner *Provisioner) determineCommunication(ui packer.Ui) ([]string, error) {
 	// declare communication args
 	var args []string
 
@@ -26,7 +27,7 @@ func (provisioner *Provisioner) determineCommunication() ([]string, error) {
 	connectionType := provisioner.generatedData["ConnType"].(string)
 
 	// determine communication string by packer connection type
-	log.Printf("testinfra communicating via %s connection type", connectionType)
+	ui.Sayf("testinfra communicating via %s connection type", connectionType)
 
 	// determine communication based on connection type
 	switch connectionType {
@@ -79,7 +80,7 @@ func (provisioner *Provisioner) determineCommunication() ([]string, error) {
 
 			// no winrm password available
 			if !ok || len(winrmPassword) == 0 {
-				log.Print("winrm communicator password could not be determined from available Packer data")
+				ui.Say("winrm communicator password could not be determined from available Packer data")
 				return nil, errors.New("unknown winrm password")
 			}
 		}
@@ -90,14 +91,14 @@ func (provisioner *Provisioner) determineCommunication() ([]string, error) {
 		// determine instanceid
 		instanceID, ok := provisioner.generatedData["ID"].(string)
 		if !ok || len(instanceID) == 0 {
-			log.Print("instance id could not be determined")
+			ui.Say("instance id could not be determined")
 			return nil, errors.New("unknown instance id")
 		}
 
 		// append args with container connection backend information (instanceid)
 		args = append(args, fmt.Sprintf("--hosts=%s://%s", connectionType, instanceID))
 	default:
-		log.Printf("communication backend with machine image is not supported, and was resolved to '%s'", connectionType)
+		ui.Sayf("communication backend with machine image is not supported, and was resolved to '%s'", connectionType)
 		return nil, errors.New("unsupported communication type")
 	}
 
