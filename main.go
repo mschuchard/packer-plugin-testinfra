@@ -12,7 +12,7 @@ import (
 
 func main() {
 	// initialize plugin version
-	pluginVersion := version.InitializePluginVersion("1.4.0", "")
+	pluginVersion := version.NewPluginVersion("1.4.1", "", "")
 
 	// initialize packer plugin set for testinfra
 	packerPluginSet := plugin.NewSet()

@@ -9,9 +9,9 @@ builds:
   - CGO_ENABLED=0
   mod_timestamp: '{{ .CommitTimestamp }}'
   flags:
-  - -trimpath #removes all file system paths from the compiled executable
+  - -trimpath # removes all file system paths from the compiled executable
   ldflags:
-  - '-s -w -X {{ .ModulePath }}/version.Version={{.Version}}'
+  - '-s -w'
   goos:
   - windows
   - linux
@@ -53,5 +53,3 @@ release:
   # To include a separate docs.zip uncomment the extra_files config and the docs.zip command hook above.
   #extra_files:
   #- glob: ./docs.zip
-changelog:
-  skip: true
