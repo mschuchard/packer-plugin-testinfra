@@ -131,7 +131,7 @@ func (provisioner *Provisioner) Prepare(raws ...interface{}) error {
 				log.Print("testinfra installation existence verified")
 			} else {
 				log.Print("testinfra installation not found by specified Pytest installation")
-				return errors.New("testinfra not found")
+				return errors.New("testinfra installation not found")
 			}
 
 			if provisioner.config.Parallel {
@@ -146,7 +146,7 @@ func (provisioner *Provisioner) Prepare(raws ...interface{}) error {
 		} else {
 			// pytest returned no stdout
 			log.Print("pytest help command returned no stdout; this indicates an issue with the specified Pytest installation")
-			return errors.New("pytest installation issue")
+			return errors.New("pytest installation issue occurred")
 		}
 	}
 
@@ -224,7 +224,7 @@ func (provisioner *Provisioner) Provision(ctx context.Context, ui packer.Ui, com
 	} else {
 		// somehow we either returned both commands or neither or something really weird for one or both
 		ui.Errorf("incorrectly determined remote command (%s) and/or command local to instance (%s); please report as bug with this log information", cmd.String(), localCmd.Command)
-		return errors.New("failed command determination")
+		return errors.New("failed pytest command determination")
 	}
 	if err != nil {
 		ui.Error("the Pytest Testinfra execution failed")
