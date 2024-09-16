@@ -20,7 +20,6 @@ import (
 func execCmd(cmd *exec.Cmd, ui packer.Ui) error {
 	// merge in env settings
 	cmd.Env = os.Environ()
-	log.Printf("complete Testinfra remote command is: %s", cmd.String())
 
 	// prepare stdout and stderr pipes
 	stdout, err := cmd.StdoutPipe()
@@ -81,7 +80,6 @@ func execCmd(cmd *exec.Cmd, ui packer.Ui) error {
 func packerRemoteCmd(localCmd *packer.RemoteCmd, installCmd []string, comm packer.Communicator, ui packer.Ui) error {
 	// initialize context and log command
 	ctx := context.Background()
-	log.Printf("complete Testinfra local command is: %s", localCmd.Command)
 
 	// install testinfra on temp packer instance
 	if len(installCmd) > 0 {

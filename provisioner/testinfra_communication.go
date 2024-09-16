@@ -43,6 +43,7 @@ func (provisioner *Provisioner) determineCommunication(ui packer.Ui) ([]string, 
 		if err != nil {
 			return nil, err
 		}
+		log.Print("determined ssh authentication information")
 
 		// determine additional args for ssh based on authentication information
 		switch sshAuthType {
@@ -98,9 +99,11 @@ func (provisioner *Provisioner) determineCommunication(ui packer.Ui) ([]string, 
 		// append args with container connection backend information (instanceid)
 		args = append(args, fmt.Sprintf("--hosts=%s://%s", connectionType, instanceID))
 	default:
-		ui.Sayf("communication backend with machine image is not supported, and was resolved to '%s'", connectionType)
+		ui.Errorf("communication backend with machine image is not supported, and was resolved to '%s'", connectionType)
 		return nil, errors.New("unsupported communication type")
 	}
+
+	log.Printf("determined communicator argument as: %+q", args)
 
 	return args, nil
 }
@@ -147,6 +150,8 @@ func (provisioner *Provisioner) determineUserAddr() (string, string, error) {
 
 		httpAddr = fmt.Sprintf("%s:%d", ipaddress, port)
 	}
+
+	log.Print("determined communication user and connection endpoint")
 
 	return user, httpAddr, nil
 }

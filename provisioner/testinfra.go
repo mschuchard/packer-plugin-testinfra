@@ -197,6 +197,8 @@ func (provisioner *Provisioner) Prepare(raws ...interface{}) error {
 		}
 	}
 
+	log.Print("packer plugin testinfra validation complete")
+
 	return nil
 }
 
@@ -210,6 +212,13 @@ func (provisioner *Provisioner) Provision(ctx context.Context, ui packer.Ui, com
 
 	// prepare testinfra test command
 	cmd, localCmd, err := provisioner.determineExecCmd(ui)
+	if cmd != nil {
+		log.Printf("complete Testinfra remote command is: %s", cmd.String())
+	} else {
+		if localCmd != nil {
+			log.Printf("complete Testinfra local command is: %s", localCmd.Command)
+		}
+	}
 	if err != nil {
 		ui.Error("the execution command could not be accurately determined")
 		return err
@@ -230,6 +239,8 @@ func (provisioner *Provisioner) Provision(ctx context.Context, ui packer.Ui, com
 		ui.Error("the Pytest Testinfra execution failed")
 		return err
 	}
+
+	ui.Say("packer plugin testinfra provisioning complete")
 
 	return nil
 }
