@@ -47,7 +47,7 @@ func (provisioner *Provisioner) uploadFiles(comm packer.Communicator, files []st
 		}
 	}
 
-	// return most recent error
-	// the logger displays the relevant debugging information, and this return is useful only in a nil comparable context, and not for specific error types
+	// return collection of errors
+	// the logger displays the relevant debugging information, and this return is useful only in a nil comparable context, and not for specific error types UNLESS only one error is returned
 	return err
 }

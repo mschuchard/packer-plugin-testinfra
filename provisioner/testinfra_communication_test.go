@@ -173,7 +173,36 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
 	}
 }
 
-// test provisioner determineSSHAuth properly determines ssh private key file location
+// test provisioner determineUserAddr properly determines user and instance address
+func TestDetermineUserAddr(test *testing.T) {
+	var provisioner Provisioner
+
+	// dummy up fake user and address data
+	generatedData := map[string]interface{}{
+		"User": "me",
+		"Host": "192.168.0.1",
+		"Port": int64(22),
+	}
+
+	provisioner.generatedData = generatedData
+
+	user, httpAddr, err := provisioner.determineUserAddr()
+	if err != nil {
+		test.Error("determineUserAddr failed to determine user and address")
+		test.Error(err)
+	}
+	if user != generatedData["User"] {
+		test.Error("user was incorrectly determined")
+		test.Errorf("expected: %s, actual: %s", generatedData["User"], user)
+	}
+	expectedHttpAddr := fmt.Sprintf("%s:%d", generatedData["Host"], generatedData["Port"])
+	if httpAddr != expectedHttpAddr {
+		test.Error("address was incorrectly determined")
+		test.Errorf("expected: %s, actual: %s", expectedHttpAddr, httpAddr)
+	}
+}
+
+// test provisioner determineSSHAuth properly determines authentication information
 func TestProvisionerDetermineSSHAuth(test *testing.T) {
 	var provisioner Provisioner
 
