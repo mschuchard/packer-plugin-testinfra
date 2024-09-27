@@ -2,6 +2,7 @@ package testinfra
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -16,14 +17,20 @@ func (provisioner *Provisioner) uploadFiles(comm packer.Communicator, files []st
 	// iterate through files to transfer
 	for _, file := range files {
 		// validate file existence
-		if _, err = os.Stat(file); err != nil {
+		if _, nestedErr := os.Stat(file); nestedErr != nil {
+			// join error into collection
+			err = errors.Join(err, nestedErr)
+
 			log.Printf("the file does not exist at path: %s, and will not be transferred", file)
 			continue
 		}
 
 		// determine file content (io.Reader) from file path (string)
-		var fileBytes []byte
-		if fileBytes, err = os.ReadFile(file); err != nil {
+		fileBytes, nestedErr := os.ReadFile(file)
+		if nestedErr != nil {
+			// join error into collection
+			err = errors.Join(err, nestedErr)
+
 			log.Printf("the file at path '%s' could not be read, and will not be transferred", file)
 			continue
 		}
@@ -31,7 +38,10 @@ func (provisioner *Provisioner) uploadFiles(comm packer.Communicator, files []st
 
 		// upload file to destination dir
 		destination := fmt.Sprintf("%s/%s", destDir, file)
-		if err = comm.Upload(destination, fileIo, nil); err != nil {
+		if nestedErr := comm.Upload(destination, fileIo, nil); nestedErr != nil {
+			// join error into collection
+			err = errors.Join(err, nestedErr)
+
 			log.Printf("the file at %s could not be transferred to %s on the temporary Packer instance", file, destination)
 			continue
 		}
