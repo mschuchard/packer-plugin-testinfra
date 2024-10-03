@@ -2,7 +2,6 @@ package main
 
 import (
 	"log"
-	"os"
 
 	"github.com/hashicorp/packer-plugin-sdk/plugin"
 	"github.com/hashicorp/packer-plugin-sdk/version"
@@ -22,6 +21,5 @@ func main() {
 	// execute packer plugin for testinfra
 	if err := packerPluginSet.Run(); err != nil {
 		log.Fatalf("Packer Plugin Testinfra failure: %s", err.Error())
-		os.Exit(1)
 	}
 }
