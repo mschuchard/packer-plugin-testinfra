@@ -23,10 +23,13 @@ func (provisioner *Provisioner) determineCommunication(ui packer.Ui) ([]string, 
 	// declare communication args
 	var args []string
 
-	// parse generated data for required values
-	connectionType := provisioner.generatedData["ConnType"].(string)
-
 	// determine communication string by packer connection type
+	connectionType, ok := provisioner.generatedData["ConnType"].(string)
+	if !ok {
+		ui.Error("packer is unable to resolve the communicator connection type")
+		return nil, errors.New("unknown communicator connection type")
+	}
+
 	ui.Sayf("testinfra communicating via %s connection type", connectionType)
 
 	// determine communication based on connection type
@@ -81,7 +84,7 @@ func (provisioner *Provisioner) determineCommunication(ui packer.Ui) ([]string, 
 
 			// no winrm password available
 			if !ok || len(winrmPassword) == 0 {
-				ui.Say("winrm communicator password could not be determined from available Packer data")
+				ui.Error("winrm communicator password could not be determined from available Packer data")
 				return nil, errors.New("unknown winrm password")
 			}
 		}
@@ -92,7 +95,7 @@ func (provisioner *Provisioner) determineCommunication(ui packer.Ui) ([]string, 
 		// determine instanceid
 		instanceID, ok := provisioner.generatedData["ID"].(string)
 		if !ok || len(instanceID) == 0 {
-			ui.Say("instance id could not be determined")
+			ui.Error("instance id could not be determined")
 			return nil, errors.New("unknown instance id")
 		}
 
