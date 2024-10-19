@@ -1,4 +1,4 @@
-### 1.4.1 (Next)
+### 1.4.1
 - Miscellaneous code, build, and logging improvements
 
 ### 1.4.0
