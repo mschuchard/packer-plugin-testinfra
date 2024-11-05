@@ -67,13 +67,12 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
 
 	// test winrm with empty host, port, and winrmpassword
 	generatedData = map[string]interface{}{
-		"ConnType":       "winrm",
-		"User":           "me",
-		"Password":       "password",
-		"Host":           "",
-		"Port":           int64(5986),
-		"PackerHTTPAddr": "192.168.0.1:5986",
-		"ID":             "1234567890",
+		"ConnType": "winrm",
+		"User":     "me",
+		"Password": "password",
+		"Host":     "192.168.0.1",
+		"Port":     int64(5986),
+		"ID":       "1234567890",
 	}
 
 	provisioner.generatedData = generatedData
@@ -82,7 +81,7 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
 	if err != nil {
 		test.Errorf("determineCommunication function failed to determine winrm: %s", err)
 	}
-	if !slices.Equal(communication, []string{fmt.Sprintf("--hosts=winrm://%s:%s@%s", generatedData["User"], generatedData["Password"], generatedData["PackerHTTPAddr"])}) {
+	if !slices.Equal(communication, []string{fmt.Sprintf("--hosts=winrm://%s:%s@%s:%d", generatedData["User"], generatedData["Password"], generatedData["Host"], generatedData["Port"])}) {
 		test.Errorf("communication string slice for winrm incorrectly determined: %v", communication)
 	}
 
@@ -186,7 +185,7 @@ func TestDetermineUserAddr(test *testing.T) {
 
 	provisioner.generatedData = generatedData
 
-	user, httpAddr, err := provisioner.determineUserAddr()
+	user, httpAddr, err := provisioner.determineUserAddr("ssh")
 	if err != nil {
 		test.Error("determineUserAddr failed to determine user and address")
 		test.Error(err)

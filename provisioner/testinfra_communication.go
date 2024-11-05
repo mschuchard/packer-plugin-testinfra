@@ -36,7 +36,7 @@ func (provisioner *Provisioner) determineCommunication(ui packer.Ui) ([]string, 
 	switch connectionType {
 	case "ssh":
 		// assign user and host address
-		user, httpAddr, err := provisioner.determineUserAddr()
+		user, httpAddr, err := provisioner.determineUserAddr(connectionType)
 		if err != nil {
 			return nil, err
 		}
@@ -71,7 +71,7 @@ func (provisioner *Provisioner) determineCommunication(ui packer.Ui) ([]string, 
 		}
 	case "winrm":
 		// assign user and host address
-		user, httpAddr, err := provisioner.determineUserAddr()
+		user, httpAddr, err := provisioner.determineUserAddr(connectionType)
 		if err != nil {
 			return nil, err
 		}
@@ -112,9 +112,24 @@ func (provisioner *Provisioner) determineCommunication(ui packer.Ui) ([]string, 
 }
 
 // determine and return user and host address
-func (provisioner *Provisioner) determineUserAddr() (string, string, error) {
-	// determine user
-	user, ok := provisioner.generatedData["SSHUsername"].(string)
+func (provisioner *Provisioner) determineUserAddr(connectionType string) (string, string, error) {
+	// ssh and winrm provisioner generated data maps
+	genDataMap := map[string]map[string]string{
+		"ssh": {
+			"user": "SSHUsername",
+			"host": "placeholder",
+			"port": "SSHPort",
+		},
+		"winrm": {
+			"user": "WinRMUser",
+			"host": "WinRMHost",
+			"port": "WinRMPort",
+		},
+	}
+
+	// determine user based on connection protocol
+	user, ok := provisioner.generatedData[genDataMap[connectionType]["user"]].(string)
+	// did we determine a user?
 	if !ok || len(user) == 0 {
 		// fallback to general user (usually packer)
 		user, ok = provisioner.generatedData["User"].(string)
@@ -125,34 +140,32 @@ func (provisioner *Provisioner) determineUserAddr() (string, string, error) {
 		}
 	}
 
-	// determine host address and port
-	var httpAddr string
-	ipaddress, ok := provisioner.generatedData["Host"].(string)
+	// determine host address and port based on connection protocol
+	ipaddress, ok := provisioner.generatedData[genDataMap[connectionType]["host"]].(string)
 	if !ok || len(ipaddress) == 0 {
-		// this is more likely to be a file upload staging server, but fallback anyway
-		httpAddr, ok = provisioner.generatedData["PackerHTTPAddr"].(string)
+		// fallback to general host information
+		ipaddress, ok = provisioner.generatedData["Host"].(string)
 
-		if !ok || len(httpAddr) == 0 {
-			log.Print("host address and port could not be determined")
+		if !ok || len(ipaddress) == 0 {
+			log.Print("host address could not be determined")
 			return "", "", errors.New("unknown host")
 		}
-	} else {
-		// valid ip address so now determine port
-		port, ok := provisioner.generatedData["SSHPort"].(int64)
-
-		// fall back to general port
-		if !ok || port == int64(0) {
-			port = provisioner.generatedData["Port"].(int64)
-
-			//if !ok || port == int64(0) {
-			if port == int64(0) {
-				log.Print("host port could not be determined")
-				return "", "", errors.New("unknown host port")
-			}
-		}
-
-		httpAddr = fmt.Sprintf("%s:%d", ipaddress, port)
 	}
+	// valid ip address so now determine port
+	port, ok := provisioner.generatedData[genDataMap[connectionType]["port"]].(int64)
+	if !ok || port == int64(0) {
+		// fall back to general port
+		port = provisioner.generatedData["Port"].(int64)
+
+		//if !ok || port == int64(0) {
+		if port == int64(0) {
+			log.Print("host port could not be determined")
+			return "", "", errors.New("unknown host port")
+		}
+	}
+
+	// string format connection endpoint
+	httpAddr := fmt.Sprintf("%s:%d", ipaddress, port)
 
 	log.Print("determined communication user and connection endpoint")
 
