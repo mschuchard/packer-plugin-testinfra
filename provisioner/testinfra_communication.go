@@ -89,8 +89,21 @@ func (provisioner *Provisioner) determineCommunication(ui packer.Ui) ([]string, 
 			}
 		}
 
+		// format string for testinfra connection backend setting
+		connectionBackend := fmt.Sprintf("--hosts=winrm://%s:%s@%s", user, winrmPassword, httpAddr)
+
+		// modify connection backend for ssl settings
+		if useSSL, ok := provisioner.generatedData["WinRMUseSSL"].(bool); ok && !useSSL {
+			// disable ssl
+			connectionBackend += "?no_ssl=true"
+		}
+		if insecure, _ := provisioner.generatedData["WinRMInsecure"].(bool); insecure {
+			// do not verify ssl
+			connectionBackend += "?no_verify_ssl=true"
+		}
+
 		// append args with winrm connection backend information (user, password, host, port)
-		args = append(args, fmt.Sprintf("--hosts=winrm://%s:%s@%s", user, winrmPassword, httpAddr))
+		args = append(args, connectionBackend)
 	case "docker", "podman", "lxc":
 		// determine instanceid
 		instanceID, ok := provisioner.generatedData["ID"].(string)
