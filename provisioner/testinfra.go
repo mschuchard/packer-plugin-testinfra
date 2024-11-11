@@ -61,11 +61,9 @@ func (provisioner *Provisioner) Prepare(raws ...interface{}) error {
 	if len(provisioner.config.PytestPath) == 0 {
 		log.Print("setting PytestPath to default 'py.test'")
 		provisioner.config.PytestPath = "py.test"
-	} else { // verify py.test exists at supplied path
-		if _, err := os.Stat(provisioner.config.PytestPath); err != nil {
-			log.Printf("the Pytest executable does not exist at: %s", provisioner.config.PytestPath)
-			return err
-		}
+	} else if _, err := os.Stat(provisioner.config.PytestPath); err != nil { // verify py.test exists at supplied path
+		log.Printf("the Pytest executable does not exist at: %s", provisioner.config.PytestPath)
+		return err
 	}
 
 	// log optional arguments
@@ -214,10 +212,8 @@ func (provisioner *Provisioner) Provision(ctx context.Context, ui packer.Ui, com
 	cmd, localCmd, err := provisioner.determineExecCmd(ui)
 	if cmd != nil {
 		log.Printf("complete Testinfra remote command is: %s", cmd.String())
-	} else {
-		if localCmd != nil {
-			log.Printf("complete Testinfra local command is: %s", localCmd.Command)
-		}
+	} else if localCmd != nil {
+		log.Printf("complete Testinfra local command is: %s", localCmd.Command)
 	}
 	if err != nil {
 		ui.Error("the execution command could not be accurately determined")

@@ -182,12 +182,10 @@ func (provisioner *Provisioner) determineExecCmd(ui packer.Ui) (*exec.Cmd, *pack
 	// sudo
 	if provisioner.config.Sudo {
 		args = append(args, "--sudo")
-	} else {
-		// sudo_user
-		if len(provisioner.config.SudoUser) > 0 {
-			args = append(args, fmt.Sprintf("\"--sudo-user=%s\"", provisioner.config.SudoUser))
-		}
+	} else if len(provisioner.config.SudoUser) > 0 { // sudo_user
+		args = append(args, fmt.Sprintf("\"--sudo-user=%s\"", provisioner.config.SudoUser))
 	}
+
 	// verbose
 	if provisioner.config.Verbose > 0 {
 		// initialize arg
