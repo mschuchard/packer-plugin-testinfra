@@ -67,12 +67,14 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
 
 	// test winrm with empty host, port, and winrmpassword
 	generatedData = map[string]interface{}{
-		"ConnType": "winrm",
-		"User":     "me",
-		"Password": "password",
-		"Host":     "192.168.0.1",
-		"Port":     int64(5986),
-		"ID":       "1234567890",
+		"ConnType":      "winrm",
+		"User":          "me",
+		"Password":      "password",
+		"Host":          "192.168.0.1",
+		"Port":          int64(5986),
+		"ID":            "1234567890",
+		"WinRMUseSSL":   false,
+		"WinRMInsecure": true,
 	}
 
 	provisioner.generatedData = generatedData
@@ -81,7 +83,7 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
 	if err != nil {
 		test.Errorf("determineCommunication function failed to determine winrm: %s", err)
 	}
-	if !slices.Equal(communication, []string{fmt.Sprintf("--hosts=winrm://%s:%s@%s:%d", generatedData["User"], generatedData["Password"], generatedData["Host"], generatedData["Port"])}) {
+	if !slices.Equal(communication, []string{fmt.Sprintf("--hosts=winrm://%s:%s@%s:%d?no_ssl=true&no_verify_ssl=true", generatedData["User"], generatedData["Password"], generatedData["Host"], generatedData["Port"])}) {
 		test.Errorf("communication string slice for winrm incorrectly determined: %v", communication)
 	}
 
