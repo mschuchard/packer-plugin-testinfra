@@ -137,7 +137,7 @@ func (provisioner *Provisioner) determineUserAddr(connectionType string) (string
 	genDataMap := map[string]map[string]string{
 		"ssh": {
 			"user": "SSHUsername",
-			"host": "placeholder",
+			"host": "SSHHost",
 			"port": "SSHPort",
 		},
 		"winrm": {
@@ -149,7 +149,6 @@ func (provisioner *Provisioner) determineUserAddr(connectionType string) (string
 
 	// determine user based on connection protocol
 	user, ok := provisioner.generatedData[genDataMap[connectionType]["user"]].(string)
-	// did we determine a user?
 	if !ok || len(user) == 0 {
 		// fallback to general user (usually packer)
 		user, ok = provisioner.generatedData["User"].(string)
@@ -174,7 +173,7 @@ func (provisioner *Provisioner) determineUserAddr(connectionType string) (string
 	// valid ip address so now determine port
 	port, ok := provisioner.generatedData[genDataMap[connectionType]["port"]].(int64)
 	if !ok || port == int64(0) {
-		// fall back to general port
+		// fallback to general port
 		port = provisioner.generatedData["Port"].(int64)
 
 		//if !ok || port == int64(0) {
@@ -194,9 +193,8 @@ func (provisioner *Provisioner) determineUserAddr(connectionType string) (string
 
 // determine and return ssh authentication
 func (provisioner *Provisioner) determineSSHAuth() (SSHAuth, string, error) {
-	// assign ssh password preferably from sshpassword
+	// assign ssh password
 	sshPassword, ok := provisioner.generatedData["SSHPassword"].(string)
-
 	// otherwise retry with general password
 	if !ok || len(sshPassword) == 0 {
 		sshPassword, ok = provisioner.generatedData["Password"].(string)
@@ -206,16 +204,19 @@ func (provisioner *Provisioner) determineSSHAuth() (SSHAuth, string, error) {
 	if ok && len(sshPassword) > 0 {
 		return passwordSSHAuth, sshPassword, nil
 	} else { // ssh is being used with private key or agent auth so determine that instead
-		// parse generated data for ssh private key and agent auth info
-		sshPrivateKeyFile := provisioner.generatedData["SSHPrivateKeyFile"].(string)
-		sshAgentAuth := provisioner.generatedData["SSHAgentAuth"].(bool)
+		// parse generated data for ssh private key
+		sshPrivateKeyFile, ok := provisioner.generatedData["SSHPrivateKeyFile"].(string)
+		// retry with certificate
+		if !ok || len(sshPrivateKeyFile) == 0 {
+			sshPrivateKeyFile = provisioner.generatedData["SSHCertificateFile"].(string)
+		}
 
 		if len(sshPrivateKeyFile) > 0 {
 			// we have a specified private key file so use that
 			return privateKeySSHAuth, sshPrivateKeyFile, nil
-		} else if sshAgentAuth {
+		} else if provisioner.generatedData["SSHAgentAuth"].(bool) {
 			// we can use an empty/automatic private key with ssh agent auth
-			return agentSSHAuth, sshPrivateKeyFile, nil
+			return agentSSHAuth, "", nil
 		} else { // create a private key file instead from the privatekey data
 			// write a tmpfile for storing a private key
 			tmpSSHPrivateKey, err := tmp.File("testinfra-key")
