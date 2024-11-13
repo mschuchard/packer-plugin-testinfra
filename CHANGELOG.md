@@ -1,3 +1,6 @@
+### 1.4.2 (Next)
+- Significantly improve Packer SSH and WinRM communicator settings' interfacing with plugin.
+
 ### 1.4.1
 - Miscellaneous code, build, and logging improvements
 

@@ -97,7 +97,7 @@ func (provisioner *Provisioner) determineCommunication(ui packer.Ui) ([]string, 
 			// disable ssl
 			optionalArgs = append(optionalArgs, "no_ssl=true")
 		}
-		if insecure, _ := provisioner.generatedData["WinRMInsecure"].(bool); insecure {
+		if insecure, ok := provisioner.generatedData["WinRMInsecure"].(bool); ok && insecure {
 			// do not verify ssl
 			optionalArgs = append(optionalArgs, "no_verify_ssl=true")
 		}
@@ -174,7 +174,7 @@ func (provisioner *Provisioner) determineUserAddr(connectionType string) (string
 	port, ok := provisioner.generatedData[genDataMap[connectionType]["port"]].(int64)
 	if !ok || port == int64(0) {
 		// fallback to general port
-		port = provisioner.generatedData["Port"].(int64)
+		port, _ = provisioner.generatedData["Port"].(int64)
 
 		//if !ok || port == int64(0) {
 		if port == int64(0) {
@@ -208,10 +208,10 @@ func (provisioner *Provisioner) determineSSHAuth() (SSHAuth, string, error) {
 		sshPrivateKeyFile, ok := provisioner.generatedData["SSHPrivateKeyFile"].(string)
 		// retry with certificate
 		if !ok || len(sshPrivateKeyFile) == 0 {
-			sshPrivateKeyFile = provisioner.generatedData["SSHCertificateFile"].(string)
+			sshPrivateKeyFile, ok = provisioner.generatedData["SSHCertificateFile"].(string)
 		}
 
-		if len(sshPrivateKeyFile) > 0 {
+		if ok && len(sshPrivateKeyFile) > 0 {
 			// we have a specified private key file so use that
 			return privateKeySSHAuth, sshPrivateKeyFile, nil
 		} else if provisioner.generatedData["SSHAgentAuth"].(bool) {
@@ -226,7 +226,11 @@ func (provisioner *Provisioner) determineSSHAuth() (SSHAuth, string, error) {
 			}
 
 			// attempt to obtain a private key
-			SSHPrivateKey := provisioner.generatedData["SSHPrivateKey"].(string)
+			SSHPrivateKey, ok := provisioner.generatedData["SSHPrivateKey"].(string)
+			if !ok || len("SSHPrivateKey") == 0 {
+				log.Print("no SSH authentication information was available in Packer data")
+				return "", "", errors.New("no ssh authentication")
+			}
 
 			// write the private key to the tmpfile
 			_, err = tmpSSHPrivateKey.WriteString(SSHPrivateKey)
