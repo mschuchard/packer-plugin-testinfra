@@ -21,7 +21,7 @@ jobs:
     - name: checkout
       uses: actions/checkout@v4
     - name: install prereqs
-      run: apk add --no-cache --update build-base && touch /usr/local/bin/py.test
+      run: apk add --no-cache --update make && touch /usr/local/bin/py.test
     - name: build
       run: make build
     - name: unit test
