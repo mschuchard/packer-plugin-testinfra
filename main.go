@@ -6,12 +6,12 @@ import (
 	"github.com/hashicorp/packer-plugin-sdk/plugin"
 	"github.com/hashicorp/packer-plugin-sdk/version"
 
-	"github.com/mschuchard/packer-plugin-testinfra/provisioner"
+	testinfra "github.com/mschuchard/packer-plugin-testinfra/provisioner"
 )
 
 func main() {
 	// initialize plugin version
-	pluginVersion := version.NewPluginVersion("1.4.1", "", "")
+	pluginVersion := version.NewPluginVersion("1.4.2", "", "")
 
 	// initialize packer plugin set for testinfra
 	packerPluginSet := plugin.NewSet()
