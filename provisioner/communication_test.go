@@ -20,13 +20,12 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
 	// test ssh with httpaddr and password
 	generatedData := map[string]interface{}{
 		"ConnType":          "ssh",
-		"User":              "me",
-		"Password":          "password",
+		"SSHUsername":       "me",
+		"SSHPassword":       "password",
 		"SSHPrivateKeyFile": "/path/to/sshprivatekeyfile",
 		"SSHAgentAuth":      false,
-		"Host":              "192.168.0.1",
-		"Port":              int64(22),
-		"PackerHTTPAddr":    "192.168.0.1:8200",
+		"SSHHost":           "192.168.0.1",
+		"SSHPort":           int64(22),
 		"ID":                "1234567890",
 	}
 
@@ -36,19 +35,19 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
 	if err != nil {
 		test.Errorf("determineCommunication function failed to determine ssh: %s", err)
 	}
-	if !slices.Equal(communication, []string{fmt.Sprintf("--hosts=ssh://%s:%s@%s:%d", generatedData["User"], generatedData["Password"], generatedData["Host"], generatedData["Port"]), "--ssh-extra-args=\"-o StrictHostKeyChecking=no\""}) {
+	if !slices.Equal(communication, []string{fmt.Sprintf("--hosts=ssh://%s:%s@%s:%d", generatedData["SSHUsername"], generatedData["SSHPassword"], generatedData["SSHHost"], generatedData["SSHPort"]), "--ssh-extra-args=\"-o StrictHostKeyChecking=no\""}) {
 		test.Errorf("communication string slice for ssh password incorrectly determined: %v", communication)
 	}
 
 	// test ssh with private key file
-	delete(generatedData, "Password")
+	delete(generatedData, "SSHPassword")
 	provisioner.generatedData = generatedData
 
 	communication, err = provisioner.determineCommunication(ui)
 	if err != nil {
 		test.Errorf("determineCommunication function failed to determine ssh: %s", err)
 	}
-	if !slices.Equal(communication, []string{fmt.Sprintf("--hosts=ssh://%s@%s:%d", generatedData["User"], generatedData["Host"], generatedData["Port"]), fmt.Sprintf("--ssh-identity-file=%s", generatedData["SSHPrivateKeyFile"]), "--ssh-extra-args=\"-o StrictHostKeyChecking=no\""}) {
+	if !slices.Equal(communication, []string{fmt.Sprintf("--hosts=ssh://%s@%s:%d", generatedData["SSHUsername"], generatedData["SSHHost"], generatedData["SSHPort"]), fmt.Sprintf("--ssh-identity-file=%s", generatedData["SSHPrivateKeyFile"]), "--ssh-extra-args=\"-o StrictHostKeyChecking=no\""}) {
 		test.Errorf("communication string slice for ssh private key incorrectly determined: %v", communication)
 	}
 
@@ -61,18 +60,17 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
 	if err != nil {
 		test.Errorf("determineCommunication function failed to determine ssh: %s", err)
 	}
-	if !slices.Equal(communication, []string{fmt.Sprintf("--hosts=ssh://%s@%s:%d", generatedData["User"], generatedData["Host"], generatedData["Port"]), "--ssh-extra-args=\"-o StrictHostKeyChecking=no\""}) {
+	if !slices.Equal(communication, []string{fmt.Sprintf("--hosts=ssh://%s@%s:%d", generatedData["SSHUsername"], generatedData["SSHHost"], generatedData["SSHPort"]), "--ssh-extra-args=\"-o StrictHostKeyChecking=no\""}) {
 		test.Errorf("communication string slice for ssh agent auth incorrectly determined: %v", communication)
 	}
 
-	// test winrm with empty host, port, and winrmpassword
+	// test winrm
 	generatedData = map[string]interface{}{
 		"ConnType":      "winrm",
-		"User":          "me",
-		"Password":      "password",
-		"Host":          "192.168.0.1",
-		"Port":          int64(5986),
-		"ID":            "1234567890",
+		"WinRMUser":     "me",
+		"WinRMPassword": "password",
+		"WinRMHost":     "192.168.0.1",
+		"WinRMPort":     int64(5986),
 		"WinRMUseSSL":   false,
 		"WinRMInsecure": true,
 	}
@@ -83,12 +81,12 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
 	if err != nil {
 		test.Errorf("determineCommunication function failed to determine winrm: %s", err)
 	}
-	if !slices.Equal(communication, []string{fmt.Sprintf("--hosts=winrm://%s:%s@%s:%d?no_ssl=true&no_verify_ssl=true", generatedData["User"], generatedData["Password"], generatedData["Host"], generatedData["Port"])}) {
+	if !slices.Equal(communication, []string{fmt.Sprintf("--hosts=winrm://%s:%s@%s:%d?no_ssl=true&no_verify_ssl=true", generatedData["WinRMUser"], generatedData["WinRMPassword"], generatedData["WinRMHost"], generatedData["WinRMPort"])}) {
 		test.Errorf("communication string slice for winrm incorrectly determined: %v", communication)
 	}
 
 	// test fails on no winrmpassword or password
-	delete(generatedData, "Password")
+	delete(generatedData, "WinRMPassword")
 	provisioner.generatedData = generatedData
 
 	_, err = provisioner.determineCommunication(ui)
@@ -98,12 +96,8 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
 
 	// test docker
 	generatedData = map[string]interface{}{
-		"ConnType":       "docker",
-		"User":           "me",
-		"Host":           "192.168.0.1",
-		"Port":           int64(0),
-		"PackerHTTPAddr": "",
-		"ID":             "1234567890abcdefg",
+		"ConnType": "docker",
+		"ID":       "1234567890abcdefg",
 	}
 
 	provisioner.generatedData = generatedData
@@ -118,12 +112,8 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
 
 	// test podman
 	generatedData = map[string]interface{}{
-		"ConnType":       "podman",
-		"User":           "me",
-		"Host":           "192.168.0.1",
-		"Port":           int64(0),
-		"PackerHTTPAddr": "",
-		"ID":             "1234567890abcdefg",
+		"ConnType": "podman",
+		"ID":       "1234567890abcdefg",
 	}
 
 	provisioner.generatedData = generatedData
@@ -138,12 +128,8 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
 
 	// test lxc
 	generatedData = map[string]interface{}{
-		"ConnType":       "lxc",
-		"User":           "me",
-		"Host":           "192.168.0.1",
-		"Port":           int64(0),
-		"PackerHTTPAddr": "",
-		"ID":             "1234567890abcdefg",
+		"ConnType": "lxc",
+		"ID":       "1234567890abcdefg",
 	}
 
 	provisioner.generatedData = generatedData
@@ -158,12 +144,11 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
 
 	// test fails on no communication
 	generatedData = map[string]interface{}{
-		"ConnType":       "unknown",
-		"User":           "me",
-		"Host":           "192.168.0.1",
-		"Port":           int64(22),
-		"PackerHTTPAddr": "192.168.0.1:22",
-		"ID":             "1234567890abcdefg",
+		"ConnType": "unknown",
+		"User":     "me",
+		"Host":     "192.168.0.1",
+		"Port":     int64(22),
+		"ID":       "1234567890abcdefg",
 	}
 
 	provisioner.generatedData = generatedData
