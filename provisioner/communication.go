@@ -166,19 +166,18 @@ func (provisioner *Provisioner) determineUserAddr(connectionType string) (string
 		ipaddress, ok = provisioner.generatedData["Host"].(string)
 
 		if !ok || len(ipaddress) == 0 {
-			log.Print("host address could not be determined")
-			return "", "", errors.New("unknown host")
+			log.Print("host address could not be determined from available Packer data")
+			return "", "", errors.New("unknown host address")
 		}
 	}
 	// valid ip address so now determine port
 	port, ok := provisioner.generatedData[genDataMap[connectionType]["port"]].(int64)
 	if !ok || port == int64(0) {
 		// fallback to general port
-		port, _ = provisioner.generatedData["Port"].(int64)
+		port, ok = provisioner.generatedData["Port"].(int64)
 
-		//if !ok || port == int64(0) {
-		if port == int64(0) {
-			log.Print("host port could not be determined")
+		if !ok || port == int64(0) {
+			log.Print("host port could not be determined from available Packer data")
 			return "", "", errors.New("unknown host port")
 		}
 	}
