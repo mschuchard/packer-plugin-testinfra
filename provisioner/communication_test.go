@@ -266,3 +266,38 @@ func TestProvisionerDetermineSSHAuth(test *testing.T) {
 		test.Errorf("temporary ssh key file content is not the ssh private key: %s", sshPrivateKey)
 	}
 }
+
+func TestProvisionerDetermineWinRMArgs(test *testing.T) {
+	var provisioner Provisioner
+
+	// test empty data
+	args := provisioner.determineWinRMArgs()
+	if len(args) > 0 {
+		test.Error("optional arguments were not empty with empty provisioner data")
+		test.Errorf("actual: %+q, expected: empty", args)
+	}
+
+	// test data resulting in no optional args
+	provisioner.generatedData = map[string]interface{}{
+		"WinRMUseSSL":   true,
+		"WinRMInsecure": false,
+	}
+	args = provisioner.determineWinRMArgs()
+	if len(args) > 0 {
+		test.Error("optional arguments were not empty with provisioner data causing no optional arguments")
+		test.Errorf("actual: %+q, expected: empty", args)
+	}
+
+	// test data with all arguments
+	provisioner.generatedData = map[string]interface{}{
+		"WinRMUseSSL":   false,
+		"WinRMInsecure": true,
+	}
+	expectedArgs := []string{"?no_ssl=true", "no_verify_ssl=true"}
+
+	args = provisioner.determineWinRMArgs()
+	if !slices.Equal(expectedArgs, args) {
+		test.Error("optional arguments were not all set according to corresponding provisioner data")
+		test.Errorf("actual: %+q, expected: %+q", args, expectedArgs)
+	}
+}
