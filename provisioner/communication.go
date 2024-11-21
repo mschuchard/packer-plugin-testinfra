@@ -91,20 +91,7 @@ func (provisioner *Provisioner) determineCommunication(ui packer.Ui) ([]string, 
 		}
 
 		// winrm optional arguments
-		var optionalArgs []string
-		// modify connection backend for ssl settings
-		if useSSL, ok := provisioner.generatedData["WinRMUseSSL"].(bool); ok && !useSSL {
-			// disable ssl
-			optionalArgs = append(optionalArgs, "no_ssl=true")
-		}
-		if insecure, ok := provisioner.generatedData["WinRMInsecure"].(bool); ok && insecure {
-			// do not verify ssl
-			optionalArgs = append(optionalArgs, "no_verify_ssl=true")
-		}
-		// prefix first optional argument with ? character if it exists
-		if len(optionalArgs) > 0 {
-			optionalArgs[0] = "?" + optionalArgs[0]
-		}
+		optionalArgs := provisioner.determineWinRMArgs()
 
 		// format string for testinfra connection backend setting
 		connectionBackend := fmt.Sprintf("--hosts=winrm://%s:%s@%s%s", user, winrmPassword, httpAddr, strings.Join(optionalArgs, "&"))
@@ -211,12 +198,12 @@ func (provisioner *Provisioner) determineSSHAuth() (SSHAuth, string, error) {
 		}
 
 		if ok && len(sshPrivateKeyFile) > 0 {
-			// we have a specified private key file so use that
+			// we have a specified private key/cert file so use that
 			return privateKeySSHAuth, sshPrivateKeyFile, nil
 		} else if provisioner.generatedData["SSHAgentAuth"].(bool) {
 			// we can use an empty/automatic private key with ssh agent auth
 			return agentSSHAuth, "", nil
-		} else { // create a private key file instead from the privatekey data
+		} else { // we have no other options, so create a temp private key file from the packer data
 			// write a tmpfile for storing a private key
 			tmpSSHPrivateKey, err := tmp.File("testinfra-key")
 			if err != nil {
@@ -248,4 +235,26 @@ func (provisioner *Provisioner) determineSSHAuth() (SSHAuth, string, error) {
 			return privateKeySSHAuth, tmpSSHPrivateKey.Name(), nil
 		}
 	}
+}
+
+// determine and return winrm optional arguments
+func (provisioner *Provisioner) determineWinRMArgs() []string {
+	// declare optional args slice to contain and later return
+	var optionalArgs []string
+
+	// modify connection backend for ssl settings
+	// check on disable ssl
+	if useSSL, ok := provisioner.generatedData["WinRMUseSSL"].(bool); ok && !useSSL {
+		optionalArgs = append(optionalArgs, "no_ssl=true")
+	}
+	// check on do not verify ssl
+	if insecure, ok := provisioner.generatedData["WinRMInsecure"].(bool); ok && insecure {
+		optionalArgs = append(optionalArgs, "no_verify_ssl=true")
+	}
+	// prefix first optional argument with ? character if it exists
+	if len(optionalArgs) > 0 {
+		optionalArgs[0] = "?" + optionalArgs[0]
+	}
+
+	return optionalArgs
 }
