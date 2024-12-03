@@ -18,7 +18,7 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
 	var provisioner Provisioner
 
 	// test ssh with httpaddr and password
-	generatedData := map[string]interface{}{
+	provisioner.generatedData = map[string]interface{}{
 		"ConnType":          "ssh",
 		"SSHUsername":       "me",
 		"SSHPassword":       "password",
@@ -29,43 +29,39 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
 		"ID":                "1234567890",
 	}
 
-	provisioner.generatedData = generatedData
-
 	communication, err := provisioner.determineCommunication(ui)
 	if err != nil {
 		test.Errorf("determineCommunication function failed to determine ssh: %s", err)
 	}
-	if !slices.Equal(communication, []string{fmt.Sprintf("--hosts=ssh://%s:%s@%s:%d", generatedData["SSHUsername"], generatedData["SSHPassword"], generatedData["SSHHost"], generatedData["SSHPort"]), "--ssh-extra-args=\"-o StrictHostKeyChecking=no\""}) {
+	if !slices.Equal(communication, []string{fmt.Sprintf("--hosts=ssh://%s:%s@%s:%d", provisioner.generatedData["SSHUsername"], provisioner.generatedData["SSHPassword"], provisioner.generatedData["SSHHost"], provisioner.generatedData["SSHPort"]), "--ssh-extra-args=\"-o StrictHostKeyChecking=no\""}) {
 		test.Errorf("communication string slice for ssh password incorrectly determined: %v", communication)
 	}
 
 	// test ssh with private key file
-	delete(generatedData, "SSHPassword")
-	provisioner.generatedData = generatedData
+	delete(provisioner.generatedData, "SSHPassword")
 
 	communication, err = provisioner.determineCommunication(ui)
 	if err != nil {
 		test.Errorf("determineCommunication function failed to determine ssh: %s", err)
 	}
-	if !slices.Equal(communication, []string{fmt.Sprintf("--hosts=ssh://%s@%s:%d", generatedData["SSHUsername"], generatedData["SSHHost"], generatedData["SSHPort"]), fmt.Sprintf("--ssh-identity-file=%s", generatedData["SSHPrivateKeyFile"]), "--ssh-extra-args=\"-o StrictHostKeyChecking=no\""}) {
+	if !slices.Equal(communication, []string{fmt.Sprintf("--hosts=ssh://%s@%s:%d", provisioner.generatedData["SSHUsername"], provisioner.generatedData["SSHHost"], provisioner.generatedData["SSHPort"]), fmt.Sprintf("--ssh-identity-file=%s", provisioner.generatedData["SSHPrivateKeyFile"]), "--ssh-extra-args=\"-o StrictHostKeyChecking=no\""}) {
 		test.Errorf("communication string slice for ssh private key incorrectly determined: %v", communication)
 	}
 
 	// test ssh with no private key but with agent auth
-	generatedData["SSHPrivateKeyFile"] = ""
-	generatedData["SSHAgentAuth"] = true
-	provisioner.generatedData = generatedData
+	provisioner.generatedData["SSHPrivateKeyFile"] = ""
+	provisioner.generatedData["SSHAgentAuth"] = true
 
 	communication, err = provisioner.determineCommunication(ui)
 	if err != nil {
 		test.Errorf("determineCommunication function failed to determine ssh: %s", err)
 	}
-	if !slices.Equal(communication, []string{fmt.Sprintf("--hosts=ssh://%s@%s:%d", generatedData["SSHUsername"], generatedData["SSHHost"], generatedData["SSHPort"]), "--ssh-extra-args=\"-o StrictHostKeyChecking=no\""}) {
+	if !slices.Equal(communication, []string{fmt.Sprintf("--hosts=ssh://%s@%s:%d", provisioner.generatedData["SSHUsername"], provisioner.generatedData["SSHHost"], provisioner.generatedData["SSHPort"]), "--ssh-extra-args=\"-o StrictHostKeyChecking=no\""}) {
 		test.Errorf("communication string slice for ssh agent auth incorrectly determined: %v", communication)
 	}
 
 	// test winrm
-	generatedData = map[string]interface{}{
+	provisioner.generatedData = map[string]interface{}{
 		"ConnType":      "winrm",
 		"WinRMUser":     "me",
 		"WinRMPassword": "password",
@@ -75,19 +71,16 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
 		"WinRMInsecure": true,
 	}
 
-	provisioner.generatedData = generatedData
-
 	communication, err = provisioner.determineCommunication(ui)
 	if err != nil {
 		test.Errorf("determineCommunication function failed to determine winrm: %s", err)
 	}
-	if !slices.Equal(communication, []string{fmt.Sprintf("--hosts=winrm://%s:%s@%s:%d?no_ssl=true&no_verify_ssl=true", generatedData["WinRMUser"], generatedData["WinRMPassword"], generatedData["WinRMHost"], generatedData["WinRMPort"])}) {
+	if !slices.Equal(communication, []string{fmt.Sprintf("--hosts=winrm://%s:%s@%s:%d?no_ssl=true&no_verify_ssl=true", provisioner.generatedData["WinRMUser"], provisioner.generatedData["WinRMPassword"], provisioner.generatedData["WinRMHost"], provisioner.generatedData["WinRMPort"])}) {
 		test.Errorf("communication string slice for winrm incorrectly determined: %v", communication)
 	}
 
 	// test fails on no winrmpassword or password
-	delete(generatedData, "WinRMPassword")
-	provisioner.generatedData = generatedData
+	delete(provisioner.generatedData, "WinRMPassword")
 
 	_, err = provisioner.determineCommunication(ui)
 	if err == nil {
@@ -95,63 +88,55 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
 	}
 
 	// test docker
-	generatedData = map[string]interface{}{
+	provisioner.generatedData = map[string]interface{}{
 		"ConnType": "docker",
 		"ID":       "1234567890abcdefg",
 	}
-
-	provisioner.generatedData = generatedData
 
 	communication, err = provisioner.determineCommunication(ui)
 	if err != nil {
 		test.Errorf("determineCommunication function failed to determine docker: %s", err)
 	}
-	if !slices.Equal(communication, []string{fmt.Sprintf("--hosts=docker://%s", generatedData["ID"])}) {
+	if !slices.Equal(communication, []string{fmt.Sprintf("--hosts=docker://%s", provisioner.generatedData["ID"])}) {
 		test.Errorf("communication string slice for docker incorrectly determined: %v", communication)
 	}
 
 	// test podman
-	generatedData = map[string]interface{}{
+	provisioner.generatedData = map[string]interface{}{
 		"ConnType": "podman",
 		"ID":       "1234567890abcdefg",
 	}
-
-	provisioner.generatedData = generatedData
 
 	communication, err = provisioner.determineCommunication(ui)
 	if err != nil {
 		test.Errorf("determineCommunication function failed to determine podman: %s", err)
 	}
-	if !slices.Equal(communication, []string{fmt.Sprintf("--hosts=podman://%s", generatedData["ID"])}) {
+	if !slices.Equal(communication, []string{fmt.Sprintf("--hosts=podman://%s", provisioner.generatedData["ID"])}) {
 		test.Errorf("communication string slice for podman incorrectly determined: %v", communication)
 	}
 
 	// test lxc
-	generatedData = map[string]interface{}{
+	provisioner.generatedData = map[string]interface{}{
 		"ConnType": "lxc",
 		"ID":       "1234567890abcdefg",
 	}
-
-	provisioner.generatedData = generatedData
 
 	communication, err = provisioner.determineCommunication(ui)
 	if err != nil {
 		test.Errorf("determineCommunication function failed to determine lxc: %s", err)
 	}
-	if !slices.Equal(communication, []string{fmt.Sprintf("--hosts=lxc://%s", generatedData["ID"])}) {
+	if !slices.Equal(communication, []string{fmt.Sprintf("--hosts=lxc://%s", provisioner.generatedData["ID"])}) {
 		test.Errorf("communication string slice for lxc incorrectly determined: %v", communication)
 	}
 
 	// test fails on no communication
-	generatedData = map[string]interface{}{
+	provisioner.generatedData = map[string]interface{}{
 		"ConnType": "unknown",
 		"User":     "me",
 		"Host":     "192.168.0.1",
 		"Port":     int64(22),
 		"ID":       "1234567890abcdefg",
 	}
-
-	provisioner.generatedData = generatedData
 
 	_, err = provisioner.determineCommunication(ui)
 	if err == nil {
@@ -164,24 +149,22 @@ func TestDetermineUserAddr(test *testing.T) {
 	var provisioner Provisioner
 
 	// dummy up fake user and address data
-	generatedData := map[string]interface{}{
+	provisioner.generatedData = map[string]interface{}{
 		"User": "me",
 		"Host": "192.168.0.1",
 		"Port": int64(22),
 	}
-
-	provisioner.generatedData = generatedData
 
 	user, httpAddr, err := provisioner.determineUserAddr("ssh")
 	if err != nil {
 		test.Error("determineUserAddr failed to determine user and address")
 		test.Error(err)
 	}
-	if user != generatedData["User"] {
+	if user != provisioner.generatedData["User"] {
 		test.Error("user was incorrectly determined")
-		test.Errorf("expected: %s, actual: %s", generatedData["User"], user)
+		test.Errorf("expected: %s, actual: %s", provisioner.generatedData["User"], user)
 	}
-	expectedHttpAddr := fmt.Sprintf("%s:%d", generatedData["Host"], generatedData["Port"])
+	expectedHttpAddr := fmt.Sprintf("%s:%d", provisioner.generatedData["Host"], provisioner.generatedData["Port"])
 	if httpAddr != expectedHttpAddr {
 		test.Error("address was incorrectly determined")
 		test.Errorf("expected: %s, actual: %s", expectedHttpAddr, httpAddr)
@@ -193,14 +176,12 @@ func TestProvisionerDetermineSSHAuth(test *testing.T) {
 	var provisioner Provisioner
 
 	// dummy up fake ssh data
-	generatedData := map[string]interface{}{
+	provisioner.generatedData = map[string]interface{}{
 		"Password":          "password",
 		"SSHPrivateKey":     "abcdefg12345",
 		"SSHPrivateKeyFile": "/tmp/sshprivatekeyfile",
 		"SSHAgentAuth":      false,
 	}
-
-	provisioner.generatedData = generatedData
 
 	// test successfully uses password for ssh auth
 	sshAuthType, sshAuthString, err := provisioner.determineSSHAuth()
@@ -210,13 +191,12 @@ func TestProvisionerDetermineSSHAuth(test *testing.T) {
 	if sshAuthType != passwordSSHAuth {
 		test.Errorf("ssh authentication type incorrectly determined: %s", sshAuthType)
 	}
-	if sshAuthString != generatedData["Password"] {
+	if sshAuthString != provisioner.generatedData["Password"] {
 		test.Errorf("password content incorrectly determined: %s", sshAuthString)
 	}
 
 	// remove password from data
-	delete(generatedData, "Password")
-	provisioner.generatedData = generatedData
+	delete(provisioner.generatedData, "Password")
 
 	// test successfully returns ssh private key file location
 	sshAuthType, sshAuthString, err = provisioner.determineSSHAuth()
@@ -226,14 +206,13 @@ func TestProvisionerDetermineSSHAuth(test *testing.T) {
 	if sshAuthType != privateKeySSHAuth {
 		test.Errorf("ssh authentication type incorrectly determined: %s", sshAuthType)
 	}
-	if sshAuthString != generatedData["SSHPrivateKeyFile"] {
+	if sshAuthString != provisioner.generatedData["SSHPrivateKeyFile"] {
 		test.Errorf("ssh private key file location incorrectly determined: %s", sshAuthString)
 	}
 
 	// modify to empty ssh key and yes to ssh agent auth
-	generatedData["SSHPrivateKeyFile"] = ""
-	generatedData["SSHAgentAuth"] = true
-	provisioner.generatedData = generatedData
+	provisioner.generatedData["SSHPrivateKeyFile"] = ""
+	provisioner.generatedData["SSHAgentAuth"] = true
 
 	// test successfully uses empty ssh private key file
 	sshAuthType, sshAuthString, err = provisioner.determineSSHAuth()
@@ -248,8 +227,7 @@ func TestProvisionerDetermineSSHAuth(test *testing.T) {
 	}
 
 	// modify to no ssh agent auth
-	generatedData["SSHAgentAuth"] = false
-	provisioner.generatedData = generatedData
+	provisioner.generatedData["SSHAgentAuth"] = false
 
 	// test successfully creates tmpfile with expected content for private key
 	sshAuthType, sshAuthString, err = provisioner.determineSSHAuth()
@@ -262,7 +240,7 @@ func TestProvisionerDetermineSSHAuth(test *testing.T) {
 	if matched, _ := regexp.Match(`/tmp/testinfra-key\d+`, []byte(sshAuthString)); !matched {
 		test.Errorf("temporary ssh private key file was not created in the expected location: %s", sshAuthString)
 	}
-	if sshPrivateKey, _ := os.ReadFile(sshAuthString); string(sshPrivateKey) != generatedData["SSHPrivateKey"] {
+	if sshPrivateKey, _ := os.ReadFile(sshAuthString); string(sshPrivateKey) != provisioner.generatedData["SSHPrivateKey"] {
 		test.Errorf("temporary ssh key file content is not the ssh private key: %s", sshPrivateKey)
 	}
 }
