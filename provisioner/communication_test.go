@@ -83,8 +83,8 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
 	delete(provisioner.generatedData, "WinRMPassword")
 
 	_, err = provisioner.determineCommunication(ui)
-	if err == nil {
-		test.Errorf("determineCommunication function did not fail on no available password")
+	if err == nil || err.Error() != "unknown winrm password" {
+		test.Error("determineCommunication function did not fail on no available password")
 	}
 
 	// test docker
@@ -129,6 +129,11 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
 		test.Errorf("communication string slice for lxc incorrectly determined: %v", communication)
 	}
 
+	delete(provisioner.generatedData, "ID")
+	if _, err = provisioner.determineCommunication(ui); err == nil || err.Error() != "unknown instance id" {
+		test.Error("determineCommunication did not fail on unknown instance id")
+	}
+
 	// test fails on no communication
 	provisioner.generatedData = map[string]interface{}{
 		"ConnType": "unknown",
@@ -139,8 +144,8 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
 	}
 
 	_, err = provisioner.determineCommunication(ui)
-	if err == nil {
-		test.Errorf("determineCommunication function did not fail on unknown connection type")
+	if err == nil || err.Error() != "unsupported communication type" {
+		test.Error("determineCommunication function did not fail on unsupported connection type")
 	}
 }
 
@@ -168,6 +173,21 @@ func TestDetermineUserAddr(test *testing.T) {
 	if httpAddr != expectedHttpAddr {
 		test.Error("address was incorrectly determined")
 		test.Errorf("expected: %s, actual: %s", expectedHttpAddr, httpAddr)
+	}
+
+	delete(provisioner.generatedData, "Port")
+	if _, _, err = provisioner.determineUserAddr("ssh"); err == nil || err.Error() != "unknown host port" {
+		test.Error("determineCommunication did not fail on unknown port")
+	}
+
+	delete(provisioner.generatedData, "Host")
+	if _, _, err = provisioner.determineUserAddr("ssh"); err == nil || err.Error() != "unknown host address" {
+		test.Error("determineCommunication did not fail on unknown host")
+	}
+
+	delete(provisioner.generatedData, "User")
+	if _, _, err = provisioner.determineUserAddr("ssh"); err == nil || err.Error() != "unknown remote user" {
+		test.Error("determineCommunication did not fail on unknown user")
 	}
 }
 
@@ -242,6 +262,11 @@ func TestProvisionerDetermineSSHAuth(test *testing.T) {
 	}
 	if sshPrivateKey, _ := os.ReadFile(sshAuthString); string(sshPrivateKey) != provisioner.generatedData["SSHPrivateKey"] {
 		test.Errorf("temporary ssh key file content is not the ssh private key: %s", sshPrivateKey)
+	}
+
+	delete(provisioner.generatedData, "SSHPrivateKey")
+	if _, _, err = provisioner.determineSSHAuth(); err == nil || err.Error() != "no ssh authentication" {
+		test.Error("sshauth did not fail on no available ssh authentication information")
 	}
 }
 
