@@ -1,4 +1,4 @@
-### 1.4.2 (Next)
+### 1.4.2
 - Significantly improve Packer SSH and WinRM communicators settings' interfacing with provisioner plugin.
 
 ### 1.4.1
