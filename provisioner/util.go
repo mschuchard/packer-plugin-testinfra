@@ -11,7 +11,7 @@ import (
 )
 
 // helper function to transfer files from local device to temporary packer instance
-func (provisioner *Provisioner) uploadFiles(comm packer.Communicator, files []string, destDir string) error {
+func uploadFiles(comm packer.Communicator, files []string, destDir string) error {
 	var err error
 
 	// iterate through files to transfer
