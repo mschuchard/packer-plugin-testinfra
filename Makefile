@@ -13,11 +13,11 @@ install: build
 	@packer plugins install --path ./packer-plugin-testinfra 'github.com/mschuchard/testinfra'
 
 unit:
-	@go test -v ./...
+	@go test -v ./provisioner
 
 accept: install
 	# start vbox machine for ssh communicator testing
-	@PACKER_ACC=1 go test -v ./provisioner/testinfra_acceptance_test.go -timeout=1m
+	@PACKER_ACC=1 go test -v ./main_test.go -timeout=1m
 
 install-packer-sdc:
 	@go install github.com/hashicorp/packer-plugin-sdk/cmd/packer-sdc@latest

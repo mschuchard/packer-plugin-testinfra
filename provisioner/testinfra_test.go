@@ -24,7 +24,7 @@ var basicConfig = &Config{
 	PytestPath: "/usr/local/bin/py.test",
 	Sudo:       true,
 	SudoUser:   "fooman",
-	TestFiles:  []string{"fixtures/test.py"},
+	TestFiles:  []string{"../fixtures/test.py"},
 	Verbose:    2,
 }
 
@@ -139,7 +139,7 @@ func TestProvisionerPrepareNonExistFiles(test *testing.T) {
 	// test no pytest
 	var noPytestConfig = &Config{
 		PytestPath: "/home/foo/py.test",
-		TestFiles:  []string{"fixtures/test.py"},
+		TestFiles:  []string{"../fixtures/test.py"},
 	}
 
 	err := provisioner.Prepare(noPytestConfig)
@@ -151,7 +151,7 @@ func TestProvisionerPrepareNonExistFiles(test *testing.T) {
 	// test nonexistent testfile
 	var noTestFileConfig = &Config{
 		PytestPath: "/usr/local/bin/py.test",
-		TestFiles:  []string{"fixtures/test.py", "/home/foo/test.py"},
+		TestFiles:  []string{"../fixtures/test.py", "/home/foo/test.py"},
 	}
 
 	if !CI {

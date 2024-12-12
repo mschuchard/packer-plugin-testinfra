@@ -1,4 +1,4 @@
-package testinfra
+package main
 
 import (
 	_ "embed"

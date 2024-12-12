@@ -10,12 +10,12 @@ import (
 )
 
 func main() {
-	// initialize plugin version
-	pluginVersion := version.NewPluginVersion("1.4.2", "", "")
-
 	// initialize packer plugin set for testinfra
 	packerPluginSet := plugin.NewSet()
+	// register plugin provisioner
 	packerPluginSet.RegisterProvisioner(plugin.DEFAULT_NAME, new(testinfra.Provisioner))
+	// set plugin version
+	pluginVersion := version.NewPluginVersion("1.4.2", "", "")
 	packerPluginSet.SetVersion(pluginVersion)
 
 	// execute packer plugin for testinfra
