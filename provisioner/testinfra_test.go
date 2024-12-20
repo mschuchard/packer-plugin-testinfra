@@ -15,17 +15,18 @@ var CI bool = os.Getenv("CIRCLECI") == "true" || os.Getenv("GITHUB_ACTIONS") == 
 
 // global helper vars for tests
 var basicConfig = &Config{
-	Chdir:      "/tmp",
-	InstallCmd: []string{"/bin/false"},
-	Keyword:    "not slow",
-	Local:      false,
-	Marker:     "fast",
-	Parallel:   true,
-	PytestPath: "/usr/local/bin/py.test",
-	Sudo:       true,
-	SudoUser:   "fooman",
-	TestFiles:  []string{"../fixtures/test.py"},
-	Verbose:    2,
+	Chdir:         "/tmp",
+	InstallCmd:    []string{"/bin/false"},
+	Keyword:       "not slow",
+	Local:         false,
+	Marker:        "fast",
+	Parallel:      true,
+	PytestPath:    "/usr/local/bin/py.test",
+	Sudo:          true,
+	SudoUser:      "fooman",
+	TransferFiles: false,
+	TestFiles:     []string{"../fixtures/test.py"},
+	Verbose:       2,
 }
 
 // test basic config for packer template/config data
@@ -34,7 +35,7 @@ func TestProvisionerConfig(test *testing.T) {
 		config: *basicConfig,
 	}
 
-	if provisioner.config.PytestPath != basicConfig.PytestPath || !slices.Equal(provisioner.config.TestFiles, basicConfig.TestFiles) || provisioner.config.Chdir != basicConfig.Chdir || !slices.Equal(provisioner.config.InstallCmd, basicConfig.InstallCmd) || provisioner.config.Keyword != basicConfig.Keyword || provisioner.config.Local != basicConfig.Local || provisioner.config.Marker != basicConfig.Marker || provisioner.config.Parallel != basicConfig.Parallel || provisioner.config.Sudo != basicConfig.Sudo || provisioner.config.SudoUser != basicConfig.SudoUser || provisioner.config.Verbose != basicConfig.Verbose {
+	if provisioner.config.PytestPath != basicConfig.PytestPath || provisioner.config.TransferFiles != basicConfig.TransferFiles || !slices.Equal(provisioner.config.TestFiles, basicConfig.TestFiles) || provisioner.config.Chdir != basicConfig.Chdir || !slices.Equal(provisioner.config.InstallCmd, basicConfig.InstallCmd) || provisioner.config.Keyword != basicConfig.Keyword || provisioner.config.Local != basicConfig.Local || provisioner.config.Marker != basicConfig.Marker || provisioner.config.Parallel != basicConfig.Parallel || provisioner.config.Sudo != basicConfig.Sudo || provisioner.config.SudoUser != basicConfig.SudoUser || provisioner.config.Verbose != basicConfig.Verbose {
 		test.Errorf("provisioner config struct not initialized correctly")
 	}
 }
@@ -59,7 +60,7 @@ func TestProvisionerPrepareBasic(test *testing.T) {
 	}
 }
 
-// test provisioner prepare with minimal config (essentially default setting)
+// test provisioner prepare with minimal config (essentially default settings)
 func TestProvisionerPrepareMinimal(test *testing.T) {
 	var provisioner Provisioner
 
@@ -110,6 +111,10 @@ func TestProvisionerPrepareMinimal(test *testing.T) {
 
 	if len(provisioner.config.TestFiles) != 0 {
 		test.Errorf("default setting for TestFiles is incorrect: %+q", provisioner.config.TestFiles)
+	}
+
+	if provisioner.config.TransferFiles {
+		test.Errorf("default false setting for TransferFiles is incorrect: %t", provisioner.config.TransferFiles)
 	}
 }
 

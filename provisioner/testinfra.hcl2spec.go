@@ -19,8 +19,8 @@ type FlatConfig struct {
 	PytestPath    *string  `mapstructure:"pytest_path" required:"false" cty:"pytest_path" hcl:"pytest_path"`
 	Sudo          *bool    `mapstructure:"sudo" required:"false" cty:"sudo" hcl:"sudo"`
 	SudoUser      *string  `mapstructure:"sudo_user" required:"false" cty:"sudo_user" hcl:"sudo_user"`
-	TransferFiles *bool    `mapstructure:"transfer_files" required:"false" cty:"transfer_files" hcl:"transfer_files"`
 	TestFiles     []string `mapstructure:"test_files" required:"false" cty:"test_files" hcl:"test_files"`
+	TransferFiles *bool    `mapstructure:"transfer_files" required:"false" cty:"transfer_files" hcl:"transfer_files"`
 	Verbose       *int     `mapstructure:"verbose" required:"false" cty:"verbose" hcl:"verbose"`
 }
 
@@ -45,8 +45,8 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"pytest_path":    &hcldec.AttrSpec{Name: "pytest_path", Type: cty.String, Required: false},
 		"sudo":           &hcldec.AttrSpec{Name: "sudo", Type: cty.Bool, Required: false},
 		"sudo_user":      &hcldec.AttrSpec{Name: "sudo_user", Type: cty.String, Required: false},
-		"transfer_files": &hcldec.AttrSpec{Name: "transfer_files", Type: cty.Bool, Required: false},
 		"test_files":     &hcldec.AttrSpec{Name: "test_files", Type: cty.List(cty.String), Required: false},
+		"transfer_files": &hcldec.AttrSpec{Name: "transfer_files", Type: cty.Bool, Required: false},
 		"verbose":        &hcldec.AttrSpec{Name: "verbose", Type: cty.Number, Required: false},
 	}
 	return s

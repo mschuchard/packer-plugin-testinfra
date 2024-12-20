@@ -27,8 +27,8 @@ type Config struct {
 	PytestPath    string   `mapstructure:"pytest_path" required:"false"`
 	Sudo          bool     `mapstructure:"sudo" required:"false"`
 	SudoUser      string   `mapstructure:"sudo_user" required:"false"`
-	TransferFiles bool     `mapstructure:"transfer_files" required:"false"`
 	TestFiles     []string `mapstructure:"test_files" required:"false"`
+	TransferFiles bool     `mapstructure:"transfer_files" required:"false"`
 	Verbose       int      `mapstructure:"verbose" required:"false"`
 
 	ctx interpolate.Context
@@ -81,6 +81,10 @@ func (provisioner *Provisioner) Prepare(raws ...interface{}) error {
 
 		if len(provisioner.config.InstallCmd) > 0 {
 			log.Printf("installation command on the temporary Packer instance prior to Testinfra test execution is: %s", strings.Join(provisioner.config.InstallCmd, " "))
+		}
+
+		if provisioner.config.TransferFiles {
+			log.Print("test files will be copied to the temporary Packer instance prior to Testinfra test execution")
 		}
 
 		// no validation of xdist installation
