@@ -18,17 +18,18 @@ import (
 
 // config data deserialized/unmarshalled from packer template/config
 type Config struct {
-	Chdir      string   `mapstructure:"chdir" required:"false"`
-	InstallCmd []string `mapstructure:"install_cmd" required:"false"`
-	Keyword    string   `mapstructure:"keyword" required:"false"`
-	Local      bool     `mapstructure:"local" required:"false"`
-	Marker     string   `mapstructure:"marker" required:"false"`
-	Parallel   bool     `mapstructure:"parallel" required:"false"`
-	PytestPath string   `mapstructure:"pytest_path" required:"false"`
-	Sudo       bool     `mapstructure:"sudo" required:"false"`
-	SudoUser   string   `mapstructure:"sudo_user" required:"false"`
-	TestFiles  []string `mapstructure:"test_files" required:"false"`
-	Verbose    int      `mapstructure:"verbose" required:"false"`
+	Chdir         string   `mapstructure:"chdir" required:"false"`
+	InstallCmd    []string `mapstructure:"install_cmd" required:"false"`
+	Keyword       string   `mapstructure:"keyword" required:"false"`
+	Local         bool     `mapstructure:"local" required:"false"`
+	Marker        string   `mapstructure:"marker" required:"false"`
+	Parallel      bool     `mapstructure:"parallel" required:"false"`
+	PytestPath    string   `mapstructure:"pytest_path" required:"false"`
+	Sudo          bool     `mapstructure:"sudo" required:"false"`
+	SudoUser      string   `mapstructure:"sudo_user" required:"false"`
+	TransferFiles bool     `mapstructure:"transfer_files" required:"false"`
+	TestFiles     []string `mapstructure:"test_files" required:"false"`
+	Verbose       int      `mapstructure:"verbose" required:"false"`
 
 	ctx interpolate.Context
 }
@@ -76,6 +77,7 @@ func (provisioner *Provisioner) Prepare(raws ...interface{}) error {
 	if provisioner.config.Local {
 		// no validation of testinfra installation
 		log.Print("test execution will occur on the temporary Packer instance used for building the machine image artifact")
+		log.Print("Testinfra validation does not occur with local execution")
 
 		if len(provisioner.config.InstallCmd) > 0 {
 			log.Printf("installation command on the temporary Packer instance prior to Testinfra test execution is: %s", strings.Join(provisioner.config.InstallCmd, " "))
@@ -83,6 +85,7 @@ func (provisioner *Provisioner) Prepare(raws ...interface{}) error {
 
 		// no validation of xdist installation
 		if provisioner.config.Parallel {
+			log.Print("pytest-xdist validation does not occur with local execution")
 			log.Print("Testinfra tests will execute in parallel across the available physical CPUs")
 		}
 	} else { // verify testinfra installed
