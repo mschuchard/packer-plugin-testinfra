@@ -227,16 +227,19 @@ func (provisioner *Provisioner) Provision(ctx context.Context, ui packer.Ui, com
 		return err
 	}
 
-	// upload testinfra files to temporary packer instance
-	if err = uploadFiles(comm, provisioner.config.TestFiles, provisioner.config.DestinationDir); err != nil {
-		ui.Error("the test files could not be transferred to the temporary Packer instance")
-		return err
-	}
-
 	// execute testinfra remotely with *exec.Cmd
 	if localCmd == nil && cmd != nil {
 		err = execCmd(cmd, ui)
 	} else if localCmd != nil && cmd == nil {
+		// testinfra local execution
+		if len(provisioner.config.DestinationDir) > 0 {
+			// upload testinfra files to temporary packer instance
+			if err = uploadFiles(comm, provisioner.config.TestFiles, provisioner.config.DestinationDir); err != nil {
+				ui.Error("the test files could not be transferred to the temporary Packer instance")
+				return err
+			}
+		}
+
 		// execute testinfra local to instance with packer.RemoteCmd
 		err = packerRemoteCmd(localCmd, provisioner.config.InstallCmd, comm, ui)
 	} else {
