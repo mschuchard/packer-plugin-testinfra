@@ -39,16 +39,17 @@ func TestProvisioner(test *testing.T) {
 			logsString := string(logsBytes)
 
 			// verify logfile content for each communicator
-			if dockerMatches, _ := regexp.MatchString("docker.ubuntu: testing machine image with Testinfra.*", logsString); !dockerMatches {
-				test.Errorf("logs do not contain expected docker testinfra value: %s", logsString)
+			if dockerMatches, _ := regexp.MatchString("docker.ubuntu: packer plugin testinfra provisioning complete.*", logsString); !dockerMatches {
+				test.Errorf("logs do not contain expected docker testinfra value in logfile: %s", logfile)
 			}
-			if nullMatches, _ := regexp.MatchString("null.vbox: testing machine image with Testinfra.*", logsString); !nullMatches {
-				test.Errorf("logs do not contain expected ssh testinfra values: %s", logsString)
+			if nullMatches, _ := regexp.MatchString("null.vbox: packer plugin testinfra provisioning complete.*", logsString); !nullMatches {
+				test.Errorf("logs do not contain expected ssh testinfra values in logfile: %s", logfile)
 			}
 			//TODO: https://github.com/hashicorp/packer-plugin-virtualbox/issues/77
-			/*if vbox_matched, _ := regexp.MatchString("virtualbox-vm.ubuntu: Testing machine image with Testinfra.*", logsString); !vbox_matched {
-			  test.Fatalf("logs do not contain expected local testinfra value %s", logsString)
+			/*if vboxMatched, _ := regexp.MatchString("virtualbox-vm.ubuntu: packer plugin testinfra provisioning complete.*", logsString); !vboxMatched {
+			  test.Fatalf("logs do not contain expected local testinfra values in logfile: %s", logfile)
 			}*/
+			// verify testinfra output is as expected
 			if testsMatches, _ := regexp.MatchString("2 passed in.*", logsString); !testsMatches {
 				test.Errorf("logs do not contain expected testinfra value: %s", logsString)
 			}

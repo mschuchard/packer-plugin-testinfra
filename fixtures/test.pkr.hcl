@@ -4,7 +4,7 @@ packer {
   required_plugins {
     docker = {
       source  = "github.com/hashicorp/docker"
-      version = "~> 1.0.0"
+      version = "~> 1.1.0"
     }
     /*virtualbox = {
       version = "~> 1.0.0"
