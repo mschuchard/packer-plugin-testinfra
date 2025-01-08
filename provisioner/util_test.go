@@ -9,7 +9,7 @@ import (
 )
 
 func TestProvisionerUploadFiles(test *testing.T) {
-	comm := new(packer.MockCommunicator)
+	comm := &packer.MockCommunicator{}
 
 	err := uploadFiles(comm, []string{"../.gitignore"}, "/dafdfsad")
 	if err != nil {

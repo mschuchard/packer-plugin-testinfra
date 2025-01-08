@@ -19,6 +19,7 @@ import (
 // config data deserialized/unmarshalled from packer template/config
 type Config struct {
 	Chdir          string   `mapstructure:"chdir" required:"false"`
+	Compact        bool     `mapstructure:"compact" required:"false"`
 	DestinationDir string   `mapstructure:"destination_dir" required:"false"`
 	InstallCmd     []string `mapstructure:"install_cmd" required:"false"`
 	Keyword        string   `mapstructure:"keyword" required:"false"`
