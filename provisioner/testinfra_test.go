@@ -123,6 +123,21 @@ func TestProvisionerPrepareMinimal(test *testing.T) {
 	}
 }
 
+// test provisioner errors on nonexistent chdir
+func TestProvisionerPrepareNonExistChdir(test *testing.T) {
+	var provisioner Provisioner
+	var noChdirConfig = &Config{
+		Chdir: "/tmp/no_one_here",
+	}
+
+	if !CI {
+		if err := provisioner.Prepare(noChdirConfig); err == nil || !errors.Is(err, os.ErrNotExist) {
+			test.Error("prepare function did not fail correctly on nonexistent chdir")
+			test.Error(err)
+		}
+	}
+}
+
 // test provisioner prepare defaults to empty slice for test files
 func TestProvisionerPrepareEmptyTestFile(test *testing.T) {
 	var provisioner Provisioner
