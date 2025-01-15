@@ -4,7 +4,6 @@ import (
 	"errors"
 	"os"
 	"slices"
-	"strings"
 	"testing"
 
 	"github.com/hashicorp/packer-plugin-sdk/packer"
@@ -114,11 +113,11 @@ func TestProvisionerPrepareMinimal(test *testing.T) {
 		test.Errorf("default setting for PytestPath is incorrect: %s", provisioner.config.PytestPath)
 	}
 
-	if len(provisioner.config.TestFiles) != 0 {
-		test.Errorf("default setting for TestFiles is incorrect: %+q", provisioner.config.TestFiles)
+	if len(provisioner.config.TestFiles) > 0 {
+		test.Errorf("default empty setting for TestFiles is incorrect: %+q", provisioner.config.TestFiles)
 	}
 
-	if len(provisioner.config.DestinationDir) != 0 {
+	if len(provisioner.config.DestinationDir) > 0 {
 		test.Errorf("default empty setting for DestinationDir is incorrect: %s", provisioner.config.DestinationDir)
 	}
 }
@@ -138,25 +137,6 @@ func TestProvisionerPrepareNonExistChdir(test *testing.T) {
 	}
 }
 
-// test provisioner prepare defaults to empty slice for test files
-func TestProvisionerPrepareEmptyTestFile(test *testing.T) {
-	var provisioner Provisioner
-	var emptyTestFileConfig = &Config{
-		PytestPath: "/usr/local/bin/py.test",
-	}
-
-	if !CI {
-		err := provisioner.Prepare(emptyTestFileConfig)
-		if err != nil {
-			test.Error("prepare function failed with no test_files minimal Testinfra Packer config")
-		}
-
-		if len(provisioner.config.TestFiles) > 0 {
-			test.Errorf("default setting for TestFiles is incorrect: %s", strings.Join(provisioner.config.TestFiles, ""))
-		}
-	}
-}
-
 // test provisioner prepare errors on nonexistent files
 func TestProvisionerPrepareNonExistFiles(test *testing.T) {
 	var provisioner Provisioner
@@ -167,8 +147,7 @@ func TestProvisionerPrepareNonExistFiles(test *testing.T) {
 		TestFiles:  []string{"../fixtures/test.py"},
 	}
 
-	err := provisioner.Prepare(noPytestConfig)
-	if !(errors.Is(err, os.ErrNotExist)) {
+	if err := provisioner.Prepare(noPytestConfig); err == nil || !(errors.Is(err, os.ErrNotExist)) {
 		test.Error("prepare function did not fail correctly on nonexistent pytest")
 		test.Error(err)
 	}
@@ -180,8 +159,7 @@ func TestProvisionerPrepareNonExistFiles(test *testing.T) {
 	}
 
 	if !CI {
-		err = provisioner.Prepare(noTestFileConfig)
-		if !(errors.Is(err, os.ErrNotExist)) {
+		if err := provisioner.Prepare(noTestFileConfig); err == nil || !(errors.Is(err, os.ErrNotExist)) {
 			test.Error("prepare function did not fail correctly on nonexistent testfile")
 			test.Error(err)
 		}
