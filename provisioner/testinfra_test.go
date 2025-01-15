@@ -16,6 +16,7 @@ var CI bool = os.Getenv("CIRCLECI") == "true" || os.Getenv("GITHUB_ACTIONS") == 
 // global helper vars for tests
 var basicConfig = &Config{
 	Chdir:          "/tmp",
+	Compact:        true,
 	InstallCmd:     []string{"/bin/false"},
 	Keyword:        "not slow",
 	Local:          false,
@@ -35,7 +36,7 @@ func TestProvisionerConfig(test *testing.T) {
 		config: *basicConfig,
 	}
 
-	if provisioner.config.PytestPath != basicConfig.PytestPath || provisioner.config.DestinationDir != basicConfig.DestinationDir || !slices.Equal(provisioner.config.TestFiles, basicConfig.TestFiles) || provisioner.config.Chdir != basicConfig.Chdir || !slices.Equal(provisioner.config.InstallCmd, basicConfig.InstallCmd) || provisioner.config.Keyword != basicConfig.Keyword || provisioner.config.Local != basicConfig.Local || provisioner.config.Marker != basicConfig.Marker || provisioner.config.Parallel != basicConfig.Parallel || provisioner.config.Sudo != basicConfig.Sudo || provisioner.config.SudoUser != basicConfig.SudoUser || provisioner.config.Verbose != basicConfig.Verbose {
+	if provisioner.config.PytestPath != basicConfig.PytestPath || provisioner.config.DestinationDir != basicConfig.DestinationDir || !slices.Equal(provisioner.config.TestFiles, basicConfig.TestFiles) || provisioner.config.Chdir != basicConfig.Chdir || provisioner.config.Compact != basicConfig.Compact || !slices.Equal(provisioner.config.InstallCmd, basicConfig.InstallCmd) || provisioner.config.Keyword != basicConfig.Keyword || provisioner.config.Local != basicConfig.Local || provisioner.config.Marker != basicConfig.Marker || provisioner.config.Parallel != basicConfig.Parallel || provisioner.config.Sudo != basicConfig.Sudo || provisioner.config.SudoUser != basicConfig.SudoUser || provisioner.config.Verbose != basicConfig.Verbose {
 		test.Errorf("provisioner config struct not initialized correctly")
 	}
 }
@@ -71,6 +72,10 @@ func TestProvisionerPrepareMinimal(test *testing.T) {
 
 	if len(provisioner.config.Chdir) > 0 {
 		test.Errorf("default empty setting for Chdir is incorrect: %s", provisioner.config.Chdir)
+	}
+
+	if provisioner.config.Compact {
+		test.Errorf("default false setting for compact is incorrect: %t", provisioner.config.Compact)
 	}
 
 	if len(provisioner.config.InstallCmd) > 0 {

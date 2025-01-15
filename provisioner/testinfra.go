@@ -69,11 +69,6 @@ func (provisioner *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	// log optional arguments
-	// keyword parameter
-	if len(provisioner.config.Keyword) > 0 {
-		log.Printf("executing tests with keyword substring expression: %s", provisioner.config.Keyword)
-	}
-
 	// local parameter
 	if provisioner.config.Local {
 		// no validation of testinfra installation
@@ -157,6 +152,16 @@ func (provisioner *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	log.Print("Testinfra installation verified")
+
+	// compact parameter
+	if provisioner.config.Compact {
+		log.Print("pytest report will be in compact form")
+	}
+
+	// keyword parameter
+	if len(provisioner.config.Keyword) > 0 {
+		log.Printf("executing tests with keyword substring expression: %s", provisioner.config.Keyword)
+	}
 
 	// marker parameter
 	if len(provisioner.config.Marker) > 0 {
