@@ -157,6 +157,10 @@ func (provisioner *Provisioner) determineExecCmd(ui packer.Ui) (*exec.Cmd, *pack
 	}
 
 	// assign optional populated values
+	// compact
+	if provisioner.config.Compact {
+		args = append(args, "--no-header", "--no-summary", "--disable-warnings")
+	}
 	// keyword
 	keyword, err := interpolate.Render(provisioner.config.Keyword, &provisioner.config.ctx)
 	if err != nil {
