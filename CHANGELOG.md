@@ -1,4 +1,4 @@
-### 1.5.0 (Next)
+### 1.5.0
 - Add `transfer_files` parameter.
 - Add `compact` parameter.
 

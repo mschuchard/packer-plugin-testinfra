@@ -40,6 +40,8 @@ build {
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | **chdir** | Change into this directory before executing `pytest`. Unsupported with `local` test execution. | string | `cwd` | no |
+| **compact** | Whether to report in compact form (no header, summary, or warnings). | bool | false | no |
+| **destination_dir** | Whether to transfer the `test_files` to the temporary Packer instance used for building the machine image artifact at input value location. Presence of this directory cannot be validated prior to execution. Ignored unless `local` is `true`. The `file` provisioner should normally be preferred instead of this parameter, and this should also be considered a beta feature. | string | "" | no |
 | **install_cmd** | Command to execute on the instance used for building the machine image artifact; can be used to e.g. install and configure Testinfra prior to a `local` test execution. Ignored unless `local` is `true`. | list(string) | [] | no |
 | **keyword** | PyTest keyword substring expression for selective test execution. | string | "" | no |
 | **local** | Execute Testinfra tests locally on the instance used for building the machine image artifact. Most plugin validation is skipped with this option. | bool | false | no |
