@@ -60,12 +60,14 @@ func (provisioner *Provisioner) determineCommunication(ui packer.Ui) ([]string, 
 		// use ssh password
 		case passwordSSHAuth:
 			log.Print("utilizing SSH password for communicator authentication")
+			log.Print("warning: this is typically invalid for Python to SSH interfacing, but this plugin will attempt it anyway")
+			log.Print("warning: consider using a passwordless private key or SSH agent instead")
 
 			// append args with ssh connection backend information (user, password, host, port), and no strict host key checking
 			args = append(args, fmt.Sprintf("--hosts=ssh://%s:%s@%s", user, sshAuthString, httpAddr), "--ssh-extra-args=\"-o StrictHostKeyChecking=no\"")
 		// use ssh agent auth
 		default:
-			log.Print("utilizing SSH Agent auth for communicator authentication")
+			log.Print("utilizing SSH Agent for communicator authentication")
 
 			// append args with ssh connection backend information (user, host, port), and no strict host key checking
 			args = append(args, fmt.Sprintf("--hosts=ssh://%s@%s", user, httpAddr), "--ssh-extra-args=\"-o StrictHostKeyChecking=no\"")
