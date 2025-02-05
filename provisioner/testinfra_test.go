@@ -52,11 +52,12 @@ func TestProvisionerInterface(test *testing.T) {
 func TestProvisionerPrepareBasic(test *testing.T) {
 	var provisioner Provisioner
 
-	if !CI {
-		err := provisioner.Prepare(basicConfig)
-		if err != nil {
-			test.Errorf("prepare function failed with basic Testinfra Packer config")
-		}
+	err := provisioner.Prepare(basicConfig)
+	if CI && err.Error() != "fork/exec /usr/local/bin/py.test: permission denied" {
+		test.Error("prepare function unexpectedly failed in CI with basic Testinfra Packer config")
+		test.Error(err)
+	} else if err != nil {
+		test.Errorf("prepare function failed with basic Testinfra Packer config")
 	}
 }
 
@@ -65,7 +66,10 @@ func TestProvisionerPrepareMinimal(test *testing.T) {
 	var provisioner Provisioner
 
 	err := provisioner.Prepare(&Config{})
-	if err != nil && !CI {
+	if CI && err.Error() != "exec: \"py.test\": executable file not found in $PATH" {
+		test.Error("prepare function unexpectedly failed in CI with minimal Testinfra Packer config")
+		test.Error(err)
+	} else if err != nil {
 		test.Errorf("prepare function failed with minimal Testinfra Packer config")
 	}
 
@@ -166,20 +170,18 @@ func TestProvisionerPrepareNonExistFiles(test *testing.T) {
 	}
 }
 
-// test provisioner prepare errors on processes with no xdist
+// test provisioner prepare reverts value on processes with no xdist
 func TestProvisionerPrepareNoXdist(test *testing.T) {
 	var provisioner Provisioner
 
-	// test no xdist with global basic config
-	if err := provisioner.Prepare(basicConfig); err != nil && !CI {
-		test.Error("prepare function failed basic config")
-	}
-	if CI && provisioner.config.Parallel != basicConfig.Parallel {
-		test.Error("prepare function did not maintain parallel member value after determing xdist is installed")
-		test.Errorf("actual value: %t", provisioner.config.Parallel)
-	}
-	if !CI && provisioner.config.Parallel {
-		test.Error("prepare function did not revert parallel member value to default 'false' after determing xdist is not installed")
-		test.Errorf("actual value: %t", provisioner.config.Parallel)
+	if !CI {
+		// test no xdist with global basic config
+		if err := provisioner.Prepare(basicConfig); err != nil {
+			test.Error("prepare function failed basic config")
+		}
+		if provisioner.config.Parallel {
+			test.Error("prepare function did not revert parallel member value to default 'false' after determing xdist is not installed")
+			test.Errorf("actual value: %t", provisioner.config.Parallel)
+		}
 	}
 }

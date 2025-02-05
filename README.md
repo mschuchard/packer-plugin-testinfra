@@ -9,7 +9,7 @@ This plugin requires Packer version `>= 1.7.0` due to the modern SDK usage. A si
 packer {
   required_plugins {
     testinfra = {
-      version = "~> 1.4.0"
+      version = "~> 1.5.0"
       source  = "github.com/mschuchard/testinfra"
     }
   }
