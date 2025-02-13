@@ -20,9 +20,9 @@ jobs:
     steps:
     - name: checkout
       uses: actions/checkout@v4
-    - name: install prereqs
-      run: apk add --no-cache --update make && touch /usr/local/bin/py.test
+    - name: install prereqs and setup fake pytest
+      run: apk add --no-cache --update make && cp fixtures/py.test /usr/local/bin/py.test
     - name: build
       run: make build
-    - name: unit test
-      run: make unit
+    - name: unit test with fake py.test
+      run: PATH="${PATH}:/usr/local/bin" make unit

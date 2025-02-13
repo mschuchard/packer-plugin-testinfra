@@ -10,14 +10,14 @@ jobs:
     steps:
     - checkout
     - run:
-        name: install prereqs
-        command: apk add --no-cache --update make && touch /usr/local/bin/py.test
+        name: install prereqs and setup fake pytest
+        command: apk add --no-cache --update make && cp fixtures/py.test /usr/local/bin/py.test
     - run:
         name: build
         command: make build
     - run:
-        name: unit test
-        command: make unit
+        name: unit test with fake py.test
+        command: PATH="${PATH}:/usr/local/bin" make unit
 
 workflows:
   execute_tests:
