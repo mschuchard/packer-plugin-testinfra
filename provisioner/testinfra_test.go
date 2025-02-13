@@ -56,7 +56,7 @@ func TestProvisionerPrepareBasic(test *testing.T) {
 	if CI && err.Error() != "fork/exec /usr/local/bin/py.test: permission denied" {
 		test.Error("prepare function unexpectedly failed in CI with basic Testinfra Packer config")
 		test.Error(err)
-	} else if err != nil {
+	} else if !CI && err != nil {
 		test.Errorf("prepare function failed with basic Testinfra Packer config")
 	}
 }
@@ -69,7 +69,7 @@ func TestProvisionerPrepareMinimal(test *testing.T) {
 	if CI && err.Error() != "exec: \"py.test\": executable file not found in $PATH" {
 		test.Error("prepare function unexpectedly failed in CI with minimal Testinfra Packer config")
 		test.Error(err)
-	} else if err != nil {
+	} else if !CI && err != nil {
 		test.Errorf("prepare function failed with minimal Testinfra Packer config")
 	}
 
