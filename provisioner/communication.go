@@ -14,9 +14,9 @@ import (
 type SSHAuth string
 
 const (
-	passwordSSHAuth   SSHAuth = "password"
-	agentSSHAuth      SSHAuth = "agent"
-	privateKeySSHAuth SSHAuth = "privateKey"
+	password   SSHAuth = "password"
+	agent      SSHAuth = "agent"
+	privateKey SSHAuth = "privateKey"
 )
 
 // determine and return appropriate communication string for pytest/testinfra
@@ -52,13 +52,13 @@ func (provisioner *Provisioner) determineCommunication(ui packer.Ui) ([]string, 
 		// determine additional args for ssh based on authentication information
 		switch sshAuthType {
 		// use ssh private key file
-		case privateKeySSHAuth:
+		case privateKey:
 			log.Printf("SSH private key filesystem location is: %s", sshAuthString)
 
 			// append args with ssh connection backend information (user, host, port), private key file, and no strict host key checking
 			args = append(args, fmt.Sprintf("--hosts=ssh://%s@%s", user, httpAddr), fmt.Sprintf("--ssh-identity-file=%s", sshAuthString), "--ssh-extra-args=\"-o StrictHostKeyChecking=no\"")
 		// use ssh password
-		case passwordSSHAuth:
+		case password:
 			log.Print("utilizing SSH password for communicator authentication")
 			log.Print("warning: this is typically invalid for Python to SSH interfacing, but this plugin will attempt it anyway")
 			log.Print("warning: consider using a passwordless private key or SSH agent instead")
@@ -66,11 +66,16 @@ func (provisioner *Provisioner) determineCommunication(ui packer.Ui) ([]string, 
 			// append args with ssh connection backend information (user, password, host, port), and no strict host key checking
 			args = append(args, fmt.Sprintf("--hosts=ssh://%s:%s@%s", user, sshAuthString, httpAddr), "--ssh-extra-args=\"-o StrictHostKeyChecking=no\"")
 		// use ssh agent auth
-		default:
+		case agent:
 			log.Print("utilizing SSH Agent for communicator authentication")
 
 			// append args with ssh connection backend information (user, host, port), and no strict host key checking
 			args = append(args, fmt.Sprintf("--hosts=ssh://%s@%s", user, httpAddr), "--ssh-extra-args=\"-o StrictHostKeyChecking=no\"")
+		// somehow not in enum
+		default:
+			log.Printf("unsupported ssh authentication type selected: %s", sshAuthType)
+
+			return nil, errors.New("unsupported ssh auth type")
 		}
 	case "winrm":
 		// assign user and host address
@@ -190,7 +195,7 @@ func (provisioner *Provisioner) determineSSHAuth() (SSHAuth, string, error) {
 
 	// ssh is being used with password auth and we have a password
 	if ok && len(sshPassword) > 0 {
-		return passwordSSHAuth, sshPassword, nil
+		return password, sshPassword, nil
 	} else { // ssh is being used with private key or agent auth so determine that instead
 		// parse generated data for ssh private key
 		sshPrivateKeyFile, ok := provisioner.generatedData["SSHPrivateKeyFile"].(string)
@@ -201,10 +206,10 @@ func (provisioner *Provisioner) determineSSHAuth() (SSHAuth, string, error) {
 
 		if ok && len(sshPrivateKeyFile) > 0 {
 			// we have a specified private key/cert file so use that
-			return privateKeySSHAuth, sshPrivateKeyFile, nil
+			return privateKey, sshPrivateKeyFile, nil
 		} else if provisioner.generatedData["SSHAgentAuth"].(bool) {
 			// we can use an empty/automatic private key with ssh agent auth
-			return agentSSHAuth, "", nil
+			return agent, "", nil
 		} else { // we have no other options, so create a temp private key file from the packer data
 			// write a tmpfile for storing a private key
 			tmpSSHPrivateKey, err := tmp.File("testinfra-key")
@@ -234,7 +239,7 @@ func (provisioner *Provisioner) determineSSHAuth() (SSHAuth, string, error) {
 				return "", "", err
 			}
 
-			return privateKeySSHAuth, tmpSSHPrivateKey.Name(), nil
+			return privateKey, tmpSSHPrivateKey.Name(), nil
 		}
 	}
 }

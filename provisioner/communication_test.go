@@ -208,7 +208,7 @@ func TestProvisionerDetermineSSHAuth(test *testing.T) {
 	if err != nil {
 		test.Errorf("determineSSHAuth failed to determine authentication password: %s", err)
 	}
-	if sshAuthType != passwordSSHAuth {
+	if sshAuthType != password {
 		test.Errorf("ssh authentication type incorrectly determined: %s", sshAuthType)
 	}
 	if sshAuthString != provisioner.generatedData["Password"] {
@@ -223,7 +223,7 @@ func TestProvisionerDetermineSSHAuth(test *testing.T) {
 	if err != nil {
 		test.Errorf("determineSSHAuth failed to determine ssh private key file location: %s", err)
 	}
-	if sshAuthType != privateKeySSHAuth {
+	if sshAuthType != privateKey {
 		test.Errorf("ssh authentication type incorrectly determined: %s", sshAuthType)
 	}
 	if sshAuthString != provisioner.generatedData["SSHPrivateKeyFile"] {
@@ -239,7 +239,7 @@ func TestProvisionerDetermineSSHAuth(test *testing.T) {
 	if err != nil {
 		test.Errorf("determineSSHAuth failed to determine keyless ssh: %s", err)
 	}
-	if sshAuthType != agentSSHAuth {
+	if sshAuthType != agent {
 		test.Errorf("ssh authentication type incorrectly determined: %s", sshAuthType)
 	}
 	if len(sshAuthString) > 0 {
@@ -254,7 +254,7 @@ func TestProvisionerDetermineSSHAuth(test *testing.T) {
 	if err != nil {
 		test.Errorf("determineSSHAuth failed to create tmpfile and return location of written ssh private key: %s", err)
 	}
-	if sshAuthType != privateKeySSHAuth {
+	if sshAuthType != privateKey {
 		test.Errorf("ssh authentication type incorrectly determined: %s", sshAuthType)
 	}
 	if matched, _ := regexp.Match(`/tmp/testinfra-key\d+`, []byte(sshAuthString)); !matched {
