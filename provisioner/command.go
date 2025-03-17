@@ -64,8 +64,7 @@ func execCmd(cmd *exec.Cmd, ui packer.Ui) error {
 	}
 
 	// wait for testinfra to complete and flush buffers
-	err = cmd.Wait()
-	if err != nil {
+	if err = cmd.Wait(); err != nil {
 		ui.Error("Testinfra returned non-zero exit status: %s")
 		return err
 	}

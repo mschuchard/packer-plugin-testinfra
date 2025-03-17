@@ -199,7 +199,7 @@ func (provisioner *Provisioner) determineSSHAuth() (SSHAuth, string, error) {
 	} else { // ssh is being used with private key or agent auth so determine that instead
 		// parse generated data for ssh private key
 		sshPrivateKeyFile, ok := provisioner.generatedData["SSHPrivateKeyFile"].(string)
-		// retry with certificate
+		// retry with certificate if necessary
 		if !ok || len(sshPrivateKeyFile) == 0 {
 			sshPrivateKeyFile, ok = provisioner.generatedData["SSHCertificateFile"].(string)
 		}
@@ -226,15 +226,13 @@ func (provisioner *Provisioner) determineSSHAuth() (SSHAuth, string, error) {
 			}
 
 			// write the private key to the tmpfile
-			_, err = tmpSSHPrivateKey.WriteString(SSHPrivateKey)
-			if err != nil {
+			if _, err = tmpSSHPrivateKey.WriteString(SSHPrivateKey); err != nil {
 				log.Print("failed to write ssh private key to temp file")
 				return "", "", err
 			}
 
 			// and then close the tmpfile storing the private key
-			err = tmpSSHPrivateKey.Close()
-			if err != nil {
+			if err = tmpSSHPrivateKey.Close(); err != nil {
 				log.Print("failed to close ssh private key temp file")
 				return "", "", err
 			}

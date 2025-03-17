@@ -1,5 +1,5 @@
 # Packer Plugin Testinfra
-The Packer plugin for [Testinfra](https://testinfra.readthedocs.io) (currently and probably also in the future only the provisioner component implemented) is used with [Packer](https://www.packer.io) for validating custom machine images.
+The Packer plugin for [Testinfra](https://testinfra.readthedocs.io) (currently and probably also in the future only the provisioner component implemented) is used with [Packer](https://www.packer.io) for automatically validating Packer-managed custom machine image artifacts against Testinfra tests.
 
 ## Installation
 
