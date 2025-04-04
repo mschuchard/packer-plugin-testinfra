@@ -10,6 +10,24 @@ import (
 	"github.com/hashicorp/packer-plugin-sdk/packer"
 )
 
+// ssh auth type with pseudo-enum
+type sshAuth string
+
+const (
+	password   sshAuth = "password"
+	agent      sshAuth = "agent"
+	privateKey sshAuth = "privateKey"
+)
+
+// ssh auth type conversion
+func (a sshAuth) New() (sshAuth, error) {
+	if a != password && a != agent && a != privateKey {
+		log.Printf("string %s could not be converted to sshAuth enum", a)
+		return "", errors.New("invalid sshAuth enum")
+	}
+	return a, nil
+}
+
 // helper function to transfer files from local device to temporary packer instance
 func uploadFiles(comm packer.Communicator, files []string, destDir string) error {
 	var err error

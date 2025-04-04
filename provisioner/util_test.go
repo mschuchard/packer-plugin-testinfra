@@ -8,6 +8,22 @@ import (
 	"github.com/hashicorp/packer-plugin-sdk/packer"
 )
 
+func TestSSHAuthNew(test *testing.T) {
+	sshAuthTest, err := sshAuth("password").New()
+	if err != nil {
+		test.Error(err)
+	}
+	if sshAuthTest != password {
+		test.Error("sshauth did not type convert correctly")
+		test.Errorf("expected: password, actual: %s", sshAuthTest)
+	}
+
+	if _, err = sshAuth("foo").New(); err == nil || err.Error() != "invalid sshAuth enum" {
+		test.Error("sshauth type conversion did not error expectedly")
+		test.Errorf("expected: invalid sshAuth enum, actual: %s", err)
+	}
+}
+
 func TestProvisionerUploadFiles(test *testing.T) {
 	comm := &packer.MockCommunicator{}
 

@@ -10,15 +10,6 @@ import (
 	"github.com/hashicorp/packer-plugin-sdk/tmp"
 )
 
-// ssh auth type with pseudo-enum
-type SSHAuth string
-
-const (
-	password   SSHAuth = "password"
-	agent      SSHAuth = "agent"
-	privateKey SSHAuth = "privateKey"
-)
-
 // determine and return appropriate communication string for pytest/testinfra
 func (provisioner *Provisioner) determineCommunication(ui packer.Ui) ([]string, error) {
 	// declare communication args
@@ -185,7 +176,7 @@ func (provisioner *Provisioner) determineUserAddr(connectionType string) (string
 }
 
 // determine and return ssh authentication
-func (provisioner *Provisioner) determineSSHAuth() (SSHAuth, string, error) {
+func (provisioner *Provisioner) determineSSHAuth() (sshAuth, string, error) {
 	// assign ssh password
 	sshPassword, ok := provisioner.generatedData["SSHPassword"].(string)
 	// otherwise retry with general password
