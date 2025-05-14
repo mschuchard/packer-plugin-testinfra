@@ -40,10 +40,10 @@ func TestProvisioner(test *testing.T) {
 
 			// verify logfile content for each communicator
 			if dockerMatches, _ := regexp.MatchString("docker.ubuntu: packer plugin testinfra provisioning complete.*", logsString); !dockerMatches {
-				test.Errorf("logs do not contain expected docker testinfra value in logfile: %s", logfile)
+				test.Errorf("logs do not contain expected docker testinfra completion log in logfile: %s", logfile)
 			}
 			if nullMatches, _ := regexp.MatchString("null.vbox: packer plugin testinfra provisioning complete.*", logsString); !nullMatches {
-				test.Errorf("logs do not contain expected ssh testinfra values in logfile: %s", logfile)
+				test.Errorf("logs do not contain expected ssh testinfra completion log in logfile: %s", logfile)
 			}
 			//TODO: https://github.com/hashicorp/packer-plugin-virtualbox/issues/77
 			/*if vboxMatched, _ := regexp.MatchString("virtualbox-vm.ubuntu: packer plugin testinfra provisioning complete.*", logsString); !vboxMatched {
@@ -51,7 +51,7 @@ func TestProvisioner(test *testing.T) {
 			}*/
 			// verify testinfra output is as expected
 			if testsMatches, _ := regexp.MatchString("2 passed in.*", logsString); !testsMatches {
-				test.Errorf("logs do not contain expected testinfra value: %s", logsString)
+				test.Errorf("logs do not contain expected testinfra test results: %s", logsString)
 			}
 
 			return nil
