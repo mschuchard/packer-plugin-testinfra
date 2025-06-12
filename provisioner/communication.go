@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"strconv"
 	"strings"
 
 	"github.com/hashicorp/packer-plugin-sdk/packer"
@@ -247,6 +248,32 @@ func (provisioner *Provisioner) determineWinRMArgs() []string {
 	if insecure, ok := provisioner.generatedData["WinRMInsecure"].(bool); ok && insecure {
 		optionalArgs = append(optionalArgs, "no_verify_ssl=true")
 	}
+	// check on timeout
+	if timeout, ok := provisioner.generatedData["WinRMTimeout"].(string); ok && timeout != "30m" {
+		// split timeout into quantity and unit
+		quantity, err := strconv.ParseFloat(timeout[:len(timeout)-1], 32)
+		if err != nil {
+			log.Printf("WinRMTimeout packer data is invalid value and/or format: %s", timeout)
+		}
+		unit := timeout[len(timeout)-1:]
+
+		// mathematical conversion to seconds if unit is hours or mins
+		switch unit {
+		case "h":
+			quantity = quantity * 3600
+		case "m":
+			quantity = quantity * 60
+		case "s": // no conversion necessary
+		default: // no unit in data
+			quantity, err = strconv.ParseFloat(timeout, 32)
+			if err != nil {
+				log.Printf("WinRMTimeout packer data is invalid value and/or format: %s", timeout)
+			}
+		}
+
+		optionalArgs = append(optionalArgs, fmt.Sprintf("read_timeout_sec=%f", quantity))
+	}
+
 	// prefix first optional argument with ? character if it exists
 	if len(optionalArgs) > 0 {
 		optionalArgs[0] = "?" + optionalArgs[0]
