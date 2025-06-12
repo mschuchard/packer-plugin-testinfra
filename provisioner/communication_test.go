@@ -274,7 +274,10 @@ func TestProvisionerDetermineWinRMArgs(test *testing.T) {
 	var provisioner Provisioner
 
 	// test empty data
-	args := provisioner.determineWinRMArgs()
+	args, err := provisioner.determineWinRMArgs()
+	if err != nil {
+		test.Error(err)
+	}
 	if len(args) > 0 {
 		test.Error("optional arguments were not empty with empty provisioner data")
 		test.Errorf("actual: %+q, expected: empty", args)
@@ -285,7 +288,10 @@ func TestProvisionerDetermineWinRMArgs(test *testing.T) {
 		"WinRMUseSSL":   true,
 		"WinRMInsecure": false,
 	}
-	args = provisioner.determineWinRMArgs()
+	args, err = provisioner.determineWinRMArgs()
+	if err != nil {
+		test.Error(err)
+	}
 	if len(args) > 0 {
 		test.Error("optional arguments were not empty with provisioner data causing no optional arguments")
 		test.Errorf("actual: %+q, expected: empty", args)
@@ -298,7 +304,10 @@ func TestProvisionerDetermineWinRMArgs(test *testing.T) {
 	}
 	expectedArgs := []string{"?no_ssl=true", "no_verify_ssl=true"}
 
-	args = provisioner.determineWinRMArgs()
+	args, err = provisioner.determineWinRMArgs()
+	if err != nil {
+		test.Error(err)
+	}
 	if !slices.Equal(expectedArgs, args) {
 		test.Error("optional arguments were not all set according to corresponding provisioner data")
 		test.Errorf("actual: %+q, expected: %+q", args, expectedArgs)

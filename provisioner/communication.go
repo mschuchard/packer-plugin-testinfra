@@ -90,7 +90,11 @@ func (provisioner *Provisioner) determineCommunication(ui packer.Ui) ([]string, 
 		}
 
 		// winrm optional arguments
-		optionalArgs := provisioner.determineWinRMArgs()
+		optionalArgs, err := provisioner.determineWinRMArgs()
+		if err != nil {
+			ui.Error("winrm communicator optional arguments could not be determined from available Packer data")
+			return nil, err
+		}
 
 		// format string for testinfra connection backend setting
 		connectionBackend := fmt.Sprintf("--hosts=winrm://%s:%s@%s%s", user, winrmPassword, httpAddr, strings.Join(optionalArgs, "&"))
@@ -235,7 +239,7 @@ func (provisioner *Provisioner) determineSSHAuth() (sshAuth, string, error) {
 }
 
 // determine and return winrm optional arguments
-func (provisioner *Provisioner) determineWinRMArgs() []string {
+func (provisioner *Provisioner) determineWinRMArgs() ([]string, error) {
 	// declare optional args slice to contain and later return
 	var optionalArgs []string
 
@@ -253,7 +257,8 @@ func (provisioner *Provisioner) determineWinRMArgs() []string {
 		// split timeout into quantity and unit
 		quantity, err := strconv.ParseFloat(timeout[:len(timeout)-1], 32)
 		if err != nil {
-			log.Printf("WinRMTimeout packer data is invalid value and/or format: %s", timeout)
+			log.Printf("WinRMTimeout Packer data is invalid value and/or format: %s", timeout)
+			return nil, errors.New("invalid winrmtimeout")
 		}
 		unit := timeout[len(timeout)-1:]
 
@@ -267,7 +272,8 @@ func (provisioner *Provisioner) determineWinRMArgs() []string {
 		default: // no unit in data
 			quantity, err = strconv.ParseFloat(timeout, 32)
 			if err != nil {
-				log.Printf("WinRMTimeout packer data is invalid value and/or format: %s", timeout)
+				log.Printf("WinRMTimeout Packer data is invalid value and/or format: %s", timeout)
+				return nil, errors.New("invalid winrmtimeout")
 			}
 		}
 
@@ -279,5 +285,5 @@ func (provisioner *Provisioner) determineWinRMArgs() []string {
 		optionalArgs[0] = "?" + optionalArgs[0]
 	}
 
-	return optionalArgs
+	return optionalArgs, nil
 }
