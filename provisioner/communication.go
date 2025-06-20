@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -254,30 +255,31 @@ func (provisioner *Provisioner) determineWinRMArgs() ([]string, error) {
 	}
 	// check on timeout
 	if timeout, ok := provisioner.generatedData["WinRMTimeout"].(string); ok && timeout != "30m" {
-		// split timeout into quantity and unit
-		quantity, err := strconv.ParseFloat(timeout[:len(timeout)-1], 32)
-		if err != nil {
+		// regular expression convert winrmtimeout format to pywinrm format
+		reTimeout := regexp.MustCompile(`^(\d*)h?(\d*)m?(\d*)s?$`)
+		timeoutQuantities := reTimeout.FindStringSubmatch(timeout)
+		if timeoutQuantities == nil || len(timeoutQuantities) != 4 {
 			log.Printf("WinRMTimeout Packer data is invalid value and/or format: %s", timeout)
 			return nil, errors.New("invalid winrmtimeout")
 		}
-		unit := timeout[len(timeout)-1:]
 
-		// mathematical conversion to seconds if unit is hours or mins
-		switch unit {
-		case "h":
-			quantity = quantity * 3600
-		case "m":
-			quantity = quantity * 60
-		case "s": // no conversion necessary
-		default: // no unit in data
-			quantity, err = strconv.ParseFloat(timeout, 32)
-			if err != nil {
-				log.Printf("WinRMTimeout Packer data is invalid value and/or format: %s", timeout)
-				return nil, errors.New("invalid winrmtimeout")
-			}
+		// mathematical conversions to seconds
+		var timeoutSeconds int
+
+		// convert hours
+		if quantity, err := strconv.Atoi(timeoutQuantities[1]); err == nil {
+			timeoutSeconds += quantity * 3600
+		}
+		// convert minutes
+		if quantity, err := strconv.Atoi(timeoutQuantities[2]); err == nil {
+			timeoutSeconds += quantity * 60
+		}
+		// convert seconds
+		if quantity, err := strconv.Atoi(timeoutQuantities[3]); err == nil {
+			timeoutSeconds += quantity
 		}
 
-		optionalArgs = append(optionalArgs, fmt.Sprintf("read_timeout_sec=%f", quantity))
+		optionalArgs = append(optionalArgs, fmt.Sprintf("read_timeout_sec=%d", timeoutSeconds))
 	}
 
 	// prefix first optional argument with ? character if it exists
