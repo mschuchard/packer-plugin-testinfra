@@ -287,6 +287,7 @@ func TestProvisionerDetermineWinRMArgs(test *testing.T) {
 	provisioner.generatedData = map[string]interface{}{
 		"WinRMUseSSL":   true,
 		"WinRMInsecure": false,
+		"WinRMTimeout":  "30m",
 	}
 	args, err = provisioner.determineWinRMArgs()
 	if err != nil {
@@ -301,8 +302,9 @@ func TestProvisionerDetermineWinRMArgs(test *testing.T) {
 	provisioner.generatedData = map[string]interface{}{
 		"WinRMUseSSL":   false,
 		"WinRMInsecure": true,
+		"WinRMTimeout":  "1h5m2s",
 	}
-	expectedArgs := []string{"?no_ssl=true", "no_verify_ssl=true"}
+	expectedArgs := []string{"?no_ssl=true", "no_verify_ssl=true", "read_timeout_sec=3902"}
 
 	args, err = provisioner.determineWinRMArgs()
 	if err != nil {
@@ -311,5 +313,12 @@ func TestProvisionerDetermineWinRMArgs(test *testing.T) {
 	if !slices.Equal(expectedArgs, args) {
 		test.Error("optional arguments were not all set according to corresponding provisioner data")
 		test.Errorf("actual: %+q, expected: %+q", args, expectedArgs)
+	}
+
+	// test malformed winrmtimeout
+	provisioner.generatedData["WinRMTimeout"] = "2s5m1h"
+	if _, err = provisioner.determineWinRMArgs(); err == nil || err.Error() != "invalid winrmtimeout" {
+		test.Error("win rm args did not fail on malformed timeout data")
+		test.Error(err)
 	}
 }
