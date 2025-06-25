@@ -45,27 +45,28 @@ func (provisioner *Provisioner) determineCommunication(ui packer.Ui) ([]string, 
 		switch sshAuthType {
 		// use ssh private key file
 		case privateKey:
+			ui.Say("utilizing SSH private key for communicator authentication")
 			log.Printf("SSH private key filesystem location is: %s", sshAuthString)
 
 			// append args with ssh connection backend information (user, host, port), private key file, and no strict host key checking
 			args = append(args, fmt.Sprintf("--hosts=ssh://%s@%s", user, httpAddr), fmt.Sprintf("--ssh-identity-file=%s", sshAuthString), "--ssh-extra-args=\"-o StrictHostKeyChecking=no\"")
 		// use ssh password
 		case password:
-			log.Print("utilizing SSH password for communicator authentication")
-			log.Print("warning: this is typically invalid for Python to SSH interfacing, but this plugin will attempt it anyway")
-			log.Print("warning: consider using a passwordless private key or SSH agent instead")
+			ui.Say("utilizing SSH password for communicator authentication")
+			ui.Say("warning: this is typically invalid for Python to SSH interfacing, but this plugin will attempt it anyway")
+			ui.Say("warning: consider using a passwordless private key or SSH agent instead")
 
 			// append args with ssh connection backend information (user, password, host, port), and no strict host key checking
 			args = append(args, fmt.Sprintf("--hosts=ssh://%s:%s@%s", user, sshAuthString, httpAddr), "--ssh-extra-args=\"-o StrictHostKeyChecking=no\"")
 		// use ssh agent auth
 		case agent:
-			log.Print("utilizing SSH Agent for communicator authentication")
+			ui.Say("utilizing SSH Agent for communicator authentication")
 
 			// append args with ssh connection backend information (user, host, port), and no strict host key checking
 			args = append(args, fmt.Sprintf("--hosts=ssh://%s@%s", user, httpAddr), "--ssh-extra-args=\"-o StrictHostKeyChecking=no\"")
 		// somehow not in enum
 		default:
-			log.Printf("unsupported ssh authentication type selected: %s", sshAuthType)
+			ui.Errorf("unsupported ssh authentication type selected: %s", sshAuthType)
 
 			return nil, errors.New("unsupported ssh auth type")
 		}
@@ -116,7 +117,7 @@ func (provisioner *Provisioner) determineCommunication(ui packer.Ui) ([]string, 
 		return nil, errors.New("unsupported communication type")
 	}
 
-	log.Printf("determined communicator argument as: %+q", args)
+	log.Printf("determined communicator arguments as: %+q", args)
 
 	return args, nil
 }
