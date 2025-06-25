@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"regexp"
 	"strconv"
 	"strings"
 
@@ -244,7 +243,7 @@ func (provisioner *Provisioner) determineWinRMArgs() ([]string, error) {
 	// declare optional args slice to contain and later return
 	var optionalArgs []string
 
-	// modify connection backend for ssl settings
+	// modify pywinrm connection backend for winrm communicator settings
 	// check on disable ssl
 	if useSSL, ok := provisioner.generatedData["WinRMUseSSL"].(bool); ok && !useSSL {
 		optionalArgs = append(optionalArgs, "no_ssl=true")
@@ -255,28 +254,52 @@ func (provisioner *Provisioner) determineWinRMArgs() ([]string, error) {
 	}
 	// check on timeout
 	if timeout, ok := provisioner.generatedData["WinRMTimeout"].(string); ok && timeout != "30m" {
-		// regular expression convert winrmtimeout format to pywinrm format
-		reTimeout := regexp.MustCompile(`^(\d*)h?(\d*)m?(\d*)s?$`)
-		timeoutQuantities := reTimeout.FindStringSubmatch(timeout)
-		if timeoutQuantities == nil || len(timeoutQuantities) != 4 {
-			log.Printf("WinRMTimeout Packer data is invalid value and/or format: %s", timeout)
-			return nil, errors.New("invalid winrmtimeout")
-		}
-
-		// mathematical conversions to seconds
+		// mathematical conversion of winrmtimeout to seconds
 		var timeoutSeconds int
 
-		// convert hours
-		if quantity, err := strconv.Atoi(timeoutQuantities[1]); err == nil {
-			timeoutSeconds += quantity * 3600
+		// cut around hours
+		hours, remainder, found := strings.Cut(timeout, "h")
+		// parse hours
+		if found {
+			if quantity, err := strconv.Atoi(hours); err == nil {
+				// convert hours
+				timeoutSeconds += quantity * 3600
+			} else {
+				log.Printf("WinRMTimeout Packer data is invalid value and/or format: %s", timeout)
+				return nil, errors.New("invalid winrmtimeout")
+			}
 		}
-		// convert minutes
-		if quantity, err := strconv.Atoi(timeoutQuantities[2]); err == nil {
-			timeoutSeconds += quantity * 60
+
+		// cut around minutes
+		minutes, remainder, found := strings.Cut(remainder, "m")
+		// parse minutes
+		if found {
+			if quantity, err := strconv.Atoi(minutes); err == nil {
+				// convert minutes
+				timeoutSeconds += quantity * 60
+			} else {
+				log.Printf("WinRMTimeout Packer data is invalid value and/or format: %s", timeout)
+				return nil, errors.New("invalid winrmtimeout")
+			}
 		}
-		// convert seconds
-		if quantity, err := strconv.Atoi(timeoutQuantities[3]); err == nil {
-			timeoutSeconds += quantity
+
+		// cut around seconds
+		seconds, found := strings.CutSuffix(remainder, "s")
+		// parse seconds
+		if found {
+			if quantity, err := strconv.Atoi(seconds); err == nil {
+				// add seconds
+				timeoutSeconds += quantity
+			} else {
+				log.Printf("WinRMTimeout Packer data is invalid value and/or format: %s", timeout)
+				return nil, errors.New("invalid winrmtimeout")
+			}
+		}
+
+		// if no unit was "found" then data is clearly invalid/malformed
+		if timeoutSeconds == 0 {
+			log.Printf("WinRMTimeout Packer data is invalid value and/or format: %s", timeout)
+			return nil, errors.New("invalid winrmtimeout")
 		}
 
 		optionalArgs = append(optionalArgs, fmt.Sprintf("read_timeout_sec=%d", timeoutSeconds))
