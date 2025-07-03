@@ -145,7 +145,7 @@ func (provisioner *Provisioner) determineUserAddr(connectionType string, ui pack
 		user, ok = provisioner.generatedData["User"].(string)
 
 		if !ok || len(user) == 0 {
-			log.Print("remote user could not be determined from available Packer data")
+			ui.Error("remote user could not be determined from available Packer data")
 			return "", "", errors.New("unknown remote user")
 		}
 	}
@@ -157,7 +157,7 @@ func (provisioner *Provisioner) determineUserAddr(connectionType string, ui pack
 		ipaddress, ok = provisioner.generatedData["Host"].(string)
 
 		if !ok || len(ipaddress) == 0 {
-			log.Print("host address could not be determined from available Packer data")
+			ui.Error("host address could not be determined from available Packer data")
 			return "", "", errors.New("unknown host address")
 		}
 	}
@@ -168,7 +168,7 @@ func (provisioner *Provisioner) determineUserAddr(connectionType string, ui pack
 		port, ok = provisioner.generatedData["Port"].(int64)
 
 		if !ok || port == int64(0) {
-			log.Print("host port could not be determined from available Packer data")
+			ui.Error("host port could not be determined from available Packer data")
 			return "", "", errors.New("unknown host port")
 		}
 	}
@@ -211,26 +211,26 @@ func (provisioner *Provisioner) determineSSHAuth(ui packer.Ui) (sshAuth, string,
 			// write a tmpfile for storing a private key
 			tmpSSHPrivateKey, err := tmp.File("testinfra-key")
 			if err != nil {
-				log.Print("error creating a temp file for the ssh private key")
+				ui.Error("error creating a temp file for the ssh private key")
 				return "", "", err
 			}
 
 			// attempt to obtain a private key
 			SSHPrivateKey, ok := provisioner.generatedData["SSHPrivateKey"].(string)
 			if !ok || len("SSHPrivateKey") == 0 {
-				log.Print("no SSH authentication information was available in Packer data")
+				ui.Error("no SSH authentication information was available in Packer data")
 				return "", "", errors.New("no ssh authentication")
 			}
 
 			// write the private key to the tmpfile
 			if _, err = tmpSSHPrivateKey.WriteString(SSHPrivateKey); err != nil {
-				log.Print("failed to write ssh private key to temp file")
+				ui.Error("failed to write ssh private key to temp file")
 				return "", "", err
 			}
 
 			// and then close the tmpfile storing the private key
 			if err = tmpSSHPrivateKey.Close(); err != nil {
-				log.Print("failed to close ssh private key temp file")
+				ui.Error("failed to close ssh private key temp file")
 				return "", "", err
 			}
 
@@ -266,7 +266,7 @@ func (provisioner *Provisioner) determineWinRMArgs(ui packer.Ui) ([]string, erro
 				// convert hours
 				timeoutSeconds += quantity * 3600
 			} else {
-				log.Printf("WinRMTimeout Packer data is invalid value and/or format: %s", timeout)
+				ui.Errorf("WinRMTimeout Packer data is invalid value and/or format: %s", timeout)
 				return nil, errors.New("invalid winrmtimeout")
 			}
 		}
@@ -279,7 +279,7 @@ func (provisioner *Provisioner) determineWinRMArgs(ui packer.Ui) ([]string, erro
 				// convert minutes
 				timeoutSeconds += quantity * 60
 			} else {
-				log.Printf("WinRMTimeout Packer data is invalid value and/or format: %s", timeout)
+				ui.Errorf("WinRMTimeout Packer data is invalid value and/or format: %s", timeout)
 				return nil, errors.New("invalid winrmtimeout")
 			}
 		}
@@ -292,14 +292,14 @@ func (provisioner *Provisioner) determineWinRMArgs(ui packer.Ui) ([]string, erro
 				// add seconds
 				timeoutSeconds += quantity
 			} else {
-				log.Printf("WinRMTimeout Packer data is invalid value and/or format: %s", timeout)
+				ui.Errorf("WinRMTimeout Packer data is invalid value and/or format: %s", timeout)
 				return nil, errors.New("invalid winrmtimeout")
 			}
 		}
 
 		// if no unit was "found" then data is clearly invalid/malformed
 		if timeoutSeconds == 0 {
-			log.Printf("WinRMTimeout Packer data is invalid value and/or format: %s", timeout)
+			ui.Errorf("WinRMTimeout Packer data is invalid value and/or format: %s", timeout)
 			return nil, errors.New("invalid winrmtimeout")
 		}
 
