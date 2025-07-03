@@ -38,7 +38,7 @@ type Config struct {
 // implements the packer.Provisioner interface as testinfra.Provisioner
 type Provisioner struct {
 	config        Config
-	generatedData map[string]interface{}
+	generatedData map[string]any
 }
 
 // implements configspec with hcl2spec helper function
@@ -47,7 +47,7 @@ func (provisioner *Provisioner) ConfigSpec() hcldec.ObjectSpec {
 }
 
 // prepares the provisioner plugin
-func (provisioner *Provisioner) Prepare(raws ...interface{}) error {
+func (provisioner *Provisioner) Prepare(raws ...any) error {
 	// parse testinfra provisioner config
 	err := config.Decode(&provisioner.config, &config.DecodeOpts{
 		PluginType:         "testinfra",
@@ -214,7 +214,7 @@ func (provisioner *Provisioner) Prepare(raws ...interface{}) error {
 }
 
 // executes the provisioner plugin
-func (provisioner *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator, generatedData map[string]interface{}) error {
+func (provisioner *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator, generatedData map[string]any) error {
 	ui.Say("testing machine image with Testinfra")
 
 	// prepare generated data and context

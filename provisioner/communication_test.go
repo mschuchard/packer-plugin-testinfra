@@ -152,6 +152,7 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
 // test provisioner determineUserAddr properly determines user and instance address
 func TestDetermineUserAddr(test *testing.T) {
 	var provisioner Provisioner
+	ui := packer.TestUi(test)
 
 	// dummy up fake user and address data
 	provisioner.generatedData = map[string]interface{}{
@@ -160,7 +161,7 @@ func TestDetermineUserAddr(test *testing.T) {
 		"Port": int64(22),
 	}
 
-	user, httpAddr, err := provisioner.determineUserAddr("ssh")
+	user, httpAddr, err := provisioner.determineUserAddr("ssh", ui)
 	if err != nil {
 		test.Error("determineUserAddr failed to determine user and address")
 		test.Error(err)
@@ -176,17 +177,17 @@ func TestDetermineUserAddr(test *testing.T) {
 	}
 
 	delete(provisioner.generatedData, "Port")
-	if _, _, err = provisioner.determineUserAddr("ssh"); err == nil || err.Error() != "unknown host port" {
+	if _, _, err = provisioner.determineUserAddr("ssh", ui); err == nil || err.Error() != "unknown host port" {
 		test.Error("determineCommunication did not fail on unknown port")
 	}
 
 	delete(provisioner.generatedData, "Host")
-	if _, _, err = provisioner.determineUserAddr("ssh"); err == nil || err.Error() != "unknown host address" {
+	if _, _, err = provisioner.determineUserAddr("ssh", ui); err == nil || err.Error() != "unknown host address" {
 		test.Error("determineCommunication did not fail on unknown host")
 	}
 
 	delete(provisioner.generatedData, "User")
-	if _, _, err = provisioner.determineUserAddr("ssh"); err == nil || err.Error() != "unknown remote user" {
+	if _, _, err = provisioner.determineUserAddr("ssh", ui); err == nil || err.Error() != "unknown remote user" {
 		test.Error("determineCommunication did not fail on unknown user")
 	}
 }
@@ -194,6 +195,7 @@ func TestDetermineUserAddr(test *testing.T) {
 // test provisioner determineSSHAuth properly determines authentication information
 func TestProvisionerDetermineSSHAuth(test *testing.T) {
 	var provisioner Provisioner
+	ui := packer.TestUi(test)
 
 	// dummy up fake ssh data
 	provisioner.generatedData = map[string]interface{}{
@@ -204,7 +206,7 @@ func TestProvisionerDetermineSSHAuth(test *testing.T) {
 	}
 
 	// test successfully uses password for ssh auth
-	sshAuthType, sshAuthString, err := provisioner.determineSSHAuth()
+	sshAuthType, sshAuthString, err := provisioner.determineSSHAuth(ui)
 	if err != nil {
 		test.Errorf("determineSSHAuth failed to determine authentication password: %s", err)
 	}
@@ -219,7 +221,7 @@ func TestProvisionerDetermineSSHAuth(test *testing.T) {
 	delete(provisioner.generatedData, "Password")
 
 	// test successfully returns ssh private key file location
-	sshAuthType, sshAuthString, err = provisioner.determineSSHAuth()
+	sshAuthType, sshAuthString, err = provisioner.determineSSHAuth(ui)
 	if err != nil {
 		test.Errorf("determineSSHAuth failed to determine ssh private key file location: %s", err)
 	}
@@ -235,7 +237,7 @@ func TestProvisionerDetermineSSHAuth(test *testing.T) {
 	provisioner.generatedData["SSHAgentAuth"] = true
 
 	// test successfully uses empty ssh private key file
-	sshAuthType, sshAuthString, err = provisioner.determineSSHAuth()
+	sshAuthType, sshAuthString, err = provisioner.determineSSHAuth(ui)
 	if err != nil {
 		test.Errorf("determineSSHAuth failed to determine keyless ssh: %s", err)
 	}
@@ -250,7 +252,7 @@ func TestProvisionerDetermineSSHAuth(test *testing.T) {
 	provisioner.generatedData["SSHAgentAuth"] = false
 
 	// test successfully creates tmpfile with expected content for private key
-	sshAuthType, sshAuthString, err = provisioner.determineSSHAuth()
+	sshAuthType, sshAuthString, err = provisioner.determineSSHAuth(ui)
 	if err != nil {
 		test.Errorf("determineSSHAuth failed to create tmpfile and return location of written ssh private key: %s", err)
 	}
@@ -265,16 +267,17 @@ func TestProvisionerDetermineSSHAuth(test *testing.T) {
 	}
 
 	delete(provisioner.generatedData, "SSHPrivateKey")
-	if _, _, err = provisioner.determineSSHAuth(); err == nil || err.Error() != "no ssh authentication" {
+	if _, _, err = provisioner.determineSSHAuth(ui); err == nil || err.Error() != "no ssh authentication" {
 		test.Error("sshauth did not fail on no available ssh authentication information")
 	}
 }
 
 func TestProvisionerDetermineWinRMArgs(test *testing.T) {
 	var provisioner Provisioner
+	ui := packer.TestUi(test)
 
 	// test empty data
-	args, err := provisioner.determineWinRMArgs()
+	args, err := provisioner.determineWinRMArgs(ui)
 	if err != nil {
 		test.Error(err)
 	}
@@ -289,7 +292,7 @@ func TestProvisionerDetermineWinRMArgs(test *testing.T) {
 		"WinRMInsecure": false,
 		"WinRMTimeout":  "30m",
 	}
-	args, err = provisioner.determineWinRMArgs()
+	args, err = provisioner.determineWinRMArgs(ui)
 	if err != nil {
 		test.Error(err)
 	}
@@ -306,7 +309,7 @@ func TestProvisionerDetermineWinRMArgs(test *testing.T) {
 	}
 	expectedArgs := []string{"?no_ssl=true", "no_verify_ssl=true", "read_timeout_sec=3902"}
 
-	args, err = provisioner.determineWinRMArgs()
+	args, err = provisioner.determineWinRMArgs(ui)
 	if err != nil {
 		test.Error(err)
 	}
@@ -317,7 +320,7 @@ func TestProvisionerDetermineWinRMArgs(test *testing.T) {
 
 	// test malformed winrmtimeout
 	provisioner.generatedData["WinRMTimeout"] = "2s5m1h"
-	if _, err = provisioner.determineWinRMArgs(); err == nil || err.Error() != "invalid winrmtimeout" {
+	if _, err = provisioner.determineWinRMArgs(ui); err == nil || err.Error() != "invalid winrmtimeout" {
 		test.Error("win rm args did not fail on malformed timeout data")
 		test.Error(err)
 	}

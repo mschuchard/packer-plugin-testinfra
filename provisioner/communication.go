@@ -29,13 +29,13 @@ func (provisioner *Provisioner) determineCommunication(ui packer.Ui) ([]string, 
 	switch connectionType {
 	case "ssh":
 		// assign user and host address
-		user, httpAddr, err := provisioner.determineUserAddr(connectionType)
+		user, httpAddr, err := provisioner.determineUserAddr(connectionType, ui)
 		if err != nil {
 			return nil, err
 		}
 
 		// assign ssh auth type and string (key file path or password)
-		sshAuthType, sshAuthString, err := provisioner.determineSSHAuth()
+		sshAuthType, sshAuthString, err := provisioner.determineSSHAuth(ui)
 		if err != nil {
 			return nil, err
 		}
@@ -72,7 +72,7 @@ func (provisioner *Provisioner) determineCommunication(ui packer.Ui) ([]string, 
 		}
 	case "winrm":
 		// assign user and host address
-		user, httpAddr, err := provisioner.determineUserAddr(connectionType)
+		user, httpAddr, err := provisioner.determineUserAddr(connectionType, ui)
 		if err != nil {
 			return nil, err
 		}
@@ -91,7 +91,7 @@ func (provisioner *Provisioner) determineCommunication(ui packer.Ui) ([]string, 
 		}
 
 		// winrm optional arguments
-		optionalArgs, err := provisioner.determineWinRMArgs()
+		optionalArgs, err := provisioner.determineWinRMArgs(ui)
 		if err != nil {
 			ui.Error("winrm communicator optional arguments could not be determined from available Packer data")
 			return nil, err
@@ -123,7 +123,7 @@ func (provisioner *Provisioner) determineCommunication(ui packer.Ui) ([]string, 
 }
 
 // determine and return user and host address
-func (provisioner *Provisioner) determineUserAddr(connectionType string) (string, string, error) {
+func (provisioner *Provisioner) determineUserAddr(connectionType string, ui packer.Ui) (string, string, error) {
 	// ssh and winrm provisioner generated data maps
 	genDataMap := map[string]map[string]string{
 		"ssh": {
@@ -182,7 +182,7 @@ func (provisioner *Provisioner) determineUserAddr(connectionType string) (string
 }
 
 // determine and return ssh authentication
-func (provisioner *Provisioner) determineSSHAuth() (sshAuth, string, error) {
+func (provisioner *Provisioner) determineSSHAuth(ui packer.Ui) (sshAuth, string, error) {
 	// assign ssh password
 	sshPassword, ok := provisioner.generatedData["SSHPassword"].(string)
 	// otherwise retry with general password
@@ -240,7 +240,7 @@ func (provisioner *Provisioner) determineSSHAuth() (sshAuth, string, error) {
 }
 
 // determine and return winrm optional arguments
-func (provisioner *Provisioner) determineWinRMArgs() ([]string, error) {
+func (provisioner *Provisioner) determineWinRMArgs(ui packer.Ui) ([]string, error) {
 	// declare optional args slice to contain and later return
 	var optionalArgs []string
 
