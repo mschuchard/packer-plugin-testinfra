@@ -162,12 +162,12 @@ func (provisioner *Provisioner) determineUserAddr(connectionType string, ui pack
 		}
 	}
 	// valid ip address so now determine port
-	port, ok := provisioner.generatedData[genDataMap[connectionType]["port"]].(int64)
-	if !ok || port == int64(0) {
+	port, ok := provisioner.generatedData[genDataMap[connectionType]["port"]].(int)
+	if !ok || port == 0 {
 		// fallback to general port
-		port, ok = provisioner.generatedData["Port"].(int64)
+		port, ok = provisioner.generatedData["Port"].(int)
 
-		if !ok || port == int64(0) {
+		if !ok || port == 0 {
 			ui.Error("host port could not be determined from available Packer data")
 			return "", "", errors.New("unknown host port")
 		}

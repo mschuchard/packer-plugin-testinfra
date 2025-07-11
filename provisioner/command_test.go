@@ -39,13 +39,13 @@ func TestProvisionerDetermineExecCmd(test *testing.T) {
 		config: *basicConfig,
 	}
 
-	provisioner.generatedData = map[string]interface{}{
+	provisioner.generatedData = map[string]any{
 		"ConnType":          "ssh",
 		"User":              "me",
 		"SSHPrivateKeyFile": "/path/to/sshprivatekeyfile",
 		"SSHAgentAuth":      true,
 		"Host":              "192.168.0.1",
-		"Port":              int64(22),
+		"Port":              22,
 		"PackerHTTPAddr":    "192.168.0.1:8200",
 		"ID":                "1234567890",
 	}

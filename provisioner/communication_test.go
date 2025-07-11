@@ -18,14 +18,14 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
 	var provisioner Provisioner
 
 	// test ssh with httpaddr and password
-	provisioner.generatedData = map[string]interface{}{
+	provisioner.generatedData = map[string]any{
 		"ConnType":          "ssh",
 		"SSHUsername":       "me",
 		"SSHPassword":       "password",
 		"SSHPrivateKeyFile": "/path/to/sshprivatekeyfile",
 		"SSHAgentAuth":      false,
 		"SSHHost":           "192.168.0.1",
-		"SSHPort":           int64(22),
+		"SSHPort":           22,
 		"ID":                "1234567890",
 	}
 
@@ -61,12 +61,12 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
 	}
 
 	// test winrm
-	provisioner.generatedData = map[string]interface{}{
+	provisioner.generatedData = map[string]any{
 		"ConnType":      "winrm",
 		"WinRMUser":     "me",
 		"WinRMPassword": "password",
 		"WinRMHost":     "192.168.0.1",
-		"WinRMPort":     int64(5986),
+		"WinRMPort":     5986,
 		"WinRMUseSSL":   false,
 		"WinRMInsecure": true,
 	}
@@ -88,7 +88,7 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
 	}
 
 	// test docker
-	provisioner.generatedData = map[string]interface{}{
+	provisioner.generatedData = map[string]any{
 		"ConnType": "docker",
 		"ID":       "1234567890abcdefg",
 	}
@@ -102,7 +102,7 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
 	}
 
 	// test podman
-	provisioner.generatedData = map[string]interface{}{
+	provisioner.generatedData = map[string]any{
 		"ConnType": "podman",
 		"ID":       "1234567890abcdefg",
 	}
@@ -116,7 +116,7 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
 	}
 
 	// test lxc
-	provisioner.generatedData = map[string]interface{}{
+	provisioner.generatedData = map[string]any{
 		"ConnType": "lxc",
 		"ID":       "1234567890abcdefg",
 	}
@@ -135,11 +135,11 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
 	}
 
 	// test fails on no communication
-	provisioner.generatedData = map[string]interface{}{
+	provisioner.generatedData = map[string]any{
 		"ConnType": "unknown",
 		"User":     "me",
 		"Host":     "192.168.0.1",
-		"Port":     int64(22),
+		"Port":     22,
 		"ID":       "1234567890abcdefg",
 	}
 
@@ -155,10 +155,10 @@ func TestDetermineUserAddr(test *testing.T) {
 	ui := packer.TestUi(test)
 
 	// dummy up fake user and address data
-	provisioner.generatedData = map[string]interface{}{
+	provisioner.generatedData = map[string]any{
 		"User": "me",
 		"Host": "192.168.0.1",
-		"Port": int64(22),
+		"Port": 22,
 	}
 
 	user, httpAddr, err := provisioner.determineUserAddr("ssh", ui)
@@ -198,7 +198,7 @@ func TestProvisionerDetermineSSHAuth(test *testing.T) {
 	ui := packer.TestUi(test)
 
 	// dummy up fake ssh data
-	provisioner.generatedData = map[string]interface{}{
+	provisioner.generatedData = map[string]any{
 		"Password":          "password",
 		"SSHPrivateKey":     "abcdefg12345",
 		"SSHPrivateKeyFile": "/tmp/sshprivatekeyfile",
@@ -287,7 +287,7 @@ func TestProvisionerDetermineWinRMArgs(test *testing.T) {
 	}
 
 	// test data resulting in no optional args
-	provisioner.generatedData = map[string]interface{}{
+	provisioner.generatedData = map[string]any{
 		"WinRMUseSSL":   true,
 		"WinRMInsecure": false,
 		"WinRMTimeout":  "30m",
@@ -302,7 +302,7 @@ func TestProvisionerDetermineWinRMArgs(test *testing.T) {
 	}
 
 	// test data with all arguments
-	provisioner.generatedData = map[string]interface{}{
+	provisioner.generatedData = map[string]any{
 		"WinRMUseSSL":   false,
 		"WinRMInsecure": true,
 		"WinRMTimeout":  "1h5m2s",

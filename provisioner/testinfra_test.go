@@ -42,7 +42,7 @@ func TestProvisionerConfig(test *testing.T) {
 
 // test struct for provisioner interface
 func TestProvisionerInterface(test *testing.T) {
-	var raw interface{} = &Provisioner{}
+	var raw any = &Provisioner{}
 	if _, ok := raw.(packer.Provisioner); !ok {
 		test.Errorf("Testinfra config struct must be a Provisioner")
 	}
