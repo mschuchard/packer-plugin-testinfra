@@ -6,6 +6,7 @@ import (
 	"regexp"
 	"slices"
 	"testing"
+	"time"
 
 	"github.com/hashicorp/packer-plugin-sdk/packer"
 )
@@ -290,8 +291,9 @@ func TestProvisionerDetermineWinRMArgs(test *testing.T) {
 	provisioner.generatedData = map[string]any{
 		"WinRMUseSSL":   true,
 		"WinRMInsecure": false,
-		"WinRMTimeout":  "30m",
 	}
+	provisioner.generatedData["WinRMTimeout"], _ = time.ParseDuration("30m")
+
 	args, err = provisioner.determineWinRMArgs(ui)
 	if err != nil {
 		test.Error(err)
@@ -305,8 +307,8 @@ func TestProvisionerDetermineWinRMArgs(test *testing.T) {
 	provisioner.generatedData = map[string]any{
 		"WinRMUseSSL":   false,
 		"WinRMInsecure": true,
-		"WinRMTimeout":  "1h5m2s",
 	}
+	provisioner.generatedData["WinRMTimeout"], _ = time.ParseDuration("1h5m2s")
 	expectedArgs := []string{"?no_ssl=true", "no_verify_ssl=true", "read_timeout_sec=3902"}
 
 	args, err = provisioner.determineWinRMArgs(ui)
@@ -319,7 +321,7 @@ func TestProvisionerDetermineWinRMArgs(test *testing.T) {
 	}
 
 	// test malformed winrmtimeout
-	provisioner.generatedData["WinRMTimeout"] = "2s5m1h"
+	provisioner.generatedData["WinRMTimeout"], _ = time.ParseDuration("2a5l1z")
 	if _, err = provisioner.determineWinRMArgs(ui); err == nil || err.Error() != "invalid winrmtimeout" {
 		test.Error("win rm args did not fail on malformed timeout data")
 		test.Error(err)

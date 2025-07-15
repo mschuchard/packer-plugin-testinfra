@@ -4,8 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"strconv"
 	"strings"
+	"time"
 
 	"github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer-plugin-sdk/tmp"
@@ -254,56 +254,23 @@ func (provisioner *Provisioner) determineWinRMArgs(ui packer.Ui) ([]string, erro
 		optionalArgs = append(optionalArgs, "no_verify_ssl=true")
 	}
 	// check on timeout
-	if timeout, ok := provisioner.generatedData["WinRMTimeout"].(string); ok && timeout != "30m" {
-		// mathematical conversion of winrmtimeout to seconds
-		var timeoutSeconds int
+	if timeout, ok := provisioner.generatedData["WinRMTimeout"].(time.Duration); ok {
+		// "ok" basically means the data was not nil (nil implies "ignore"), so really if it coerced to 0s then it was invalid
+		if timeout == 0 {
+			log.Print(ok)
+			log.Print(timeout)
 
-		// cut around hours
-		hours, remainder, found := strings.Cut(timeout, "h")
-		// parse hours
-		if found {
-			if quantity, err := strconv.Atoi(hours); err == nil {
-				// convert hours
-				timeoutSeconds += quantity * 3600
-			} else {
-				ui.Errorf("WinRMTimeout Packer data is invalid value and/or format: %s", timeout)
-				return nil, errors.New("invalid winrmtimeout")
-			}
-		}
-
-		// cut around minutes
-		minutes, remainder, found := strings.Cut(remainder, "m")
-		// parse minutes
-		if found {
-			if quantity, err := strconv.Atoi(minutes); err == nil {
-				// convert minutes
-				timeoutSeconds += quantity * 60
-			} else {
-				ui.Errorf("WinRMTimeout Packer data is invalid value and/or format: %s", timeout)
-				return nil, errors.New("invalid winrmtimeout")
-			}
-		}
-
-		// cut around seconds
-		seconds, found := strings.CutSuffix(remainder, "s")
-		// parse seconds
-		if found {
-			if quantity, err := strconv.Atoi(seconds); err == nil {
-				// add seconds
-				timeoutSeconds += quantity
-			} else {
-				ui.Errorf("WinRMTimeout Packer data is invalid value and/or format: %s", timeout)
-				return nil, errors.New("invalid winrmtimeout")
-			}
-		}
-
-		// if no unit was "found" then data is clearly invalid/malformed
-		if timeoutSeconds == 0 {
+			// stronger validation of packer data timeout duration
+			//if _, err = time.ParseDuration(); err != nil {
+			//ui.Error(err)
 			ui.Errorf("WinRMTimeout Packer data is invalid value and/or format: %s", timeout)
 			return nil, errors.New("invalid winrmtimeout")
+			//}
+		} else if timeout.String() != "30m0s" {
+			// valid non-default timeout duration value, so convert to seconds and round to integer for final value
+			log.Print(timeout.String())
+			optionalArgs = append(optionalArgs, fmt.Sprintf("read_timeout_sec=%.0f", timeout.Seconds()))
 		}
-
-		optionalArgs = append(optionalArgs, fmt.Sprintf("read_timeout_sec=%d", timeoutSeconds))
 	}
 
 	// prefix first optional argument with ? character if it exists
