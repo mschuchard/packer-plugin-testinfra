@@ -71,12 +71,13 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
 		"WinRMUseSSL":   false,
 		"WinRMInsecure": true,
 	}
+	provisioner.generatedData["WinRMTimeout"], _ = time.ParseDuration("20m5s")
 
 	communication, err = provisioner.determineCommunication(ui)
 	if err != nil {
 		test.Errorf("determineCommunication function failed to determine winrm: %s", err)
 	}
-	if !slices.Equal(communication, []string{fmt.Sprintf("--hosts=winrm://%s:%s@%s:%d?no_ssl=true&no_verify_ssl=true", provisioner.generatedData["WinRMUser"], provisioner.generatedData["WinRMPassword"], provisioner.generatedData["WinRMHost"], provisioner.generatedData["WinRMPort"])}) {
+	if !slices.Equal(communication, []string{fmt.Sprintf("--hosts=winrm://%s:%s@%s:%d?no_ssl=true&no_verify_ssl=true&read_timeout_sec=1205", provisioner.generatedData["WinRMUser"], provisioner.generatedData["WinRMPassword"], provisioner.generatedData["WinRMHost"], provisioner.generatedData["WinRMPort"])}) {
 		test.Errorf("communication string slice for winrm incorrectly determined: %v", communication)
 	}
 

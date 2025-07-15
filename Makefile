@@ -30,8 +30,7 @@ plugin-check: install-packer-sdc build
 	@~/go/bin/packer-sdc plugin-check packer-plugin-testinfra
 
 generate: install-packer-sdc
-	export PATH="${PATH}:$(shell go env GOPATH)/bin"
-	@go generate ./...
+	PATH="${PATH}:$(shell go env GOPATH)/bin" go generate ./...
 	#packer-sdc renderdocs -src ./docs -dst ./.docs -partials ./docs-partials
 
 test: unit accept plugin-check
