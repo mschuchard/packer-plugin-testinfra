@@ -39,10 +39,11 @@ func (provisioner *Provisioner) determineCommunication(ui packer.Ui) ([]string, 
 			// "ok" basically means the data was not nil (nil implies "ignore"), so really if it coerced to 0s then it was invalid
 			if timeout == 0 {
 				ui.Errorf("SSHTimeout Packer data is invalid value and/or format: %s", timeout)
-				return nil, errors.New("invalid winrmtimeout")
+				return nil, errors.New("invalid sshtimeout")
 			} else if timeout.String() != "5m0s" {
 				// valid non-default timeout duration value, so convert to seconds and round to integer for final value
 				httpAddr = fmt.Sprintf("%s?timeout=%.0f", httpAddr, timeout.Seconds())
+				ui.Sayf("testinfra ssh timeout set to custom value of: %.0f seconds", timeout.Seconds())
 			}
 		}
 
@@ -188,7 +189,7 @@ func (provisioner *Provisioner) determineUserAddr(connectionType string, ui pack
 	// string format connection endpoint
 	httpAddr := fmt.Sprintf("%s:%d", ipaddress, port)
 
-	log.Print("determined communication user and connection endpoint")
+	ui.Sayf("user determined to be %s and connection endpoint determined to be %s", user, httpAddr)
 
 	return user, httpAddr, nil
 }
@@ -260,10 +261,12 @@ func (provisioner *Provisioner) determineWinRMArgs(ui packer.Ui) ([]string, erro
 	// check on disable ssl
 	if useSSL, ok := provisioner.generatedData["WinRMUseSSL"].(bool); ok && !useSSL {
 		optionalArgs = append(optionalArgs, "no_ssl=true")
+		ui.Say("winrm ssl disabled")
 	}
 	// check on do not verify ssl
 	if insecure, ok := provisioner.generatedData["WinRMInsecure"].(bool); ok && insecure {
 		optionalArgs = append(optionalArgs, "no_verify_ssl=true")
+		ui.Say("winrm ssl verification disabled")
 	}
 	// check on timeout
 	if timeout, ok := provisioner.generatedData["WinRMTimeout"].(time.Duration); ok {
@@ -274,6 +277,7 @@ func (provisioner *Provisioner) determineWinRMArgs(ui packer.Ui) ([]string, erro
 		} else if timeout.String() != "30m0s" {
 			// valid non-default timeout duration value, so convert to seconds and round to integer for final value
 			optionalArgs = append(optionalArgs, fmt.Sprintf("read_timeout_sec=%.0f", timeout.Seconds()))
+			ui.Sayf("testinfra winrm timeout set to custom value of: %.0f seconds", timeout.Seconds())
 		}
 	}
 

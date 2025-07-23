@@ -1,3 +1,6 @@
+### 1.5.1 (Next)
+- More improvements to Packer communicators' settings interfacing with Testinfra provisioner plugin.
+
 ### 1.5.0
 - Add `transfer_files` parameter.
 - Add `compact` parameter.
