@@ -19,6 +19,7 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
 	var provisioner Provisioner
 
 	// test ssh with httpaddr and password
+	sshTimeout, _ := time.ParseDuration("1h5m2s")
 	provisioner.generatedData = map[string]any{
 		"ConnType":          "ssh",
 		"SSHUsername":       "me",
@@ -27,6 +28,7 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
 		"SSHAgentAuth":      false,
 		"SSHHost":           "192.168.0.1",
 		"SSHPort":           22,
+		"SSHTimeout":        sshTimeout,
 		"ID":                "1234567890",
 	}
 
@@ -34,12 +36,20 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
 	if err != nil {
 		test.Errorf("determineCommunication function failed to determine ssh: %s", err)
 	}
-	if !slices.Equal(communication, []string{fmt.Sprintf("--hosts=ssh://%s:%s@%s:%d", provisioner.generatedData["SSHUsername"], provisioner.generatedData["SSHPassword"], provisioner.generatedData["SSHHost"], provisioner.generatedData["SSHPort"]), "--ssh-extra-args=\"-o StrictHostKeyChecking=no\""}) {
+	if !slices.Equal(communication, []string{fmt.Sprintf("--hosts=ssh://%s:%s@%s:%d?timeout=%.0f", provisioner.generatedData["SSHUsername"], provisioner.generatedData["SSHPassword"], provisioner.generatedData["SSHHost"], provisioner.generatedData["SSHPort"], sshTimeout.Seconds()), "--ssh-extra-args=\"-o StrictHostKeyChecking=no\""}) {
 		test.Errorf("communication string slice for ssh password incorrectly determined: %v", communication)
+	}
+
+	// test invalid ssh timeout
+	provisioner.generatedData["SSHTimeout"], _ = time.ParseDuration("2a5l1z")
+	if _, err = provisioner.determineCommunication(ui); err == nil || err.Error() != "invalid sshtimeout" {
+		test.Error("determineCommunication did not fail on invalid ssh timeout")
+		test.Error(err)
 	}
 
 	// test ssh with private key file
 	delete(provisioner.generatedData, "SSHPassword")
+	delete(provisioner.generatedData, "SSHTimeout")
 
 	communication, err = provisioner.determineCommunication(ui)
 	if err != nil {
