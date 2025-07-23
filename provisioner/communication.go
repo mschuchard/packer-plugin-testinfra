@@ -34,6 +34,18 @@ func (provisioner *Provisioner) determineCommunication(ui packer.Ui) ([]string, 
 			return nil, err
 		}
 
+		// check if ssh timeout is custom value
+		if timeout, ok := provisioner.generatedData["SSHTimeout"].(time.Duration); ok {
+			// "ok" basically means the data was not nil (nil implies "ignore"), so really if it coerced to 0s then it was invalid
+			if timeout == 0 {
+				ui.Errorf("SSHTimeout Packer data is invalid value and/or format: %s", timeout)
+				return nil, errors.New("invalid winrmtimeout")
+			} else if timeout.String() != "5m0s" {
+				// valid non-default timeout duration value, so convert to seconds and round to integer for final value
+				httpAddr = fmt.Sprintf("%s?timeout=%.0f", httpAddr, timeout.Seconds())
+			}
+		}
+
 		// assign ssh auth type and string (key file path or password)
 		sshAuthType, sshAuthString, err := provisioner.determineSSHAuth(ui)
 		if err != nil {
@@ -257,18 +269,10 @@ func (provisioner *Provisioner) determineWinRMArgs(ui packer.Ui) ([]string, erro
 	if timeout, ok := provisioner.generatedData["WinRMTimeout"].(time.Duration); ok {
 		// "ok" basically means the data was not nil (nil implies "ignore"), so really if it coerced to 0s then it was invalid
 		if timeout == 0 {
-			log.Print(ok)
-			log.Print(timeout)
-
-			// stronger validation of packer data timeout duration
-			//if _, err = time.ParseDuration(); err != nil {
-			//ui.Error(err)
 			ui.Errorf("WinRMTimeout Packer data is invalid value and/or format: %s", timeout)
 			return nil, errors.New("invalid winrmtimeout")
-			//}
 		} else if timeout.String() != "30m0s" {
 			// valid non-default timeout duration value, so convert to seconds and round to integer for final value
-			log.Print(timeout.String())
 			optionalArgs = append(optionalArgs, fmt.Sprintf("read_timeout_sec=%.0f", timeout.Seconds()))
 		}
 	}
