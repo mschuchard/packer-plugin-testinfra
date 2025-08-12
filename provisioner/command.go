@@ -27,11 +27,14 @@ func execCmd(cmd *exec.Cmd, ui packer.Ui) error {
 		ui.Error("unable to prepare the pipe for capturing stdout")
 		return err
 	}
+	defer stdout.Close()
+
 	stderr, err := cmd.StderrPipe()
 	if err != nil {
 		ui.Error("unable to prepare the pipe for capturing stderr")
 		return err
 	}
+	defer stderr.Close()
 
 	// initialize testinfra tests
 	ui.Say("Beginning Testinfra validation of machine image")
@@ -61,11 +64,12 @@ func execCmd(cmd *exec.Cmd, ui packer.Ui) error {
 	if len(errSlurp) > 0 {
 		ui.Error("Testinfra errored internally during execution:")
 		ui.Error(string(errSlurp))
+		return errors.New("Testinfra internal execution error")
 	}
 
 	// wait for testinfra to complete and flush buffers
 	if err = cmd.Wait(); err != nil {
-		ui.Error("Testinfra returned non-zero exit status: %s")
+		ui.Error("Testinfra returned non-zero exit status")
 		return err
 	}
 
@@ -193,11 +197,8 @@ func (provisioner *Provisioner) determineExecCmd(ui packer.Ui) (*exec.Cmd, *pack
 	if provisioner.config.Verbose > 0 {
 		// initialize arg
 		levelArg := "-"
-
-		// determine number of "v" in arg this way until go 1.23
-		for level := 0; level < provisioner.config.Verbose; level++ {
-			levelArg += "v"
-		}
+		// append correct number of "v" based on verbosity level
+		levelArg += strings.Repeat("v", provisioner.config.Verbose)
 
 		args = append(args, levelArg)
 	}
