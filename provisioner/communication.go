@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"os"
 	"strings"
 	"time"
 
@@ -221,13 +222,6 @@ func (provisioner *Provisioner) determineSSHAuth(ui packer.Ui) (sshAuth, string,
 			// we can use an empty/automatic private key with ssh agent auth
 			return agent, "", nil
 		} else { // we have no other options, so create a temp private key file from the packer data
-			// write a tmpfile for storing a private key
-			tmpSSHPrivateKey, err := tmp.File("testinfra-key")
-			if err != nil {
-				ui.Error("error creating a temp file for the ssh private key")
-				return "", "", err
-			}
-
 			// attempt to obtain a private key
 			SSHPrivateKey, ok := provisioner.generatedData["SSHPrivateKey"].(string)
 			if !ok || len("SSHPrivateKey") == 0 {
@@ -235,15 +229,29 @@ func (provisioner *Provisioner) determineSSHAuth(ui packer.Ui) (sshAuth, string,
 				return "", "", errors.New("no ssh authentication")
 			}
 
+			// write a tmpfile for storing a private key
+			tmpSSHPrivateKey, err := tmp.File("testinfra-key")
+			if err != nil {
+				ui.Error("error creating a temp file for the ssh private key")
+				return "", "", err
+			}
+
 			// write the private key to the tmpfile
 			if _, err = tmpSSHPrivateKey.WriteString(SSHPrivateKey); err != nil {
 				ui.Error("failed to write ssh private key to temp file")
+				// close and cleanup file
+				tmpSSHPrivateKey.Close()
+				os.Remove(tmpSSHPrivateKey.Name())
+
 				return "", "", err
 			}
 
 			// and then close the tmpfile storing the private key
 			if err = tmpSSHPrivateKey.Close(); err != nil {
 				ui.Error("failed to close ssh private key temp file")
+				// cleanup file
+				os.Remove(tmpSSHPrivateKey.Name())
+
 				return "", "", err
 			}
 
