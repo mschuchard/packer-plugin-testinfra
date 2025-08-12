@@ -2,6 +2,7 @@
 - More improvements to Packer communicators' settings interfacing with Testinfra provisioner plugin.
 - Improve SSH temporary file cleanup during errors.
 - Improve Testinfra command handling.
+- Improve path validation.
 
 ### 1.5.0
 - Add `transfer_files` parameter.

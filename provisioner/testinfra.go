@@ -63,9 +63,14 @@ func (provisioner *Provisioner) Prepare(raws ...any) error {
 	if len(provisioner.config.PytestPath) == 0 {
 		log.Print("setting PytestPath to default 'py.test'")
 		provisioner.config.PytestPath = "py.test"
-	} else if _, err := os.Stat(provisioner.config.PytestPath); err != nil { // verify py.test exists at supplied path
-		log.Printf("the Pytest executable does not exist at: %s", provisioner.config.PytestPath)
-		return err
+	} else if info, err := os.Stat(provisioner.config.PytestPath); err != nil || info.IsDir() { // verify valid py.test exists at supplied path
+		log.Printf("the Pytest executable does not exist, is not a file, or cannot be accessed at: %s", provisioner.config.PytestPath)
+
+		if err != nil {
+			return err
+		} else {
+			return errors.New("pytest installation issue")
+		}
 	}
 
 	// log optional arguments
@@ -91,10 +96,15 @@ func (provisioner *Provisioner) Prepare(raws ...any) error {
 	} else { // verify testinfra installed
 		// chdir parameter
 		if len(provisioner.config.Chdir) > 0 {
-			// verify chdir exists
-			if _, err := os.Stat(provisioner.config.Chdir); err != nil {
-				log.Printf("the chdir does not exist at: %s", provisioner.config.Chdir)
-				return err
+			// verify chdir exists and is directory
+			if info, err := os.Stat(provisioner.config.Chdir); err != nil || !info.IsDir() {
+				log.Printf("the chdir does not exist, is not a directory, or cannot be accessed at: %s", provisioner.config.Chdir)
+
+				if err != nil {
+					return err
+				} else {
+					return errors.New("chdir path issue")
+				}
 			} else {
 				log.Printf("test execution will occur within the following directory: %s", provisioner.config.Chdir)
 			}
@@ -111,6 +121,7 @@ func (provisioner *Provisioner) Prepare(raws ...any) error {
 			log.Print("unable to prepare the pipe for capturing stdout")
 			return err
 		}
+		defer stdout.Close()
 
 		// initialize testinfra installed check
 		if err := cmd.Start(); err != nil {
@@ -201,9 +212,14 @@ func (provisioner *Provisioner) Prepare(raws ...any) error {
 		log.Print("all files prefixed with 'test_' recursively discovered from the current working directory will be considered Testinfra test files")
 	} else { // verify testinfra files exist
 		for _, testFile := range provisioner.config.TestFiles {
-			if _, err := os.Stat(testFile); err != nil {
-				log.Printf("the Testinfra test_file does not exist at: %s", testFile)
-				return err
+			if info, err := os.Stat(testFile); err != nil || info.IsDir() {
+				log.Printf("the Testinfra test_file does not exist, is not a file, or cannot be accessed at: %s", testFile)
+
+				if err != nil {
+					return err
+				} else {
+					return errors.New("test file path issue")
+				}
 			}
 		}
 	}
