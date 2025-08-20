@@ -1,5 +1,5 @@
 packer {
-  required_version = "~> 1.10.0"
+  required_version = "~> 1.13.0"
 
   required_plugins {
     docker = {
@@ -13,12 +13,14 @@ packer {
   }
 }
 
+variable "password" {}
+
 # use local device with null provider
 source "null" "vbox" {
   ssh_host       = "127.0.0.1"
   ssh_port       = "10022"
   ssh_username   = "vagrant"
-  ssh_agent_auth = true
+  ssh_password   = var.password
 }
 
 # use ubuntu:latest docker image with docker provider
