@@ -175,6 +175,7 @@ func (provisioner *Provisioner) determineUserAddr(connectionType string, ui pack
 			return "", "", errors.New("unknown host address")
 		}
 	}
+
 	// valid ip address so now determine port
 	port, ok := provisioner.generatedData[genDataMap[connectionType]["port"]].(int)
 	if !ok || port == 0 {
@@ -182,8 +183,14 @@ func (provisioner *Provisioner) determineUserAddr(connectionType string, ui pack
 		port, ok = provisioner.generatedData["Port"].(int)
 
 		if !ok || port == 0 {
-			ui.Errorf("host port could not be determined from available Packer data: %d", port)
-			return "", "", errors.New("unknown host port")
+			// packer > 1.11 now casts "port" as int64 so try again with that
+			// never mind that sshport is still int (but dropped now for some reason), and either would actually be uint16...
+			port, ok := provisioner.generatedData["Port"].(int64)
+
+			if !ok || port == 0 {
+				ui.Error("host port could not be determined from available Packer data")
+				return "", "", errors.New("unknown host port")
+			}
 		}
 	}
 
