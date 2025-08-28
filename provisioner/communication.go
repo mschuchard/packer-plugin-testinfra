@@ -185,12 +185,15 @@ func (provisioner *Provisioner) determineUserAddr(connectionType string, ui pack
 		if !ok || port == 0 {
 			// packer > 1.11 now casts "port" as int64 so try again with that
 			// never mind that sshport is still int (but dropped now for some reason), and either would actually be uint16...
-			port, ok := provisioner.generatedData["Port"].(int64)
+			newPort, ok := provisioner.generatedData["Port"].(int64)
 
-			if !ok || port == 0 {
+			if !ok || newPort == 0 {
 				ui.Error("host port could not be determined from available Packer data")
 				return "", "", errors.New("unknown host port")
 			}
+
+			// convert int64 port to int
+			port = int(newPort)
 		}
 	}
 
