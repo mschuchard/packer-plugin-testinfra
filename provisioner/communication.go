@@ -182,7 +182,7 @@ func (provisioner *Provisioner) determineUserAddr(connectionType string, ui pack
 		port, ok = provisioner.generatedData["Port"].(int)
 
 		if !ok || port == 0 {
-			ui.Error("host port could not be determined from available Packer data")
+			ui.Errorf("host port could not be determined from available Packer data: %d", port)
 			return "", "", errors.New("unknown host port")
 		}
 	}
@@ -190,7 +190,7 @@ func (provisioner *Provisioner) determineUserAddr(connectionType string, ui pack
 	// string format connection endpoint
 	httpAddr := fmt.Sprintf("%s:%d", ipaddress, port)
 
-	ui.Sayf("user determined to be %s and connection endpoint determined to be %s", user, httpAddr)
+	log.Printf("user determined to be %s and connection endpoint determined to be %s", user, httpAddr)
 
 	return user, httpAddr, nil
 }

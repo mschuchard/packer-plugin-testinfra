@@ -144,7 +144,7 @@ func (provisioner *Provisioner) determineExecCmd(ui packer.Ui) (*exec.Cmd, *pack
 	if !localExec {
 		communication, err := provisioner.determineCommunication(ui)
 		if err != nil {
-			ui.Say("could not accurately determine communication configuration")
+			ui.Error("could not accurately determine communication configuration")
 			return nil, nil, err
 		}
 
@@ -155,7 +155,7 @@ func (provisioner *Provisioner) determineExecCmd(ui packer.Ui) (*exec.Cmd, *pack
 	// pytest path
 	pytestPath, err := interpolate.Render(provisioner.config.PytestPath, &provisioner.config.ctx)
 	if err != nil {
-		ui.Sayf("error parsing config for PytestPath: %v", err.Error())
+		ui.Errorf("error parsing config for PytestPath: %v", err.Error())
 		return nil, nil, err
 	}
 
@@ -167,7 +167,7 @@ func (provisioner *Provisioner) determineExecCmd(ui packer.Ui) (*exec.Cmd, *pack
 	// keyword
 	keyword, err := interpolate.Render(provisioner.config.Keyword, &provisioner.config.ctx)
 	if err != nil {
-		ui.Sayf("error parsing config for Keyword: %v", err.Error())
+		ui.Errorf("error parsing config for Keyword: %v", err.Error())
 		return nil, nil, err
 	}
 	if len(keyword) > 0 {
@@ -176,7 +176,7 @@ func (provisioner *Provisioner) determineExecCmd(ui packer.Ui) (*exec.Cmd, *pack
 	// marker
 	marker, err := interpolate.Render(provisioner.config.Marker, &provisioner.config.ctx)
 	if err != nil {
-		ui.Sayf("error parsing config for Marker: %v", err.Error())
+		ui.Errorf("error parsing config for Marker: %v", err.Error())
 		return nil, nil, err
 	}
 	if len(marker) > 0 {
