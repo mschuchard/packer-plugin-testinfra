@@ -15,7 +15,7 @@ func main() {
 	// register plugin provisioner
 	packerPluginSet.RegisterProvisioner(plugin.DEFAULT_NAME, new(testinfra.Provisioner))
 	// set plugin version
-	pluginVersion := version.NewPluginVersion("1.5.0", "", "")
+	pluginVersion := version.NewPluginVersion("1.5.1", "", "")
 	packerPluginSet.SetVersion(pluginVersion)
 
 	// execute packer plugin for testinfra
