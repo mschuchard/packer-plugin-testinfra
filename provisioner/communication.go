@@ -17,9 +17,10 @@ func (provisioner *Provisioner) determineCommunication(ui packer.Ui) ([]string, 
 	// declare communication args
 	var args []string
 
-	// determine communication string by packer connection type
-	connectionType, ok := provisioner.generatedData["ConnType"].(string)
-	if !ok {
+	// determine communication type enum by packer data
+	connectionType, err := connectionType(provisioner.generatedData["ConnType"].(string)).New()
+	if err != nil {
+		// do not log the enum returned error because it is only a symptom of the packer data issue
 		ui.Error("packer is unable to resolve the communicator connection type")
 		return nil, errors.New("unknown communicator connection type")
 	}
@@ -28,7 +29,7 @@ func (provisioner *Provisioner) determineCommunication(ui packer.Ui) ([]string, 
 
 	// determine communication based on connection type
 	switch connectionType {
-	case "ssh":
+	case ssh:
 		// assign user and host address
 		user, httpAddr, err := provisioner.determineUserAddr(connectionType, ui)
 		if err != nil {
@@ -84,7 +85,7 @@ func (provisioner *Provisioner) determineCommunication(ui packer.Ui) ([]string, 
 
 			return nil, errors.New("unsupported ssh auth type")
 		}
-	case "winrm":
+	case winrm:
 		// assign user and host address
 		user, httpAddr, err := provisioner.determineUserAddr(connectionType, ui)
 		if err != nil {
@@ -116,7 +117,7 @@ func (provisioner *Provisioner) determineCommunication(ui packer.Ui) ([]string, 
 
 		// append args with winrm connection backend information (user, password, host, port)
 		args = append(args, connectionBackend)
-	case "docker", "podman", "lxc":
+	case docker, podman, lxc:
 		// determine instanceid
 		instanceID, ok := provisioner.generatedData["ID"].(string)
 		if !ok || len(instanceID) == 0 {
@@ -127,6 +128,7 @@ func (provisioner *Provisioner) determineCommunication(ui packer.Ui) ([]string, 
 		// append args with container connection backend information (instanceid)
 		args = append(args, fmt.Sprintf("--hosts=%s://%s", connectionType, instanceID))
 	default:
+		// should be unreachable due to earlier enum validation, but here for safety
 		ui.Errorf("communication backend with machine image is not supported, and was resolved to '%s'", connectionType)
 		return nil, errors.New("unsupported communication type")
 	}
@@ -137,15 +139,15 @@ func (provisioner *Provisioner) determineCommunication(ui packer.Ui) ([]string, 
 }
 
 // determine and return user and host address
-func (provisioner *Provisioner) determineUserAddr(connectionType string, ui packer.Ui) (string, string, error) {
+func (provisioner *Provisioner) determineUserAddr(connType connectionType, ui packer.Ui) (string, string, error) {
 	// ssh and winrm provisioner generated data maps
-	genDataMap := map[string]map[string]string{
-		"ssh": {
+	genDataMap := map[connectionType]map[string]string{
+		ssh: {
 			"user": "SSHUsername",
 			"host": "SSHHost",
 			"port": "SSHPort",
 		},
-		"winrm": {
+		winrm: {
 			"user": "WinRMUser",
 			"host": "WinRMHost",
 			"port": "WinRMPort",
@@ -153,7 +155,7 @@ func (provisioner *Provisioner) determineUserAddr(connectionType string, ui pack
 	}
 
 	// determine user based on connection protocol
-	user, ok := provisioner.generatedData[genDataMap[connectionType]["user"]].(string)
+	user, ok := provisioner.generatedData[genDataMap[connType]["user"]].(string)
 	if !ok || len(user) == 0 {
 		// fallback to general user (usually packer)
 		user, ok = provisioner.generatedData["User"].(string)
@@ -165,7 +167,7 @@ func (provisioner *Provisioner) determineUserAddr(connectionType string, ui pack
 	}
 
 	// determine host address and port based on connection protocol
-	ipaddress, ok := provisioner.generatedData[genDataMap[connectionType]["host"]].(string)
+	ipaddress, ok := provisioner.generatedData[genDataMap[connType]["host"]].(string)
 	if !ok || len(ipaddress) == 0 {
 		// fallback to general host information
 		ipaddress, ok = provisioner.generatedData["Host"].(string)
@@ -177,7 +179,7 @@ func (provisioner *Provisioner) determineUserAddr(connectionType string, ui pack
 	}
 
 	// valid ip address so now determine port
-	port, ok := provisioner.generatedData[genDataMap[connectionType]["port"]].(int)
+	port, ok := provisioner.generatedData[genDataMap[connType]["port"]].(int)
 	if !ok || port == 0 {
 		// fallback to general port
 		port, ok = provisioner.generatedData["Port"].(int)

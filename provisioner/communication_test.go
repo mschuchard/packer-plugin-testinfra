@@ -156,7 +156,7 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
 	}
 
 	_, err = provisioner.determineCommunication(ui)
-	if err == nil || err.Error() != "unsupported communication type" {
+	if err == nil || err.Error() != "unknown communicator connection type" {
 		test.Error("determineCommunication function did not fail on unsupported connection type")
 	}
 }
@@ -173,7 +173,7 @@ func TestDetermineUserAddr(test *testing.T) {
 		"Port": 22,
 	}
 
-	user, httpAddr, err := provisioner.determineUserAddr("ssh", ui)
+	user, httpAddr, err := provisioner.determineUserAddr(ssh, ui)
 	if err != nil {
 		test.Error("determineUserAddr failed to determine user and address")
 		test.Error(err)
@@ -189,17 +189,17 @@ func TestDetermineUserAddr(test *testing.T) {
 	}
 
 	delete(provisioner.generatedData, "Port")
-	if _, _, err = provisioner.determineUserAddr("ssh", ui); err == nil || err.Error() != "unknown host port" {
+	if _, _, err = provisioner.determineUserAddr(ssh, ui); err == nil || err.Error() != "unknown host port" {
 		test.Error("determineCommunication did not fail on unknown port")
 	}
 
 	delete(provisioner.generatedData, "Host")
-	if _, _, err = provisioner.determineUserAddr("ssh", ui); err == nil || err.Error() != "unknown host address" {
+	if _, _, err = provisioner.determineUserAddr(ssh, ui); err == nil || err.Error() != "unknown host address" {
 		test.Error("determineCommunication did not fail on unknown host")
 	}
 
 	delete(provisioner.generatedData, "User")
-	if _, _, err = provisioner.determineUserAddr("ssh", ui); err == nil || err.Error() != "unknown remote user" {
+	if _, _, err = provisioner.determineUserAddr(ssh, ui); err == nil || err.Error() != "unknown remote user" {
 		test.Error("determineCommunication did not fail on unknown user")
 	}
 }
