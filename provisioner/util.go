@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"slices"
 
 	"github.com/hashicorp/packer-plugin-sdk/packer"
 )
@@ -21,9 +22,29 @@ const (
 
 // ssh auth type conversion
 func (a sshAuth) New() (sshAuth, error) {
-	if a != password && a != agent && a != privateKey {
+	if !slices.Contains([]sshAuth{password, agent, privateKey}, a) {
 		log.Printf("string %s could not be converted to sshAuth enum", a)
 		return "", errors.New("invalid sshAuth enum")
+	}
+	return a, nil
+}
+
+// connection type with pseudo-enum
+type connectionType string
+
+const (
+	ssh    connectionType = "ssh"
+	winrm  connectionType = "winrm"
+	docker connectionType = "docker"
+	podman connectionType = "podman"
+	lxc    connectionType = "lxc"
+)
+
+// connection type conversion
+func (a connectionType) New() (connectionType, error) {
+	if !slices.Contains([]connectionType{ssh, winrm, docker, podman, lxc}, a) {
+		log.Printf("string %s could not be converted to connection enum", a)
+		return "", errors.New("invalid connection enum")
 	}
 	return a, nil
 }
