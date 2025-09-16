@@ -2,6 +2,7 @@ package main
 
 import (
 	_ "embed"
+	"log"
 	"os"
 	"os/exec"
 	"regexp"
@@ -17,15 +18,23 @@ var testTemplate string
 func TestProvisioner(test *testing.T) {
 	// initialize acceptance test config struct
 	testCase := &acctest.PluginTestCase{
-		Name:     "testinfra_provisioner_test",
-		Init:     false,
-		Setup:    func() error { return nil },
+		Name: "testinfra_plugin_test",
+		Init: false,
+		Setup: func() error {
+			// inform vbox machine should be running
+			log.Print("INFO: ensure the virtualbox virtual machine is running for ssh communicator testing")
+			// validate password env var exists
+			if password := os.Getenv("PACKER_VAR_password"); len(password) == 0 {
+				test.Fatal("environment variable 'PACKER_VAR_password' must be set for acceptance testing")
+			}
+			return nil
+		},
 		Template: testTemplate,
 		Type:     "provisioner",
 		Check: func(buildCommand *exec.Cmd, logfile string) error {
 			// verify good exit code from packer process
 			if buildCommand.ProcessState != nil && buildCommand.ProcessState.ExitCode() != 0 {
-				test.Errorf("unexpected exit code from Packer build; logfile: %s", logfile)
+				test.Errorf("unexpected exit code from 'packer build'; logfile: %s", logfile)
 				return nil
 			}
 

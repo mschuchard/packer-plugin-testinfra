@@ -16,8 +16,6 @@ unit:
 	@go test -v ./provisioner
 
 accept: install
-	# start vbox machine for ssh communicator testing
-	# export PKR_VAR_password=
 	@PACKER_ACC=1 go test -v ./main_test.go -timeout=1m
 
 install-packer-sdc:
