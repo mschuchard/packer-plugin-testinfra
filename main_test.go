@@ -18,19 +18,34 @@ var testTemplate string
 func TestProvisioner(test *testing.T) {
 	// initialize acceptance test config struct
 	testCase := &acctest.PluginTestCase{
-		Name: "testinfra_plugin_test",
-		Init: false,
+		Name:     "testinfra_plugin_test",
+		Type:     "provisioner",
+		Template: testTemplate,
+		Init:     false,
 		Setup: func() error {
-			// inform vbox machine should be running
+			// inform vbox machine should be running and env var name
 			log.Print("INFO: ensure the virtualbox virtual machine is running for ssh communicator testing")
-			// validate password env var exists
-			if password := os.Getenv("PACKER_VAR_password"); len(password) == 0 {
-				test.Fatal("environment variable 'PACKER_VAR_password' must be set for acceptance testing")
+			log.Print("INFO: password env var name is 'PKR_VAR_password'")
+
+			// symlink fixture for pathing issue
+			os.Symlink("fixtures/test.pkr.hcl", "test.pkr.hcl")
+			defer func() {
+				if err := os.Remove("test.pkr.hcl"); err != nil {
+					log.Printf("failed to remove packer template fixture symlink: %s", err)
+					log.Print("symlink must be removed manually")
+				}
+			}()
+
+			// execute packer validate command on template
+			validateCommand := exec.Command("packer", "validate", ".")
+			validateCommand.Stdout = os.Stdout
+			validateCommand.Stderr = os.Stderr
+			if err := validateCommand.Run(); err != nil {
+				test.Fatalf("packer test fixture validation error: %s", err)
 			}
+
 			return nil
 		},
-		Template: testTemplate,
-		Type:     "provisioner",
 		Check: func(buildCommand *exec.Cmd, logfile string) error {
 			// verify good exit code from packer process
 			if buildCommand.ProcessState != nil && buildCommand.ProcessState.ExitCode() != 0 {
