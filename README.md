@@ -55,7 +55,7 @@ build {
 
 ### Communicators
 
-This plugin currently supports the `ssh`, `docker`, `lxc`, and `podman` communicator types. It also supports the `winrm` communicator type, and execution local to the instance used for building the machine image artifact, as beta features. Please ensure that at least one communication type is enabled for the built image (this is also generally a requirement for Packer itself).
+This plugin currently supports the `ssh`, `winrm`, `docker`, `lxc`, and `podman` communicator types. It also supports execution local to the instance used for building the machine image artifact as a beta feature (it is not currently acceptance tested). Please ensure that at least one communication type is enabled for the built image (this is also generally a requirement for Packer itself).
 
 ## Contributing
 Code should pass all unit and acceptance tests. New features should involve new unit tests.
