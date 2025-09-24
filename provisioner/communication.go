@@ -281,12 +281,12 @@ func (provisioner *Provisioner) determineWinRMArgs(ui packer.Ui) ([]string, erro
 	// check on disable ssl
 	if useSSL, ok := provisioner.generatedData["WinRMUseSSL"].(bool); ok && !useSSL {
 		optionalArgs = append(optionalArgs, "no_ssl=true")
-		ui.Say("winrm ssl disabled")
+		ui.Say("winrm ssl disabled for testinfra backend")
 	}
 	// check on do not verify ssl
 	if insecure, ok := provisioner.generatedData["WinRMInsecure"].(bool); ok && insecure {
 		optionalArgs = append(optionalArgs, "no_verify_ssl=true")
-		ui.Say("winrm ssl verification disabled")
+		ui.Say("winrm ssl verification disabled for testinfra backend")
 	}
 	// check on timeout
 	if timeout, ok := provisioner.generatedData["WinRMTimeout"].(time.Duration); ok {

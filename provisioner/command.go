@@ -24,14 +24,14 @@ func execCmd(cmd *exec.Cmd, ui packer.Ui) error {
 	// prepare stdout and stderr pipes
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
-		ui.Error("unable to prepare the pipe for capturing stdout")
+		ui.Error("unable to prepare the pipe for capturing testinfra stdout")
 		return err
 	}
 	defer stdout.Close()
 
 	stderr, err := cmd.StderrPipe()
 	if err != nil {
-		ui.Error("unable to prepare the pipe for capturing stderr")
+		ui.Error("unable to prepare the pipe for capturing testinfra stderr")
 		return err
 	}
 	defer stderr.Close()
@@ -144,7 +144,7 @@ func (provisioner *Provisioner) determineExecCmd(ui packer.Ui) (*exec.Cmd, *pack
 	if !localExec {
 		communication, err := provisioner.determineCommunication(ui)
 		if err != nil {
-			ui.Error("could not accurately determine communication configuration")
+			ui.Error("could not accurately determine packer communication configuration")
 			return nil, nil, err
 		}
 

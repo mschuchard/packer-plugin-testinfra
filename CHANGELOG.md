@@ -1,3 +1,6 @@
+### 1.5.2 (Next)
+- Note in Packer logs when they originate from this plugin.
+
 ### 1.5.1
 - More improvements to Packer communicators' settings interfacing with Testinfra provisioner plugin.
 - Improve SSH temporary file cleanup during errors.

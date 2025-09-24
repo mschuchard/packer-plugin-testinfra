@@ -21,6 +21,7 @@ source "null" "vbox" {
   ssh_port       = "10022"
   ssh_username   = "vagrant"
   ssh_password   = var.password
+  ssh_timeout    = "10s"
 }
 
 # use ubuntu:latest docker image with docker provider
