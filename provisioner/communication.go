@@ -17,12 +17,17 @@ func (provisioner *Provisioner) determineCommunication(ui packer.Ui) ([]string, 
 	// declare communication args
 	var args []string
 
-	// determine communication type enum by packer data
-	connectionType, err := connectionType(provisioner.generatedData["ConnType"].(string)).New()
-	if err != nil {
-		// do not log the enum returned error because it is only a symptom of the packer data issue
-		ui.Error("packer is unable to resolve the communicator connection type")
+	// determine communication type string by packer data
+	connectionString, ok := provisioner.generatedData["ConnType"].(string)
+	if !ok || len(connectionString) == 0 {
+		ui.Error("packer is unable to determine the communicator connection type from available data")
 		return nil, errors.New("unknown communicator connection type")
+	}
+	// convert to enum
+	connectionType, err := connectionType(connectionString).New()
+	if err != nil {
+		ui.Error("packer is using an unsupported connection type")
+		return nil, err
 	}
 
 	ui.Sayf("testinfra communicating via %s connection type", connectionType)

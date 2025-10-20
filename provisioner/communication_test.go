@@ -156,8 +156,14 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
 	}
 
 	_, err = provisioner.determineCommunication(ui)
-	if err == nil || err.Error() != "unknown communicator connection type" {
+	if err == nil || err.Error() != "invalid connection enum" {
 		test.Error("determineCommunication function did not fail on unsupported connection type")
+	}
+
+	delete(provisioner.generatedData, "ConnType")
+	_, err = provisioner.determineCommunication(ui)
+	if err == nil || err.Error() != "unknown communicator connection type" {
+		test.Error("determineCommunication function did not fail on missing connection type")
 	}
 }
 
