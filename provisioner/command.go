@@ -113,7 +113,7 @@ func packerRemoteCmd(localCmd *packer.RemoteCmd, installCmd []string, comm packe
 
 	// wait for testinfra to complete and flush buffers
 	// then check for pytest/testinfra execution issues
-	if exitStatus := localCmd.Wait(); exitStatus > 0 || len(stderr.String()) > 0 {
+	if exitStatus := localCmd.Wait(); exitStatus > 0 {
 		ui.Error("Testinfra errored internally during execution:")
 		ui.Error(stderr.String())
 		ui.Errorf("Testinfra returned exit status: %d", exitStatus)

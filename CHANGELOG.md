@@ -2,6 +2,8 @@
 - Note in Packer logs when they originate from this plugin.
 - Promote `winrm` to officially supported communicator.
 - Minor code optimization.
+- Fix Packer ssh private key validation.
+- Indicate failed testinfra execution based solely on exit code.
 
 ### 1.5.1
 - More improvements to Packer communicators' settings interfacing with Testinfra provisioner plugin.

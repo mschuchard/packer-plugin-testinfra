@@ -241,7 +241,7 @@ func (provisioner *Provisioner) determineSSHAuth(ui packer.Ui) (sshAuth, string,
 		} else { // we have no other options, so create a temp private key file from the packer data
 			// attempt to obtain a private key
 			SSHPrivateKey, ok := provisioner.generatedData["SSHPrivateKey"].(string)
-			if !ok || len("SSHPrivateKey") == 0 {
+			if !ok || len(SSHPrivateKey) == 0 {
 				ui.Error("no SSH authentication information was available in Packer data")
 				return "", "", errors.New("no ssh authentication")
 			}
