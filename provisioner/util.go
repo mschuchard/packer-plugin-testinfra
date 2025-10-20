@@ -20,9 +20,11 @@ const (
 	privateKey sshAuth = "privateKey"
 )
 
+var sshAuths = []sshAuth{password, agent, privateKey}
+
 // ssh auth type conversion
 func (a sshAuth) New() (sshAuth, error) {
-	if !slices.Contains([]sshAuth{password, agent, privateKey}, a) {
+	if !slices.Contains(sshAuths, a) {
 		log.Printf("string %s could not be converted to sshAuth enum", a)
 		return "", errors.New("invalid sshAuth enum")
 	}
@@ -40,9 +42,11 @@ const (
 	lxc    connectionType = "lxc"
 )
 
+var connectionTypes = []connectionType{ssh, winrm, docker, podman, lxc}
+
 // connection type conversion
 func (a connectionType) New() (connectionType, error) {
-	if !slices.Contains([]connectionType{ssh, winrm, docker, podman, lxc}, a) {
+	if !slices.Contains(connectionTypes, a) {
 		log.Printf("string %s could not be converted to connection enum", a)
 		return "", errors.New("invalid connection enum")
 	}

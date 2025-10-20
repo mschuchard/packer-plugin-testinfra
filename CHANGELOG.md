@@ -1,6 +1,7 @@
 ### 1.5.2 (Next)
 - Note in Packer logs when they originate from this plugin.
 - Promote `winrm` to officially supported communicator.
+- Minor code optimization.
 
 ### 1.5.1
 - More improvements to Packer communicators' settings interfacing with Testinfra provisioner plugin.
