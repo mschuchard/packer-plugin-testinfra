@@ -1,4 +1,4 @@
-### 1.5.2 (Next)
+### 1.5.2
 - Note in Packer logs when they originate from this plugin.
 - Promote `winrm` to officially supported communicator.
 - Minor code optimization.
