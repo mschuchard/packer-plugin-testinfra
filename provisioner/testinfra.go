@@ -138,6 +138,13 @@ func (provisioner *Provisioner) Prepare(raws ...any) error {
 
 		// examine pytest stdout
 		if len(outSlurp) > 0 {
+			// validate minimum version 8.4.0
+			if strings.Contains(string(outSlurp), "--force-short-summary") {
+				log.Print("pytest version greater than or equal to 8.4.0 verified")
+			} else {
+				log.Print("the version of the specified pytest is lower than the minimum required version of 8.4.0")
+				return errors.New("unsupported version of pytest specified")
+			}
 			// check for testinfra in stdout
 			if strings.Contains(string(outSlurp), "testinfra") {
 				log.Print("testinfra installation existence verified")

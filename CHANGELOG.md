@@ -1,3 +1,8 @@
+### 1.6.0 (Next)
+- Minimum `pytest` version increased to 8.4.0.
+- Validate minimum version of `pytest`.
+- Add forced short summary configuration to `compact` parameter functionality.
+
 ### 1.5.2
 - Note in Packer logs when they originate from this plugin.
 - Promote `winrm` to officially supported communicator.
