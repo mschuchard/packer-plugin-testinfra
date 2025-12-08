@@ -171,7 +171,7 @@ func (provisioner *Provisioner) determineExecCmd(ui packer.Ui) (*exec.Cmd, *pack
 		return nil, nil, err
 	}
 	if len(keyword) > 0 {
-		args = append(args, "-k", fmt.Sprintf("\"%s\"", keyword))
+		args = append(args, "-k", keyword)
 	}
 	// marker
 	marker, err := interpolate.Render(provisioner.config.Marker, &provisioner.config.ctx)
@@ -180,7 +180,7 @@ func (provisioner *Provisioner) determineExecCmd(ui packer.Ui) (*exec.Cmd, *pack
 		return nil, nil, err
 	}
 	if len(marker) > 0 {
-		args = append(args, "-m", fmt.Sprintf("\"%s\"", marker))
+		args = append(args, "-m", marker)
 	}
 	// parallel
 	if provisioner.config.Parallel {
@@ -190,7 +190,7 @@ func (provisioner *Provisioner) determineExecCmd(ui packer.Ui) (*exec.Cmd, *pack
 	if provisioner.config.Sudo {
 		args = append(args, "--sudo")
 	} else if len(provisioner.config.SudoUser) > 0 { // sudo_user
-		args = append(args, fmt.Sprintf("\"--sudo-user=%s\"", provisioner.config.SudoUser))
+		args = append(args, fmt.Sprintf("--sudo-user=%s", provisioner.config.SudoUser))
 	}
 
 	// verbose

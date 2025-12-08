@@ -3,6 +3,7 @@
 - Validate minimum version of `pytest`.
 - Add forced short summary configuration to `compact` parameter functionality.
 - Improve Packer `SSHAgentAuth` check.
+- Improve Testinfra argument string formatting.
 
 ### 1.5.2
 - Note in Packer logs when they originate from this plugin.
