@@ -235,7 +235,7 @@ func (provisioner *Provisioner) determineSSHAuth(ui packer.Ui) (sshAuth, string,
 		if ok && len(sshPrivateKeyFile) > 0 {
 			// we have a specified private key/cert file so use that
 			return privateKey, sshPrivateKeyFile, nil
-		} else if provisioner.generatedData["SSHAgentAuth"].(bool) {
+		} else if agentAuth, ok := provisioner.generatedData["SSHAgentAuth"].(bool); agentAuth && ok {
 			// we can use an empty/automatic private key with ssh agent auth
 			return agent, "", nil
 		} else { // we have no other options, so create a temp private key file from the packer data

@@ -1,2 +1,2 @@
 #!/bin/sh
-echo "testinfra"
+echo "testinfra\n--force-short-summary"
