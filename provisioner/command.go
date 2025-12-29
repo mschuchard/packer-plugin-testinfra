@@ -18,9 +18,6 @@ import (
 
 // execute testinfra remotely with *exec.Cmd
 func execCmd(cmd *exec.Cmd, ui packer.Ui) error {
-	// merge in env settings
-	cmd.Env = os.Environ()
-
 	// prepare stdout and stderr pipes
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
@@ -217,6 +214,23 @@ func (provisioner *Provisioner) determineExecCmd(ui packer.Ui) (*exec.Cmd, *pack
 		// determine if user requested execution in different directory
 		if len(provisioner.config.Chdir) > 0 {
 			cmd.Dir = provisioner.config.Chdir
+		}
+
+		// convert env vars parameter from map to slice
+		if len(provisioner.config.EnvVars) > 0 {
+			// intiialize envVars string slice
+			envVars := make([]string, 0, len(provisioner.config.EnvVars))
+
+			// convert EnvVars map to envVars slice
+			for key, value := range provisioner.config.EnvVars {
+				envVars = append(envVars, fmt.Sprintf("%s=%s", key, value))
+			}
+
+			// concat os environment with envVars
+			cmd.Env = slices.Concat(os.Environ(), envVars)
+		} else {
+			// initialize environment variables from os
+			cmd.Env = os.Environ()
 		}
 
 		return cmd, nil, nil
