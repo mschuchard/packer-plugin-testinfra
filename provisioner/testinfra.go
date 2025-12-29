@@ -18,19 +18,20 @@ import (
 
 // config data deserialized/unmarshalled from packer template/config
 type Config struct {
-	Chdir          string   `mapstructure:"chdir" required:"false"`
-	Compact        bool     `mapstructure:"compact" required:"false"`
-	DestinationDir string   `mapstructure:"destination_dir" required:"false"`
-	InstallCmd     []string `mapstructure:"install_cmd" required:"false"`
-	Keyword        string   `mapstructure:"keyword" required:"false"`
-	Local          bool     `mapstructure:"local" required:"false"`
-	Marker         string   `mapstructure:"marker" required:"false"`
-	Parallel       bool     `mapstructure:"parallel" required:"false"`
-	PytestPath     string   `mapstructure:"pytest_path" required:"false"`
-	Sudo           bool     `mapstructure:"sudo" required:"false"`
-	SudoUser       string   `mapstructure:"sudo_user" required:"false"`
-	TestFiles      []string `mapstructure:"test_files" required:"false"`
-	Verbose        int      `mapstructure:"verbose" required:"false"`
+	Chdir          string            `mapstructure:"chdir" required:"false"`
+	Compact        bool              `mapstructure:"compact" required:"false"`
+	DestinationDir string            `mapstructure:"destination_dir" required:"false"`
+	EnvVars        map[string]string `mapstructure:"env_vars" required:"false"`
+	InstallCmd     []string          `mapstructure:"install_cmd" required:"false"`
+	Keyword        string            `mapstructure:"keyword" required:"false"`
+	Local          bool              `mapstructure:"local" required:"false"`
+	Marker         string            `mapstructure:"marker" required:"false"`
+	Parallel       bool              `mapstructure:"parallel" required:"false"`
+	PytestPath     string            `mapstructure:"pytest_path" required:"false"`
+	Sudo           bool              `mapstructure:"sudo" required:"false"`
+	SudoUser       string            `mapstructure:"sudo_user" required:"false"`
+	TestFiles      []string          `mapstructure:"test_files" required:"false"`
+	Verbose        int               `mapstructure:"verbose" required:"false"`
 
 	ctx interpolate.Context
 }
@@ -170,6 +171,11 @@ func (provisioner *Provisioner) Prepare(raws ...any) error {
 	}
 
 	log.Print("Testinfra installation verified")
+
+	// environment variables
+	if len(provisioner.config.EnvVars) > 0 {
+		log.Printf("environment variables '%v' will be set for the Testinfra execution", provisioner.config.EnvVars)
+	}
 
 	// compact parameter
 	if provisioner.config.Compact {

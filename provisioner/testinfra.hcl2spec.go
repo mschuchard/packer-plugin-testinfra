@@ -10,19 +10,20 @@ import (
 // FlatConfig is an auto-generated flat version of Config.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatConfig struct {
-	Chdir          *string  `mapstructure:"chdir" required:"false" cty:"chdir" hcl:"chdir"`
-	Compact        *bool    `mapstructure:"compact" required:"false" cty:"compact" hcl:"compact"`
-	DestinationDir *string  `mapstructure:"destination_dir" required:"false" cty:"destination_dir" hcl:"destination_dir"`
-	InstallCmd     []string `mapstructure:"install_cmd" required:"false" cty:"install_cmd" hcl:"install_cmd"`
-	Keyword        *string  `mapstructure:"keyword" required:"false" cty:"keyword" hcl:"keyword"`
-	Local          *bool    `mapstructure:"local" required:"false" cty:"local" hcl:"local"`
-	Marker         *string  `mapstructure:"marker" required:"false" cty:"marker" hcl:"marker"`
-	Parallel       *bool    `mapstructure:"parallel" required:"false" cty:"parallel" hcl:"parallel"`
-	PytestPath     *string  `mapstructure:"pytest_path" required:"false" cty:"pytest_path" hcl:"pytest_path"`
-	Sudo           *bool    `mapstructure:"sudo" required:"false" cty:"sudo" hcl:"sudo"`
-	SudoUser       *string  `mapstructure:"sudo_user" required:"false" cty:"sudo_user" hcl:"sudo_user"`
-	TestFiles      []string `mapstructure:"test_files" required:"false" cty:"test_files" hcl:"test_files"`
-	Verbose        *int     `mapstructure:"verbose" required:"false" cty:"verbose" hcl:"verbose"`
+	Chdir          *string           `mapstructure:"chdir" required:"false" cty:"chdir" hcl:"chdir"`
+	Compact        *bool             `mapstructure:"compact" required:"false" cty:"compact" hcl:"compact"`
+	DestinationDir *string           `mapstructure:"destination_dir" required:"false" cty:"destination_dir" hcl:"destination_dir"`
+	EnvVars        map[string]string `mapstructure:"env_vars" required:"false" cty:"env_vars" hcl:"env_vars"`
+	InstallCmd     []string          `mapstructure:"install_cmd" required:"false" cty:"install_cmd" hcl:"install_cmd"`
+	Keyword        *string           `mapstructure:"keyword" required:"false" cty:"keyword" hcl:"keyword"`
+	Local          *bool             `mapstructure:"local" required:"false" cty:"local" hcl:"local"`
+	Marker         *string           `mapstructure:"marker" required:"false" cty:"marker" hcl:"marker"`
+	Parallel       *bool             `mapstructure:"parallel" required:"false" cty:"parallel" hcl:"parallel"`
+	PytestPath     *string           `mapstructure:"pytest_path" required:"false" cty:"pytest_path" hcl:"pytest_path"`
+	Sudo           *bool             `mapstructure:"sudo" required:"false" cty:"sudo" hcl:"sudo"`
+	SudoUser       *string           `mapstructure:"sudo_user" required:"false" cty:"sudo_user" hcl:"sudo_user"`
+	TestFiles      []string          `mapstructure:"test_files" required:"false" cty:"test_files" hcl:"test_files"`
+	Verbose        *int              `mapstructure:"verbose" required:"false" cty:"verbose" hcl:"verbose"`
 }
 
 // FlatMapstructure returns a new FlatConfig.
@@ -40,6 +41,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"chdir":           &hcldec.AttrSpec{Name: "chdir", Type: cty.String, Required: false},
 		"compact":         &hcldec.AttrSpec{Name: "compact", Type: cty.Bool, Required: false},
 		"destination_dir": &hcldec.AttrSpec{Name: "destination_dir", Type: cty.String, Required: false},
+		"env_vars":        &hcldec.AttrSpec{Name: "env_vars", Type: cty.Map(cty.String), Required: false},
 		"install_cmd":     &hcldec.AttrSpec{Name: "install_cmd", Type: cty.List(cty.String), Required: false},
 		"keyword":         &hcldec.AttrSpec{Name: "keyword", Type: cty.String, Required: false},
 		"local":           &hcldec.AttrSpec{Name: "local", Type: cty.Bool, Required: false},
