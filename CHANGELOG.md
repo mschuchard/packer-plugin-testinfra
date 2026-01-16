@@ -2,6 +2,7 @@
 - Minimum `pytest` version increased to 8.4.0.
 - Validate minimum version of `pytest`.
 - Add forced short summary configuration to `compact` parameter functionality.
+- Add `env_vars` parameter.
 - Improve Packer `SSHAgentAuth` check.
 - Improve Testinfra argument string formatting.
 

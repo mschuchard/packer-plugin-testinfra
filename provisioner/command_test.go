@@ -64,4 +64,8 @@ func TestProvisionerDetermineExecCmd(test *testing.T) {
 	if localCmd != nil {
 		test.Errorf("determineExecCmd function failed to properly determine empty local execution command for basic config with SSH communicator: %v", localCmd.Command)
 	}
+	// hardcoded for efficiency
+	if !slices.Contains(execCmd.Env, "foo=bar") || !slices.Contains(execCmd.Env, "baz=bot") {
+		test.Errorf("determineExecCmd function failed to properly determine remote execution command environment variables for basic config with SSH communicator: %v", execCmd.Env)
+	}
 }
