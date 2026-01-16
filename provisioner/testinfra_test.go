@@ -2,6 +2,7 @@ package testinfra
 
 import (
 	"errors"
+	"maps"
 	"os"
 	"slices"
 	"testing"
@@ -17,6 +18,7 @@ var basicConfig = &Config{
 	Chdir:          "/tmp",
 	Compact:        true,
 	InstallCmd:     []string{"/bin/false"},
+	EnvVars:        map[string]string{"foo": "bar", "baz": "bot"},
 	Keyword:        "not slow",
 	Local:          false,
 	Marker:         "fast",
@@ -35,7 +37,7 @@ func TestProvisionerConfig(test *testing.T) {
 		config: *basicConfig,
 	}
 
-	if provisioner.config.PytestPath != basicConfig.PytestPath || provisioner.config.DestinationDir != basicConfig.DestinationDir || !slices.Equal(provisioner.config.TestFiles, basicConfig.TestFiles) || provisioner.config.Chdir != basicConfig.Chdir || provisioner.config.Compact != basicConfig.Compact || !slices.Equal(provisioner.config.InstallCmd, basicConfig.InstallCmd) || provisioner.config.Keyword != basicConfig.Keyword || provisioner.config.Local != basicConfig.Local || provisioner.config.Marker != basicConfig.Marker || provisioner.config.Parallel != basicConfig.Parallel || provisioner.config.Sudo != basicConfig.Sudo || provisioner.config.SudoUser != basicConfig.SudoUser || provisioner.config.Verbose != basicConfig.Verbose {
+	if provisioner.config.PytestPath != basicConfig.PytestPath || provisioner.config.DestinationDir != basicConfig.DestinationDir || !slices.Equal(provisioner.config.TestFiles, basicConfig.TestFiles) || provisioner.config.Chdir != basicConfig.Chdir || provisioner.config.Compact != basicConfig.Compact || !slices.Equal(provisioner.config.InstallCmd, basicConfig.InstallCmd) || !maps.Equal(provisioner.config.EnvVars, basicConfig.EnvVars) || provisioner.config.Keyword != basicConfig.Keyword || provisioner.config.Local != basicConfig.Local || provisioner.config.Marker != basicConfig.Marker || provisioner.config.Parallel != basicConfig.Parallel || provisioner.config.Sudo != basicConfig.Sudo || provisioner.config.SudoUser != basicConfig.SudoUser || provisioner.config.Verbose != basicConfig.Verbose {
 		test.Errorf("provisioner config struct not initialized correctly")
 	}
 }
@@ -72,11 +74,15 @@ func TestProvisionerPrepareMinimal(test *testing.T) {
 	}
 
 	if provisioner.config.Compact {
-		test.Errorf("default false setting for compact is incorrect: %t", provisioner.config.Compact)
+		test.Errorf("default false setting for Compact is incorrect: %t", provisioner.config.Compact)
 	}
 
 	if len(provisioner.config.InstallCmd) > 0 {
 		test.Errorf("default empty setting for InstallCmd is incorrect: %s", provisioner.config.InstallCmd)
+	}
+
+	if len(provisioner.config.EnvVars) > 0 {
+		test.Errorf("default empty setting for EnvVars is incorrect: %+q", provisioner.config.EnvVars)
 	}
 
 	if len(provisioner.config.Keyword) > 0 {
