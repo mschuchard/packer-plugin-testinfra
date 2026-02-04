@@ -54,10 +54,19 @@ func TestProvisionerInterface(test *testing.T) {
 func TestProvisionerPrepareBasic(test *testing.T) {
 	var provisioner Provisioner
 
+	// validate basic config passes
 	if err := provisioner.Prepare(basicConfig); err != nil {
 		test.Errorf("prepare function failed with basic Testinfra Packer config")
 		test.Error(err)
 	}
+
+	// validate basic config passes when execution is local
+	basicConfig.Local = true
+	if err := provisioner.Prepare(basicConfig); err != nil {
+		test.Errorf("prepare function failed with basic Testinfra Packer config with local execution")
+		test.Error(err)
+	}
+	basicConfig.Local = false
 }
 
 // test provisioner prepare with minimal config (essentially default settings)
@@ -132,10 +141,20 @@ func TestProvisionerPrepareNonExistChdir(test *testing.T) {
 	var noChdirConfig = &Config{
 		Chdir: "/tmp/no_one_here",
 	}
+	var fileChdirConfig = &Config{
+		Chdir: "/etc/hosts",
+	}
 
 	if !CI {
+		// test nonexistent chdir
 		if err := provisioner.Prepare(noChdirConfig); err == nil || !errors.Is(err, os.ErrNotExist) {
 			test.Error("prepare function did not fail correctly on nonexistent chdir")
+			test.Error(err)
+		}
+
+		// test chdir is file
+		if err := provisioner.Prepare(fileChdirConfig); err == nil || err.Error() != "chdir path issue" {
+			test.Error("prepare function did not fail correctly on file chdir")
 			test.Error(err)
 		}
 	}
@@ -153,6 +172,17 @@ func TestProvisionerPrepareNonExistFiles(test *testing.T) {
 
 	if err := provisioner.Prepare(noPytestConfig); err == nil || !(errors.Is(err, os.ErrNotExist)) {
 		test.Error("prepare function did not fail correctly on nonexistent pytest")
+		test.Error(err)
+	}
+
+	// test pytest is directory
+	var dirPytestConfig = &Config{
+		PytestPath: "/etc",
+		TestFiles:  []string{"../fixtures/test.py"},
+	}
+
+	if err := provisioner.Prepare(dirPytestConfig); err == nil || err.Error() != "pytest installation issue" {
+		test.Error("prepare function did not fail correctly on directory pytest")
 		test.Error(err)
 	}
 
