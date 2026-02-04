@@ -92,7 +92,12 @@ func (provisioner *Provisioner) Prepare(raws ...any) error {
 		// no validation of xdist installation
 		if provisioner.config.Parallel {
 			log.Print("pytest-xdist validation does not occur with local execution")
-			log.Print("Testinfra tests will execute in parallel across the available physical CPUs")
+			log.Print("Testinfra tests will execute in parallel across the available physical CPUs if possible")
+		}
+
+		// environment variables
+		if len(provisioner.config.EnvVars) > 0 {
+			log.Print("environment variables cannot be set for local execution, and this parameter will be ignored")
 		}
 	} else { // verify testinfra installed
 		// chdir parameter
@@ -109,6 +114,11 @@ func (provisioner *Provisioner) Prepare(raws ...any) error {
 			} else {
 				log.Printf("test execution will occur within the following directory: %s", provisioner.config.Chdir)
 			}
+		}
+
+		// environment variables
+		if len(provisioner.config.EnvVars) > 0 {
+			log.Printf("environment variables '%v' will be set for the Testinfra execution", provisioner.config.EnvVars)
 		}
 
 		log.Print("beginning Testinfra installation verification")
@@ -171,11 +181,6 @@ func (provisioner *Provisioner) Prepare(raws ...any) error {
 	}
 
 	log.Print("Testinfra installation verified")
-
-	// environment variables
-	if len(provisioner.config.EnvVars) > 0 {
-		log.Printf("environment variables '%v' will be set for the Testinfra execution", provisioner.config.EnvVars)
-	}
 
 	// compact parameter
 	if provisioner.config.Compact {
