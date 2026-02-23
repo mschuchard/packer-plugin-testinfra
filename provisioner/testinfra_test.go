@@ -61,12 +61,12 @@ func TestProvisionerPrepareBasic(test *testing.T) {
 	}
 
 	// validate basic config passes when execution is local
-	basicConfig.Local = true
-	if err := provisioner.Prepare(basicConfig); err != nil {
+	newBasicConfig := *basicConfig
+	newBasicConfig.Local = true
+	if err := provisioner.Prepare(&newBasicConfig); err != nil {
 		test.Errorf("prepare function failed with basic Testinfra Packer config with local execution")
 		test.Error(err)
 	}
-	basicConfig.Local = false
 }
 
 // test provisioner prepare with minimal config (essentially default settings)
