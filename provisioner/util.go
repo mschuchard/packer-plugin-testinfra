@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 	"slices"
 
 	"github.com/hashicorp/packer-plugin-sdk/packer"
@@ -80,7 +81,7 @@ func uploadFiles(comm packer.Communicator, files []string, destDir string) error
 		fileIo := bytes.NewReader(fileBytes)
 
 		// upload file to destination dir
-		destination := fmt.Sprintf("%s/%s", destDir, file)
+		destination := fmt.Sprintf("%s/%s", destDir, filepath.Base(file))
 		if nestedErr := comm.Upload(destination, fileIo, nil); nestedErr != nil {
 			// join error into collection
 			err = errors.Join(err, nestedErr)
