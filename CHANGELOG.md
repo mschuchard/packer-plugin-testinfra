@@ -1,6 +1,7 @@
 ### 1.6.1
 - Improve `env_vars` parameter configuration logging.
 - Improve file upload destination targeting.
+- Improve logging safeguards if dual remote/local commands are determined.
 
 ### 1.6.0
 - Minimum `pytest` version increased to 8.4.0.

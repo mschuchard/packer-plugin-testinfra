@@ -283,8 +283,12 @@ func (provisioner *Provisioner) Provision(ctx context.Context, ui packer.Ui, com
 		// execute testinfra local to instance with packer.RemoteCmd
 		err = packerRemoteCmd(localCmd, provisioner.config.InstallCmd, comm, ui)
 	} else {
-		// somehow we either returned both commands or neither or something really weird for one or both
-		ui.Errorf("incorrectly determined Testinfra remote command (%s) and/or command local to instance (%s); please report as bug with this log information", cmd.String(), localCmd.Command)
+		// somehow we either returned both commands or neither
+		ui.Error("incorrectly determined Testinfra remote command and command local to instance; please report as bug with any relevant log information")
+		if cmd != nil && localCmd != nil {
+			ui.Errorf("Testinfra remote command: %s", cmd.String())
+			ui.Errorf("Testinfra local command: %s", localCmd.Command)
+		}
 		return errors.New("failed pytest command determination")
 	}
 	if err != nil {
