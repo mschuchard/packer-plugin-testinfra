@@ -1,6 +1,7 @@
 package testinfra
 
 import (
+	"context"
 	"fmt"
 	"slices"
 	"testing"
@@ -22,7 +23,7 @@ func TestProvisionerDetermineExecCmd(test *testing.T) {
 		},
 	}
 
-	execCmd, localCmd, err := provisioner.determineExecCmd(ui)
+	execCmd, localCmd, err := provisioner.determineExecCmd(context.Background(), ui)
 	if err != nil {
 		test.Errorf("determineExecCmd function failed to determine execution commands for local execution minimal config: %v", err)
 	}
@@ -50,7 +51,7 @@ func TestProvisionerDetermineExecCmd(test *testing.T) {
 		"ID":                "1234567890",
 	}
 
-	execCmd, localCmd, err = provisioner.determineExecCmd(ui)
+	execCmd, localCmd, err = provisioner.determineExecCmd(context.Background(), ui)
 	if err != nil {
 		test.Errorf("determineExecCmd function failed to determine execution command for basic config with SSH communicator: %s", err)
 	}

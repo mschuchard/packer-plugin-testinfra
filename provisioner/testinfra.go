@@ -256,7 +256,7 @@ func (provisioner *Provisioner) Provision(ctx context.Context, ui packer.Ui, com
 	provisioner.config.ctx.Data = generatedData
 
 	// prepare testinfra test command
-	cmd, localCmd, err := provisioner.determineExecCmd(ui)
+	cmd, localCmd, err := provisioner.determineExecCmd(ctx, ui)
 	if cmd != nil {
 		log.Printf("complete Testinfra remote command is: %s", cmd.String())
 	} else if localCmd != nil {
@@ -281,7 +281,7 @@ func (provisioner *Provisioner) Provision(ctx context.Context, ui packer.Ui, com
 		}
 
 		// execute testinfra local to instance with packer.RemoteCmd
-		err = packerRemoteCmd(localCmd, provisioner.config.InstallCmd, comm, ui)
+		err = packerRemoteCmd(ctx, localCmd, provisioner.config.InstallCmd, comm, ui)
 	} else {
 		// somehow we either returned both commands or neither
 		ui.Error("incorrectly determined Testinfra remote command and command local to instance; please report as bug with any relevant log information")

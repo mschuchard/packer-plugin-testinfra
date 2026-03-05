@@ -3,6 +3,7 @@
 - Improve file upload destination targeting.
 - Improve logging safeguards if no remote/local commands are determined.
 - Indicate failed testinfra execution based solely on exit code (remote).
+- Ensure Testinfra process follows Packer process user instructions (context propagation).
 
 ### 1.6.0
 - Minimum `pytest` version increased to 8.4.0.

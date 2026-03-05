@@ -72,10 +72,7 @@ func execCmd(cmd *exec.Cmd, ui packer.Ui) error {
 }
 
 // execute testinfra local to temp packer instance with packer.RemoteCmd
-func packerRemoteCmd(localCmd *packer.RemoteCmd, installCmd []string, comm packer.Communicator, ui packer.Ui) error {
-	// initialize context and log command
-	ctx := context.Background()
-
+func packerRemoteCmd(ctx context.Context, localCmd *packer.RemoteCmd, installCmd []string, comm packer.Communicator, ui packer.Ui) error {
 	// install testinfra on temp packer instance
 	if len(installCmd) > 0 {
 		// cast installCmd to string, log, and init localInstallCmd
@@ -127,7 +124,7 @@ func packerRemoteCmd(localCmd *packer.RemoteCmd, installCmd []string, comm packe
 }
 
 // determine and return execution command for testinfra
-func (provisioner *Provisioner) determineExecCmd(ui packer.Ui) (*exec.Cmd, *packer.RemoteCmd, error) {
+func (provisioner *Provisioner) determineExecCmd(ctx context.Context, ui packer.Ui) (*exec.Cmd, *packer.RemoteCmd, error) {
 	// declare args
 	var args []string
 
@@ -205,7 +202,7 @@ func (provisioner *Provisioner) determineExecCmd(ui packer.Ui) (*exec.Cmd, *pack
 		return nil, &packer.RemoteCmd{Command: strings.Join(command, " ")}, nil
 	} else { // return exec command for remote testing against instance
 		// initialize cmd
-		cmd := exec.Command(pytestPath, args...)
+		cmd := exec.CommandContext(ctx, pytestPath, args...)
 		// determine if user requested execution in different directory
 		if len(provisioner.config.Chdir) > 0 {
 			cmd.Dir = provisioner.config.Chdir
