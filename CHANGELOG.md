@@ -1,7 +1,8 @@
-### 1.6.1
+### 1.6.1 (Next)
 - Improve `env_vars` parameter configuration logging.
 - Improve file upload destination targeting.
-- Improve logging safeguards if dual remote/local commands are determined.
+- Improve logging safeguards if no remote/local commands are determined.
+- Indicate failed testinfra execution based solely on exit code (remote).
 
 ### 1.6.0
 - Minimum `pytest` version increased to 8.4.0.
@@ -16,7 +17,7 @@
 - Promote `winrm` to officially supported communicator.
 - Minor code optimization.
 - Fix Packer ssh private key validation.
-- Indicate failed testinfra execution based solely on exit code.
+- Indicate failed testinfra execution based solely on exit code (local).
 
 ### 1.5.1
 - More improvements to Packer communicators' settings interfacing with Testinfra provisioner plugin.

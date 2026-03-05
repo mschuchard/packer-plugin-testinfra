@@ -53,15 +53,10 @@ func execCmd(cmd *exec.Cmd, ui packer.Ui) error {
 		ui.Say("Testinfra produced no stdout; it is probable that something unintended occurred during execution")
 	}
 
-	errSlurp, err := io.ReadAll(stderr)
+	_, err = io.ReadAll(stderr)
 	if err != nil {
 		ui.Error("unable to read stderr from Testinfra")
 		return err
-	}
-	if len(errSlurp) > 0 {
-		ui.Error("Testinfra errored internally during execution:")
-		ui.Error(string(errSlurp))
-		return errors.New("Testinfra internal execution error")
 	}
 
 	// wait for testinfra to complete and flush buffers
