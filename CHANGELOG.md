@@ -1,4 +1,4 @@
-### 1.6.1 (Next)
+### 1.6.1
 - Improve `env_vars` parameter configuration logging.
 - Improve file upload destination targeting.
 - Improve logging safeguards if no remote/local commands are determined.
