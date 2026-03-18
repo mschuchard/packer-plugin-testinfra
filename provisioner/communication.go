@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"os/exec"
 	"strings"
 	"time"
 
@@ -50,7 +51,7 @@ func (provisioner *Provisioner) determineCommunication(ui packer.Ui) ([]string, 
 			} else if timeout.String() != "5m0s" {
 				// valid non-default timeout duration value, so convert to seconds and round to integer for final value
 				httpAddr = fmt.Sprintf("%s?timeout=%.0f", httpAddr, timeout.Seconds())
-				ui.Sayf("testinfra ssh timeout set to custom value of: %.0f seconds", timeout.Seconds())
+				log.Printf("testinfra ssh timeout set to custom value of: %.0f seconds", timeout.Seconds())
 			}
 		}
 
@@ -73,8 +74,11 @@ func (provisioner *Provisioner) determineCommunication(ui packer.Ui) ([]string, 
 		// use ssh password
 		case password:
 			ui.Say("utilizing SSH password for communicator authentication")
-			ui.Say("warning: this is typically invalid for Python to SSH interfacing, but this plugin will attempt it anyway")
-			ui.Say("warning: consider using a passwordless private key or SSH agent instead")
+			// validate sshpass is installed
+			if _, err := exec.LookPath("sshpass"); err != nil {
+				ui.Error("sshpass is not installed or not found in the system path, and it is required to support password-based SSH authentication in testinfra")
+				return nil, errors.New("sshpass installation not found")
+			}
 
 			// append args with ssh connection backend information (user, password, host, port), and no strict host key checking
 			args = append(args, fmt.Sprintf("--hosts=ssh://%s:%s@%s", user, sshAuthString, httpAddr), "--ssh-extra-args=\"-o StrictHostKeyChecking=no\"")

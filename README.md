@@ -62,6 +62,8 @@ build {
 
 This plugin currently supports the `ssh`, `winrm`, `docker`, `lxc`, and `podman` communicator types. It also supports execution local to the instance used for building the machine image artifact as a beta feature (it is not currently acceptance tested). Please ensure that at least one communication type is enabled for the built image (this is also generally a requirement for Packer itself).
 
+The `ssh` communicator requires private key, password, or agent based authentication. If password-based authentication is utilized, then `sshpass` must be installed to support it with the `testinfra` connection backend.
+
 ## Contributing
 Code should pass all unit and acceptance tests. New features should involve new unit tests.
 

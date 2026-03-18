@@ -1,3 +1,6 @@
+### 1.6.2
+- Validate `sshpass` is installed for password-based SSH authentication.
+
 ### 1.6.1
 - Improve `env_vars` parameter configuration logging.
 - Improve file upload destination targeting.
