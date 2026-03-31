@@ -3,6 +3,7 @@ package testinfra
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"regexp"
 	"slices"
 	"testing"
@@ -32,14 +33,15 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
 		"ID":                "1234567890",
 	}
 
+	absFixturesPath, _ := filepath.Abs("../fixtures")
+	os.Setenv("PATH", absFixturesPath+":"+os.Getenv("PATH"))
 	communication, err := provisioner.determineCommunication(ui)
-	if err == nil || err.Error() != "sshpass installation not found" {
-		test.Error("determineCommunication function failed to error when sshpass was not installed or errored unexpectedly")
-		test.Error(err)
+	if err != nil {
+		test.Errorf("determineCommunication function failed to determine ssh: %s", err)
 	}
-	/*if !slices.Equal(communication, []string{fmt.Sprintf("--hosts=ssh://%s:%s@%s:%d?timeout=%.0f", provisioner.generatedData["SSHUsername"], provisioner.generatedData["SSHPassword"], provisioner.generatedData["SSHHost"], provisioner.generatedData["SSHPort"], sshTimeout.Seconds()), "--ssh-extra-args=\"-o StrictHostKeyChecking=no\""}) {
+	if !slices.Equal(communication, []string{fmt.Sprintf("--hosts=ssh://%s:%s@%s:%d?timeout=%.0f", provisioner.generatedData["SSHUsername"], provisioner.generatedData["SSHPassword"], provisioner.generatedData["SSHHost"], provisioner.generatedData["SSHPort"], sshTimeout.Seconds()), "--ssh-extra-args=\"-o StrictHostKeyChecking=no\""}) {
 		test.Errorf("communication string slice for ssh password incorrectly determined: %v", communication)
-	}*/
+	}
 
 	// test invalid ssh timeout
 	provisioner.generatedData["SSHTimeout"], _ = time.ParseDuration("2a5l1z")
