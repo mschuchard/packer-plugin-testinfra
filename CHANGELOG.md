@@ -1,5 +1,6 @@
-### 1.6.2
+### 1.6.2 (Next)
 - Validate `sshpass` is installed for password-based SSH authentication.
+- Optimize `pytest` validation preflight checks.
 
 ### 1.6.1
 - Improve `env_vars` parameter configuration logging.

@@ -4,7 +4,6 @@ package testinfra
 import (
 	"context"
 	"errors"
-	"io"
 	"log"
 	"os"
 	"os/exec"
@@ -124,24 +123,7 @@ func (provisioner *Provisioner) Prepare(raws ...any) error {
 		log.Print("beginning Testinfra installation verification")
 
 		// initialize testinfra -h command
-		cmd := exec.Command(provisioner.config.PytestPath, []string{"-h"}...)
-
-		// prepare stdout pipe
-		stdout, err := cmd.StdoutPipe()
-		if err != nil {
-			log.Print("unable to prepare the pipe for capturing stdout")
-			return err
-		}
-		defer stdout.Close()
-
-		// initialize testinfra installed check
-		if err := cmd.Start(); err != nil {
-			log.Printf("initialization of Testinfra 'py.test -h' command execution returned non-zero exit status: %s", err.Error())
-			return err
-		}
-
-		// capture pytest stdout
-		outSlurp, err := io.ReadAll(stdout)
+		outSlurp, err := exec.Command(provisioner.config.PytestPath, "-h").Output()
 		if err != nil {
 			log.Printf("unable to read stdout from Pytest: %s", err.Error())
 			return err
