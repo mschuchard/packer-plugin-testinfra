@@ -23,7 +23,7 @@ var basicConfig = &Config{
 	Local:          false,
 	Marker:         "fast",
 	Parallel:       true,
-	PytestPath:     "/usr/local/bin/py.test",
+	PytestPath:     "../fixtures/py.test",
 	Sudo:           true,
 	SudoUser:       "fooman",
 	DestinationDir: "/tmp",
