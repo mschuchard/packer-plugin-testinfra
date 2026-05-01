@@ -63,6 +63,12 @@ func (provisioner *Provisioner) Prepare(raws ...any) error {
 	if len(provisioner.config.PytestPath) == 0 {
 		log.Print("setting PytestPath to default 'py.test'")
 		provisioner.config.PytestPath = "py.test"
+
+		// validate py.test exists in default path
+		if _, err := exec.LookPath("py.test"); err != nil {
+			log.Print("the default Pytest executable 'py.test' does not exist in the system PATH")
+			return err
+		}
 	} else if info, err := os.Stat(provisioner.config.PytestPath); err != nil || info.IsDir() { // verify valid py.test exists at supplied path
 		log.Printf("the Pytest executable does not exist, is not a file, or cannot be accessed at: %s", provisioner.config.PytestPath)
 

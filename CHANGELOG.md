@@ -2,6 +2,7 @@
 - Validate `sshpass` is installed for password-based SSH authentication.
 - Optimize `pytest` validation preflight checks.
 - Log `stderr` during Testinfra failures.
+- Validate Pytest in system PATH when using default value.
 
 ### 1.6.1
 - Improve `env_vars` parameter configuration logging.
