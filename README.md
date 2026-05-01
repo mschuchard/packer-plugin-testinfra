@@ -3,7 +3,7 @@ The Packer plugin for [Testinfra](https://testinfra.readthedocs.io) (currently a
 
 ## Requirements
 - Packer >= 1.7.0
-- Pytest >= 8.4.0
+- PyTest >= 8.4.0
 - Testinfra >= 6.7.0
 
 ## Installation
