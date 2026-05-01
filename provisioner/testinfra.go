@@ -187,10 +187,10 @@ func (provisioner *Provisioner) Prepare(raws ...any) error {
 		if len(provisioner.config.SudoUser) > 0 {
 			log.Print("the 'sudo_user' parameter is ignored when sudo is enabled")
 		}
-	} else {
+	} else { // sudo_user mutually exclusive with sudo
 		log.Print("testinfra will not execute with sudo")
 
-		// sudo_user mutually exclusive with sudo
+		// check if sudo_user specified
 		if len(provisioner.config.SudoUser) > 0 {
 			log.Printf("testinfra will execute as user: %s", provisioner.config.SudoUser)
 		}

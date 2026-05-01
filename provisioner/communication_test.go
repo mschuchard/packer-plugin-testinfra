@@ -33,8 +33,13 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
 		"ID":                "1234567890",
 	}
 
-	absFixturesPath, _ := filepath.Abs("../fixtures")
-	os.Setenv("PATH", absFixturesPath+":"+os.Getenv("PATH"))
+	absFixturesPath, err := filepath.Abs("../fixtures")
+	if err != nil {
+		test.Error("unable to determine absolute path for fixtures directory")
+		test.Fatal(err)
+	}
+	test.Setenv("PATH", absFixturesPath+":"+os.Getenv("PATH"))
+
 	communication, err := provisioner.determineCommunication(ui)
 	if err != nil {
 		test.Errorf("determineCommunication function failed to determine ssh: %s", err)
