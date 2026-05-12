@@ -4,6 +4,7 @@ import (
 	"errors"
 	"maps"
 	"os"
+	"path/filepath"
 	"slices"
 	"testing"
 
@@ -72,6 +73,13 @@ func TestProvisionerPrepareBasic(test *testing.T) {
 // test provisioner prepare with minimal config (essentially default settings)
 func TestProvisionerPrepareMinimal(test *testing.T) {
 	var provisioner Provisioner
+
+	absFixturesPath, err := filepath.Abs("../fixtures")
+	if err != nil {
+		test.Error("unable to determine absolute path for fixtures directory")
+		test.Fatal(err)
+	}
+	test.Setenv("PATH", absFixturesPath+":"+os.Getenv("PATH"))
 
 	if err := provisioner.Prepare(&Config{}); err != nil {
 		test.Errorf("prepare function failed with minimal Testinfra Packer config")
