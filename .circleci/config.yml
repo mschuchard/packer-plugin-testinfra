@@ -16,7 +16,7 @@ jobs:
         name: build
         command: make build
     - run:
-        name: unit test with fake py.test
+        name: unit test
         command: make unit
 
 workflows:

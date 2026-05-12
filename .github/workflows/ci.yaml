@@ -24,5 +24,5 @@ jobs:
       run: apk add --no-cache --update make
     - name: build
       run: make build
-    - name: unit test with fake py.test
+    - name: unit test
       run: make unit
