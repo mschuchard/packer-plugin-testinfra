@@ -1,4 +1,4 @@
-### 1.6.2 (Next)
+### 1.6.2
 - Validate `sshpass` is installed for password-based SSH authentication.
 - Optimize `pytest` validation preflight checks.
 - Log `stderr` during Testinfra failures.
