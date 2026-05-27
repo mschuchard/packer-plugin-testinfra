@@ -27,6 +27,7 @@ type Config struct {
 	Marker         string            `mapstructure:"marker" required:"false"`
 	Parallel       bool              `mapstructure:"parallel" required:"false"`
 	PytestPath     string            `mapstructure:"pytest_path" required:"false"`
+	Retries        int               `mapstructure:"retries" required:"false"`
 	Sudo           bool              `mapstructure:"sudo" required:"false"`
 	SudoUser       string            `mapstructure:"sudo_user" required:"false"`
 	TestFiles      []string          `mapstructure:"test_files" required:"false"`
@@ -183,6 +184,11 @@ func (provisioner *Provisioner) Prepare(raws ...any) error {
 	// marker parameter
 	if len(provisioner.config.Marker) > 0 {
 		log.Printf("executing tests with marker expression: %s", provisioner.config.Marker)
+	}
+
+	// retries parameter
+	if provisioner.config.Retries > 0 {
+		log.Printf("failed tests will be retried up to %d times", provisioner.config.Retries)
 	}
 
 	// sudo and sudo_user parameters

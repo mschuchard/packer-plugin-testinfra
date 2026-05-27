@@ -2,10 +2,8 @@ package testinfra
 
 import (
 	"errors"
-	"maps"
 	"os"
 	"path/filepath"
-	"slices"
 	"testing"
 
 	"github.com/hashicorp/packer-plugin-sdk/packer"
@@ -18,16 +16,17 @@ var CI bool = os.Getenv("CIRCLECI") == "true" || os.Getenv("GITHUB_ACTIONS") == 
 var basicConfig = &Config{
 	Chdir:          "/tmp",
 	Compact:        true,
-	InstallCmd:     []string{"/bin/false"},
+	DestinationDir: "/tmp",
 	EnvVars:        map[string]string{"foo": "bar", "baz": "bot"},
+	InstallCmd:     []string{"/bin/false"},
 	Keyword:        "not slow",
 	Local:          false,
 	Marker:         "fast",
 	Parallel:       true,
 	PytestPath:     "../fixtures/py.test",
+	Retries:        2,
 	Sudo:           true,
 	SudoUser:       "fooman",
-	DestinationDir: "/tmp",
 	TestFiles:      []string{"../fixtures/test.py"},
 	Verbose:        2,
 }
@@ -38,8 +37,35 @@ func TestProvisionerConfig(test *testing.T) {
 		config: *basicConfig,
 	}
 
-	if provisioner.config.PytestPath != basicConfig.PytestPath || provisioner.config.DestinationDir != basicConfig.DestinationDir || !slices.Equal(provisioner.config.TestFiles, basicConfig.TestFiles) || provisioner.config.Chdir != basicConfig.Chdir || provisioner.config.Compact != basicConfig.Compact || !slices.Equal(provisioner.config.InstallCmd, basicConfig.InstallCmd) || !maps.Equal(provisioner.config.EnvVars, basicConfig.EnvVars) || provisioner.config.Keyword != basicConfig.Keyword || provisioner.config.Local != basicConfig.Local || provisioner.config.Marker != basicConfig.Marker || provisioner.config.Parallel != basicConfig.Parallel || provisioner.config.Sudo != basicConfig.Sudo || provisioner.config.SudoUser != basicConfig.SudoUser || provisioner.config.Verbose != basicConfig.Verbose {
+	if provisioner.config.PytestPath != basicConfig.PytestPath || provisioner.config.DestinationDir != basicConfig.DestinationDir || provisioner.config.Chdir != basicConfig.Chdir || provisioner.config.Compact != basicConfig.Compact || provisioner.config.Keyword != basicConfig.Keyword || provisioner.config.Local != basicConfig.Local || provisioner.config.Marker != basicConfig.Marker || provisioner.config.Parallel != basicConfig.Parallel || provisioner.config.Retries != basicConfig.Retries || provisioner.config.Sudo != basicConfig.Sudo || provisioner.config.SudoUser != basicConfig.SudoUser || provisioner.config.Verbose != basicConfig.Verbose {
 		test.Errorf("provisioner config struct not initialized correctly")
+	}
+
+	if len(provisioner.config.TestFiles) != len(basicConfig.TestFiles) {
+		test.Errorf("provisioner config struct not initialized correctly")
+	}
+	for i, v := range provisioner.config.TestFiles {
+		if v != basicConfig.TestFiles[i] {
+			test.Errorf("provisioner config struct testfiles not initialized correctly")
+		}
+	}
+
+	if len(provisioner.config.InstallCmd) != len(basicConfig.InstallCmd) {
+		test.Errorf("provisioner config struct not initialized correctly")
+	}
+	for i, v := range provisioner.config.InstallCmd {
+		if v != basicConfig.InstallCmd[i] {
+			test.Errorf("provisioner config struct installcmd not initialized correctly")
+		}
+	}
+
+	if len(provisioner.config.EnvVars) != len(basicConfig.EnvVars) {
+		test.Errorf("provisioner config struct not initialized correctly")
+	}
+	for k, v := range provisioner.config.EnvVars {
+		if v != basicConfig.EnvVars[k] {
+			test.Errorf("provisioner config struct envvars not initialized correctly")
+		}
 	}
 }
 
@@ -94,12 +120,16 @@ func TestProvisionerPrepareMinimal(test *testing.T) {
 		test.Errorf("default false setting for Compact is incorrect: %t", provisioner.config.Compact)
 	}
 
-	if len(provisioner.config.InstallCmd) > 0 {
-		test.Errorf("default empty setting for InstallCmd is incorrect: %s", provisioner.config.InstallCmd)
+	if len(provisioner.config.DestinationDir) > 0 {
+		test.Errorf("default empty setting for DestinationDir is incorrect: %s", provisioner.config.DestinationDir)
 	}
 
 	if len(provisioner.config.EnvVars) > 0 {
 		test.Errorf("default empty setting for EnvVars is incorrect: %+q", provisioner.config.EnvVars)
+	}
+
+	if len(provisioner.config.InstallCmd) > 0 {
+		test.Errorf("default empty setting for InstallCmd is incorrect: %s", provisioner.config.InstallCmd)
 	}
 
 	if len(provisioner.config.Keyword) > 0 {
@@ -118,6 +148,14 @@ func TestProvisionerPrepareMinimal(test *testing.T) {
 		test.Errorf("default false setting for Parallel is incorrect: %t", provisioner.config.Parallel)
 	}
 
+	if provisioner.config.PytestPath != "py.test" {
+		test.Errorf("default setting for PytestPath is incorrect: %s", provisioner.config.PytestPath)
+	}
+
+	if provisioner.config.Retries != 0 {
+		test.Errorf("default 0 setting for Retries is incorrect: %d", provisioner.config.Retries)
+	}
+
 	if provisioner.config.Sudo {
 		test.Errorf("default false setting for Sudo is incorrect: %t", provisioner.config.Sudo)
 	}
@@ -127,19 +165,11 @@ func TestProvisionerPrepareMinimal(test *testing.T) {
 	}
 
 	if provisioner.config.Verbose != 0 {
-		test.Errorf("default empty setting for Verbose is incorrect: %d", provisioner.config.Verbose)
-	}
-
-	if provisioner.config.PytestPath != "py.test" {
-		test.Errorf("default setting for PytestPath is incorrect: %s", provisioner.config.PytestPath)
+		test.Errorf("default 0 setting for Verbose is incorrect: %d", provisioner.config.Verbose)
 	}
 
 	if len(provisioner.config.TestFiles) > 0 {
 		test.Errorf("default empty setting for TestFiles is incorrect: %+q", provisioner.config.TestFiles)
-	}
-
-	if len(provisioner.config.DestinationDir) > 0 {
-		test.Errorf("default empty setting for DestinationDir is incorrect: %s", provisioner.config.DestinationDir)
 	}
 }
 
