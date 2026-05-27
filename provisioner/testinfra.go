@@ -261,30 +261,41 @@ func (provisioner *Provisioner) Provision(ctx context.Context, ui packer.Ui, com
 		return err
 	}
 
-	// execute testinfra remotely with *exec.Cmd
-	if localCmd == nil && cmd != nil {
-		err = execCmd(cmd, ui)
-	} else if localCmd != nil && cmd == nil {
-		// testinfra local execution
-		if len(provisioner.config.DestinationDir) > 0 {
-			// upload testinfra files to temporary packer instance
-			if err = uploadFiles(comm, provisioner.config.TestFiles, provisioner.config.DestinationDir); err != nil {
-				ui.Error("the test files could not be transferred to the temporary Packer instance")
-				return err
+	// attempt testinfra test executions up to retries + 1 times
+	for attempt := 0; attempt <= provisioner.config.Retries; attempt++ {
+		ui.Sayf("Testinfra tests execution attempt #%d", attempt+1)
+
+		// execute testinfra remotely with *exec.Cmd
+		if localCmd == nil && cmd != nil {
+			err = execCmd(cmd, ui)
+		} else if localCmd != nil && cmd == nil {
+			// testinfra local execution
+			if len(provisioner.config.DestinationDir) > 0 && attempt == 0 { // only upload test files on first attempt
+				// upload testinfra files to temporary packer instance
+				if err = uploadFiles(comm, provisioner.config.TestFiles, provisioner.config.DestinationDir); err != nil {
+					ui.Error("the test files could not be transferred to the temporary Packer instance")
+					return err
+				}
 			}
+
+			// execute testinfra local to instance with packer.RemoteCmd
+			err = packerRemoteCmd(ctx, localCmd, provisioner.config.InstallCmd, comm, ui)
+		} else {
+			// somehow we either returned both commands or neither
+			ui.Error("incorrectly determined Testinfra remote command and command local to instance; please report as bug with any relevant log information")
+			if cmd != nil && localCmd != nil {
+				ui.Errorf("Testinfra remote command: %s", cmd.String())
+				ui.Errorf("Testinfra local command: %s", localCmd.Command)
+			}
+			return errors.New("failed pytest command determination")
 		}
 
-		// execute testinfra local to instance with packer.RemoteCmd
-		err = packerRemoteCmd(ctx, localCmd, provisioner.config.InstallCmd, comm, ui)
-	} else {
-		// somehow we either returned both commands or neither
-		ui.Error("incorrectly determined Testinfra remote command and command local to instance; please report as bug with any relevant log information")
-		if cmd != nil && localCmd != nil {
-			ui.Errorf("Testinfra remote command: %s", cmd.String())
-			ui.Errorf("Testinfra local command: %s", localCmd.Command)
+		// break out of retry loop if execution succeeded
+		if err == nil {
+			break
 		}
-		return errors.New("failed pytest command determination")
 	}
+	// return most recent error if all attempts failed
 	if err != nil {
 		ui.Error("the Pytest Testinfra execution failed")
 		return err
