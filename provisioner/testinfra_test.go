@@ -2,8 +2,10 @@ package testinfra
 
 import (
 	"errors"
+	"maps"
 	"os"
 	"path/filepath"
+	"slices"
 	"testing"
 
 	"github.com/hashicorp/packer-plugin-sdk/packer"
@@ -37,35 +39,8 @@ func TestProvisionerConfig(test *testing.T) {
 		config: *basicConfig,
 	}
 
-	if provisioner.config.PytestPath != basicConfig.PytestPath || provisioner.config.DestinationDir != basicConfig.DestinationDir || provisioner.config.Chdir != basicConfig.Chdir || provisioner.config.Compact != basicConfig.Compact || provisioner.config.Keyword != basicConfig.Keyword || provisioner.config.Local != basicConfig.Local || provisioner.config.Marker != basicConfig.Marker || provisioner.config.Parallel != basicConfig.Parallel || provisioner.config.Retries != basicConfig.Retries || provisioner.config.Sudo != basicConfig.Sudo || provisioner.config.SudoUser != basicConfig.SudoUser || provisioner.config.Verbose != basicConfig.Verbose {
+	if provisioner.config.PytestPath != basicConfig.PytestPath || provisioner.config.DestinationDir != basicConfig.DestinationDir || !slices.Equal(provisioner.config.TestFiles, basicConfig.TestFiles) || provisioner.config.Chdir != basicConfig.Chdir || provisioner.config.Compact != basicConfig.Compact || !slices.Equal(provisioner.config.InstallCmd, basicConfig.InstallCmd) || !maps.Equal(provisioner.config.EnvVars, basicConfig.EnvVars) || provisioner.config.Keyword != basicConfig.Keyword || provisioner.config.Local != basicConfig.Local || provisioner.config.Marker != basicConfig.Marker || provisioner.config.Parallel != basicConfig.Parallel || provisioner.config.Retries != basicConfig.Retries || provisioner.config.Sudo != basicConfig.Sudo || provisioner.config.SudoUser != basicConfig.SudoUser || provisioner.config.Verbose != basicConfig.Verbose {
 		test.Errorf("provisioner config struct not initialized correctly")
-	}
-
-	if len(provisioner.config.TestFiles) != len(basicConfig.TestFiles) {
-		test.Errorf("provisioner config struct not initialized correctly")
-	}
-	for i, v := range provisioner.config.TestFiles {
-		if v != basicConfig.TestFiles[i] {
-			test.Errorf("provisioner config struct testfiles not initialized correctly")
-		}
-	}
-
-	if len(provisioner.config.InstallCmd) != len(basicConfig.InstallCmd) {
-		test.Errorf("provisioner config struct not initialized correctly")
-	}
-	for i, v := range provisioner.config.InstallCmd {
-		if v != basicConfig.InstallCmd[i] {
-			test.Errorf("provisioner config struct installcmd not initialized correctly")
-		}
-	}
-
-	if len(provisioner.config.EnvVars) != len(basicConfig.EnvVars) {
-		test.Errorf("provisioner config struct not initialized correctly")
-	}
-	for k, v := range provisioner.config.EnvVars {
-		if v != basicConfig.EnvVars[k] {
-			test.Errorf("provisioner config struct envvars not initialized correctly")
-		}
 	}
 }
 

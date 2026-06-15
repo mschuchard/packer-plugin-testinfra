@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"regexp"
 	"slices"
 
 	"github.com/hashicorp/packer-plugin-sdk/packer"
@@ -94,4 +95,21 @@ func uploadFiles(comm packer.Communicator, files []string, destDir string) error
 	// return collection of errors
 	// the logger displays the relevant debugging information, and this return is useful only in a nil comparable context, and not for specific error types UNLESS only one error is returned
 	return err
+}
+
+// compile regular expression to match credential strings
+var credPattern = regexp.MustCompile(`--hosts=(ssh|winrm)://([^:@]+):(.+)@(.+)`)
+
+// helper function to redact credentials from logging
+func redact(stringSlice []string) []string {
+	// consruct return string slice
+	returnStringSlice := make([]string, len(stringSlice))
+
+	// iterate through string slice (typically command, subcommand, and arguments)
+	for index, element := range stringSlice {
+		// redact all credentials strings
+		returnStringSlice[index] = credPattern.ReplaceAllString(element, "--hosts=$1://$2:REDACTED@$4")
+	}
+
+	return returnStringSlice
 }
