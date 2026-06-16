@@ -61,6 +61,6 @@ func TestRedact(test *testing.T) {
 
 	if !slices.Equal(redacted, expected) {
 		test.Error("input string slice was not redacted correctly")
-		test.Errorf("expected: %q+, actual: %q+", expected, redacted)
+		test.Errorf("expected: %+q, actual: %+q", expected, redacted)
 	}
 }

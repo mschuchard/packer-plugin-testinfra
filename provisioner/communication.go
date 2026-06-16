@@ -142,7 +142,7 @@ func (provisioner *Provisioner) determineCommunication(ui packer.Ui) ([]string, 
 		return nil, errors.New("unsupported communication type")
 	}
 
-	log.Printf("determined communicator arguments as: %+q", args)
+	log.Printf("determined communicator arguments as: %+q", redact(args))
 
 	return args, nil
 }

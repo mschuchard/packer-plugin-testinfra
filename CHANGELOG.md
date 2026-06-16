@@ -1,5 +1,6 @@
 ### 1.7.0 (Next)
 - Add `retries` parameter.
+- Redact credentials during logging.
 
 ### 1.6.2
 - Validate `sshpass` is installed for password-based SSH authentication.

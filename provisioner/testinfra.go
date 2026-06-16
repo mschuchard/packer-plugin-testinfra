@@ -252,7 +252,7 @@ func (provisioner *Provisioner) Provision(ctx context.Context, ui packer.Ui, com
 	// prepare testinfra test command
 	cmd, localCmd, err := provisioner.determineExecCmd(ctx, ui)
 	if cmd != nil {
-		log.Printf("complete Testinfra remote command is: %s", cmd.String())
+		log.Printf("complete Testinfra remote command is: %+q", redact(cmd.Args))
 	} else if localCmd != nil {
 		log.Printf("complete Testinfra local command is: %s", localCmd.Command)
 	}
@@ -284,7 +284,7 @@ func (provisioner *Provisioner) Provision(ctx context.Context, ui packer.Ui, com
 			// somehow we either returned both commands or neither
 			ui.Error("incorrectly determined Testinfra remote command and command local to instance; please report as bug with any relevant log information")
 			if cmd != nil && localCmd != nil {
-				ui.Errorf("Testinfra remote command: %s", cmd.String())
+				ui.Errorf("Testinfra remote command: %+q", redact(cmd.Args))
 				ui.Errorf("Testinfra local command: %s", localCmd.Command)
 			}
 			return errors.New("failed pytest command determination")
