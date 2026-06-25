@@ -1,3 +1,6 @@
+version: 2
+changelog:
+  disable: true
 before:
   hooks:
   - go mod tidy
@@ -29,7 +32,7 @@ builds:
     goarch: arm64
   binary: '{{ .ProjectName }}_v{{ .Version }}_{{ .Env.API_VERSION }}_{{ .Os }}_{{ .Arch }}'
 archives:
-- format: zip
+- formats: [zip]
   files:
   - none*
   name_template: '{{ .ProjectName }}_v{{ .Version }}_{{ .Env.API_VERSION }}_{{ .Os }}_{{ .Arch }}'
