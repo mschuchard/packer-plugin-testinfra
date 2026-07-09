@@ -21,6 +21,7 @@ var basicConfig = &Config{
 	DestinationDir: "/tmp",
 	EnvVars:        map[string]string{"foo": "bar", "baz": "bot"},
 	InstallCmd:     []string{"/bin/false"},
+	JUnitXML:       "/tmp/junit.xml",
 	Keyword:        "not slow",
 	Local:          false,
 	Marker:         "fast",
@@ -39,7 +40,7 @@ func TestProvisionerConfig(test *testing.T) {
 		config: *basicConfig,
 	}
 
-	if provisioner.config.PytestPath != basicConfig.PytestPath || provisioner.config.DestinationDir != basicConfig.DestinationDir || !slices.Equal(provisioner.config.TestFiles, basicConfig.TestFiles) || provisioner.config.Chdir != basicConfig.Chdir || provisioner.config.Compact != basicConfig.Compact || !slices.Equal(provisioner.config.InstallCmd, basicConfig.InstallCmd) || !maps.Equal(provisioner.config.EnvVars, basicConfig.EnvVars) || provisioner.config.Keyword != basicConfig.Keyword || provisioner.config.Local != basicConfig.Local || provisioner.config.Marker != basicConfig.Marker || provisioner.config.Parallel != basicConfig.Parallel || provisioner.config.Retries != basicConfig.Retries || provisioner.config.Sudo != basicConfig.Sudo || provisioner.config.SudoUser != basicConfig.SudoUser || provisioner.config.Verbose != basicConfig.Verbose {
+	if provisioner.config.PytestPath != basicConfig.PytestPath || provisioner.config.DestinationDir != basicConfig.DestinationDir || !slices.Equal(provisioner.config.TestFiles, basicConfig.TestFiles) || provisioner.config.Chdir != basicConfig.Chdir || provisioner.config.Compact != basicConfig.Compact || !slices.Equal(provisioner.config.InstallCmd, basicConfig.InstallCmd) || !maps.Equal(provisioner.config.EnvVars, basicConfig.EnvVars) || provisioner.config.JUnitXML != basicConfig.JUnitXML || provisioner.config.Keyword != basicConfig.Keyword || provisioner.config.Local != basicConfig.Local || provisioner.config.Marker != basicConfig.Marker || provisioner.config.Parallel != basicConfig.Parallel || provisioner.config.Retries != basicConfig.Retries || provisioner.config.Sudo != basicConfig.Sudo || provisioner.config.SudoUser != basicConfig.SudoUser || provisioner.config.Verbose != basicConfig.Verbose {
 		test.Errorf("provisioner config struct not initialized correctly")
 	}
 }
@@ -105,6 +106,10 @@ func TestProvisionerPrepareMinimal(test *testing.T) {
 
 	if len(provisioner.config.InstallCmd) > 0 {
 		test.Errorf("default empty setting for InstallCmd is incorrect: %s", provisioner.config.InstallCmd)
+	}
+
+	if len(provisioner.config.JUnitXML) > 0 {
+		test.Errorf("default empty setting for JUnitXML is incorrect: %s", provisioner.config.JUnitXML)
 	}
 
 	if len(provisioner.config.Keyword) > 0 {

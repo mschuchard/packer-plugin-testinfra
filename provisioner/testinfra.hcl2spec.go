@@ -15,6 +15,7 @@ type FlatConfig struct {
 	DestinationDir *string           `mapstructure:"destination_dir" required:"false" cty:"destination_dir" hcl:"destination_dir"`
 	EnvVars        map[string]string `mapstructure:"env_vars" required:"false" cty:"env_vars" hcl:"env_vars"`
 	InstallCmd     []string          `mapstructure:"install_cmd" required:"false" cty:"install_cmd" hcl:"install_cmd"`
+	JUnitXML       *string           `mapstructure:"junit_xml" required:"false" cty:"junit_xml" hcl:"junit_xml"`
 	Keyword        *string           `mapstructure:"keyword" required:"false" cty:"keyword" hcl:"keyword"`
 	Local          *bool             `mapstructure:"local" required:"false" cty:"local" hcl:"local"`
 	Marker         *string           `mapstructure:"marker" required:"false" cty:"marker" hcl:"marker"`
@@ -44,6 +45,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"destination_dir": &hcldec.AttrSpec{Name: "destination_dir", Type: cty.String, Required: false},
 		"env_vars":        &hcldec.AttrSpec{Name: "env_vars", Type: cty.Map(cty.String), Required: false},
 		"install_cmd":     &hcldec.AttrSpec{Name: "install_cmd", Type: cty.List(cty.String), Required: false},
+		"junit_xml":       &hcldec.AttrSpec{Name: "junit_xml", Type: cty.String, Required: false},
 		"keyword":         &hcldec.AttrSpec{Name: "keyword", Type: cty.String, Required: false},
 		"local":           &hcldec.AttrSpec{Name: "local", Type: cty.Bool, Required: false},
 		"marker":          &hcldec.AttrSpec{Name: "marker", Type: cty.String, Required: false},

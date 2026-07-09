@@ -22,6 +22,7 @@ type Config struct {
 	DestinationDir string            `mapstructure:"destination_dir" required:"false"`
 	EnvVars        map[string]string `mapstructure:"env_vars" required:"false"`
 	InstallCmd     []string          `mapstructure:"install_cmd" required:"false"`
+	JUnitXML       string            `mapstructure:"junit_xml" required:"false"`
 	Keyword        string            `mapstructure:"keyword" required:"false"`
 	Local          bool              `mapstructure:"local" required:"false"`
 	Marker         string            `mapstructure:"marker" required:"false"`
@@ -174,6 +175,11 @@ func (provisioner *Provisioner) Prepare(raws ...any) error {
 	// compact parameter
 	if provisioner.config.Compact {
 		log.Print("pytest report will be in compact form")
+	}
+
+	// junit xml parameter
+	if len(provisioner.config.JUnitXML) > 0 {
+		log.Printf("pytest will generate a JUnit XML report at: %s", provisioner.config.JUnitXML)
 	}
 
 	// keyword parameter
