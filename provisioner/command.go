@@ -154,6 +154,10 @@ func (provisioner *Provisioner) determineExecCmd(ctx context.Context, ui packer.
 	if provisioner.config.Compact {
 		args = append(args, "--no-header", "--no-summary", "--disable-warnings", "--force-short-summary")
 	}
+	// junit xml
+	if len(provisioner.config.JUnitXML) > 0 {
+		args = append(args, fmt.Sprintf("--junit-xml=%s", provisioner.config.JUnitXML))
+	}
 	// keyword
 	keyword, err := interpolate.Render(provisioner.config.Keyword, &provisioner.config.ctx)
 	if err != nil {
