@@ -1,6 +1,7 @@
 ### 1.7.0 (Next)
 - Add `retries` parameter.
 - Add `junit_xml` parameter.
+- Add `log_level` parameter.
 - Redact credentials during logging.
 
 ### 1.6.2

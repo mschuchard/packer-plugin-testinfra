@@ -167,6 +167,10 @@ func (provisioner *Provisioner) determineExecCmd(ctx context.Context, ui packer.
 	if len(keyword) > 0 {
 		args = append(args, "-k", keyword)
 	}
+	// log level
+	if len(provisioner.config.LogLevel) > 0 {
+		args = append(args, fmt.Sprintf("--log-level=%s", strings.ToUpper(provisioner.config.LogLevel)))
+	}
 	// marker
 	marker, err := interpolate.Render(provisioner.config.Marker, &provisioner.config.ctx)
 	if err != nil {

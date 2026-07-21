@@ -24,7 +24,7 @@ var basicConfig = &Config{
 	JUnitXML:       "/tmp/junit.xml",
 	Keyword:        "not slow",
 	Local:          false,
-	LogLevel:       "WARNING",
+	LogLevel:       "Warning",
 	Marker:         "fast",
 	Parallel:       true,
 	PytestPath:     "../fixtures/py.test",

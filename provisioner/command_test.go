@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"slices"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/packer-plugin-sdk/packer"
@@ -59,7 +60,7 @@ func TestProvisionerDetermineExecCmd(test *testing.T) {
 		test.Error("determineExecCmd function failed to determine execution directory for basic config")
 		test.Errorf("actual: %s, expected: %s", execCmd.Dir, basicConfig.Chdir)
 	}
-	if !slices.Equal(execCmd.Args, slices.Concat([]string{provisioner.config.PytestPath, fmt.Sprintf("--hosts=ssh://%s@%s:%d", provisioner.generatedData["User"], provisioner.generatedData["Host"], provisioner.generatedData["Port"]), fmt.Sprintf("--ssh-identity-file=%s", provisioner.generatedData["SSHPrivateKeyFile"]), "--ssh-extra-args=\"-o StrictHostKeyChecking=no\"", "--no-header", "--no-summary", "--disable-warnings", "--force-short-summary", "--junit-xml=/tmp/junit.xml", "-k", provisioner.config.Keyword, "-m", provisioner.config.Marker, "-n", "auto", "--sudo", "-vv"}, provisioner.config.TestFiles)) {
+	if !slices.Equal(execCmd.Args, slices.Concat([]string{provisioner.config.PytestPath, fmt.Sprintf("--hosts=ssh://%s@%s:%d", provisioner.generatedData["User"], provisioner.generatedData["Host"], provisioner.generatedData["Port"]), fmt.Sprintf("--ssh-identity-file=%s", provisioner.generatedData["SSHPrivateKeyFile"]), "--ssh-extra-args=\"-o StrictHostKeyChecking=no\"", "--no-header", "--no-summary", "--disable-warnings", "--force-short-summary", fmt.Sprintf("--junit-xml=%s", provisioner.config.JUnitXML), "-k", provisioner.config.Keyword, fmt.Sprintf("--log-level=%s", strings.ToUpper(provisioner.config.LogLevel)), "-m", provisioner.config.Marker, "-n", "auto", "--sudo", "-vv"}, provisioner.config.TestFiles)) {
 		test.Errorf("determineExecCmd function failed to properly determine remote execution command for basic config with SSH communicator: %s", execCmd.String())
 	}
 	if localCmd != nil {
