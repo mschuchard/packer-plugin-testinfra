@@ -25,6 +25,7 @@ type Config struct {
 	JUnitXML       string            `mapstructure:"junit_xml" required:"false"`
 	Keyword        string            `mapstructure:"keyword" required:"false"`
 	Local          bool              `mapstructure:"local" required:"false"`
+	LogLevel       string            `mapstructure:"log_level" required:"false"`
 	Marker         string            `mapstructure:"marker" required:"false"`
 	Parallel       bool              `mapstructure:"parallel" required:"false"`
 	PytestPath     string            `mapstructure:"pytest_path" required:"false"`
@@ -185,6 +186,11 @@ func (provisioner *Provisioner) Prepare(raws ...any) error {
 	// keyword parameter
 	if len(provisioner.config.Keyword) > 0 {
 		log.Printf("executing tests with keyword substring expression: %s", provisioner.config.Keyword)
+	}
+
+	// log level parameter
+	if len(provisioner.config.LogLevel) > 0 {
+		log.Printf("pytest will execute with log level set to: %s", provisioner.config.LogLevel)
 	}
 
 	// marker parameter

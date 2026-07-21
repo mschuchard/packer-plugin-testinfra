@@ -18,6 +18,7 @@ type FlatConfig struct {
 	JUnitXML       *string           `mapstructure:"junit_xml" required:"false" cty:"junit_xml" hcl:"junit_xml"`
 	Keyword        *string           `mapstructure:"keyword" required:"false" cty:"keyword" hcl:"keyword"`
 	Local          *bool             `mapstructure:"local" required:"false" cty:"local" hcl:"local"`
+	LogLevel       *string           `mapstructure:"log_level" required:"false" cty:"log_level" hcl:"log_level"`
 	Marker         *string           `mapstructure:"marker" required:"false" cty:"marker" hcl:"marker"`
 	Parallel       *bool             `mapstructure:"parallel" required:"false" cty:"parallel" hcl:"parallel"`
 	PytestPath     *string           `mapstructure:"pytest_path" required:"false" cty:"pytest_path" hcl:"pytest_path"`
@@ -48,6 +49,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"junit_xml":       &hcldec.AttrSpec{Name: "junit_xml", Type: cty.String, Required: false},
 		"keyword":         &hcldec.AttrSpec{Name: "keyword", Type: cty.String, Required: false},
 		"local":           &hcldec.AttrSpec{Name: "local", Type: cty.Bool, Required: false},
+		"log_level":       &hcldec.AttrSpec{Name: "log_level", Type: cty.String, Required: false},
 		"marker":          &hcldec.AttrSpec{Name: "marker", Type: cty.String, Required: false},
 		"parallel":        &hcldec.AttrSpec{Name: "parallel", Type: cty.Bool, Required: false},
 		"pytest_path":     &hcldec.AttrSpec{Name: "pytest_path", Type: cty.String, Required: false},
