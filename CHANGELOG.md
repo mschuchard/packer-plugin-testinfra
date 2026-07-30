@@ -1,4 +1,4 @@
-### 1.7.0 (Next)
+### 1.7.0
 - Add `retries` parameter.
 - Add `junit_xml` parameter.
 - Add `log_level` parameter.

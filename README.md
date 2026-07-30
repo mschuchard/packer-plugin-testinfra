@@ -13,7 +13,7 @@ A simple Packer config located in the same directory as your other templates and
 packer {
   required_plugins {
     testinfra = {
-      version = "~> 1.6.0"
+      version = "~> 1.7.0"
       source  = "github.com/mschuchard/testinfra"
     }
   }
@@ -48,11 +48,14 @@ build {
 | **destination_dir** | Whether to transfer the `test_files` to the temporary Packer instance used for building the machine image artifact at input value location. Presence of this directory cannot be validated prior to execution. Ignored unless `local` is `true`. The `file` provisioner should normally be preferred instead of this parameter, and this should also be considered a beta feature. | string | "" | no |
 | **env_vars** | Additional environment variables to be appended to the system environment variables during test execution. These are ignored if `local` is `true`. | map(string) | {} | no |
 | **install_cmd** | Command to execute on the instance used for building the machine image artifact; can be used to e.g. install and configure Testinfra prior to a `local` test execution. Ignored unless `local` is `true`. | list(string) | [] | no |
+| **junit_xml** | Create JUnit XML style report output file at given path for test results. | string | "" | no |
 | **keyword** | PyTest keyword substring expression for selective test execution. | string | "" | no |
 | **local** | Execute Testinfra tests locally on the instance used for building the machine image artifact. Most plugin validation is skipped with this option. | bool | false | no |
+| **log_level** | The log level for PyTest/Testinfra execution. Valid values are `CRITICAL`, `ERROR`, `WARNING` (default), `INFO`, and `DEBUG`. Note this value is automatically converted to uppercase as a guardrail. | string | "" | no |
 | **marker** | PyTest marker expression for selective test execution. | string | "" | no |
 | **parallel** | Whether to execute the Testinfra tests in parallel across the available physical CPUs. This parameter requires installation of the [pytest-xdist](https://pypi.org/project/pytest-xdist) plugin. | bool | false | no |
 | **pytest_path** | The path to the installed `py.test` executable for initiating the Testinfra tests. | string | "py.test" | no |
+| **retries** | Number of retries to attempt if Testinfra tests fail. | number | 0 | no |
 | **sudo** | Whether or not to execute the tests with `sudo` elevated permissions. | bool | false | no |
 | **sudo_user** | User to become when executing the tests. Mutually exclusive with `sudo`, and therefore ignored when `sudo` is input as `true`. | string | "" | no |
 | **test_files** | The paths to the files containing the Testinfra tests for execution and validation of the machine image artifact. The default empty value will execute default PyTest behavior of all test files prefixed with `test_` recursively discovered from the current working directory. | list(string) | [] | no |
@@ -60,7 +63,7 @@ build {
 
 ### Communicators
 
-This plugin currently supports the `ssh`, `winrm`, `docker`, `lxc`, and `podman` communicator types. It also supports execution local to the instance used for building the machine image artifact as a beta feature (it is not currently acceptance tested). Please ensure that at least one communication type is enabled for the built image (this is also generally a requirement for Packer itself).
+This plugin currently supports the `ssh`, `winrm` (Testinfra mandates NTLM), `docker`, `lxc`, and `podman` communicator types. It also supports execution local to the instance used for building the machine image artifact as a beta feature (it is not currently acceptance tested). Please ensure that at least one communication type is enabled for the built image (this is also generally a requirement for Packer itself).
 
 The `ssh` communicator requires private key, password, or agent based authentication. If password-based authentication is utilized, then `sshpass` must be installed to support it with the `testinfra` connection backend.
 

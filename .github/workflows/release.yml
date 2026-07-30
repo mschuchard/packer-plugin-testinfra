@@ -19,8 +19,9 @@ jobs:
     steps:
     - name: checkout
       uses: actions/checkout@v4
-    - name: unshallow
-      run: git fetch --prune --unshallow
+      with:
+        # Allow goreleaser to access older tag information.
+        fetch-depth: 0
     - name: set up Go
       uses: actions/setup-go@v5
       with:
