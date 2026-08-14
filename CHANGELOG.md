@@ -1,3 +1,6 @@
+### 1.7.1 (Next)
+- Fix variable interpolation for `env_vars` parameter.
+
 ### 1.7.0
 - Add `retries` parameter.
 - Add `junit_xml` parameter.

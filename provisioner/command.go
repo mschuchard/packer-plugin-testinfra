@@ -217,18 +217,40 @@ func (provisioner *Provisioner) determineExecCmd(ctx context.Context, ui packer.
 			cmd.Dir = provisioner.config.Chdir
 		}
 
-		// convert env vars parameter from map to slice
+		// convert interpolated env vars parameter from map to slice
 		if len(provisioner.config.EnvVars) > 0 {
-			// intiialize envVars string slice
-			envVars := make([]string, 0, len(provisioner.config.EnvVars))
+			// initialize interpolated env vars
+			envVars := make(map[string]string, len(provisioner.config.EnvVars))
 
-			// convert EnvVars map to envVars slice
+			// iteratively interpolate env vars
 			for key, value := range provisioner.config.EnvVars {
-				envVars = append(envVars, fmt.Sprintf("%s=%s", key, value))
+				// interpolate env var key
+				renderedKey, err := interpolate.Render(key, &provisioner.config.ctx)
+				if err != nil {
+					ui.Errorf("error parsing config for EnvVars key: %s", err.Error())
+					return nil, nil, err
+				}
+				// interpolate env var value
+				renderedValue, err := interpolate.Render(value, &provisioner.config.ctx)
+				if err != nil {
+					ui.Errorf("error parsing config for EnvVars value: %s", err.Error())
+					return nil, nil, err
+				}
+
+				// add interpolated key-value pair to envVars map
+				envVars[renderedKey] = renderedValue
+			}
+
+			// initialize envVars string slice
+			envVarsSlice := make([]string, 0, len(envVars))
+
+			// convert interpolated envVars map to envVars slice
+			for key, value := range envVars {
+				envVarsSlice = append(envVarsSlice, fmt.Sprintf("%s=%s", key, value))
 			}
 
 			// concat os environment with envVars
-			cmd.Env = slices.Concat(os.Environ(), envVars)
+			cmd.Env = slices.Concat(os.Environ(), envVarsSlice)
 		} else {
 			// initialize environment variables from os
 			cmd.Env = os.Environ()
