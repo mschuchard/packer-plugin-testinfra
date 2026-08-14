@@ -201,8 +201,24 @@ func (provisioner *Provisioner) determineExecCmd(ctx context.Context, ui packer.
 		args = append(args, levelArg)
 	}
 
-	// testfiles
-	args = slices.Concat(args, provisioner.config.TestFiles)
+	// test files
+	// initialize interpolated test files
+	testFiles := make([]string, len(provisioner.config.TestFiles))
+
+	// iteratively interpolate test files
+	for index, testFile := range provisioner.config.TestFiles {
+		// interpolate test file
+		rendered, err := interpolate.Render(testFile, &provisioner.config.ctx)
+		if err != nil {
+			ui.Errorf("error parsing config for TestFiles: %v", err.Error())
+			return nil, nil, err
+		}
+
+		// add interpolated test file to testFiles slice
+		testFiles[index] = rendered
+	}
+	// add testfiles to end of args slice for command string slice
+	args = slices.Concat(args, testFiles)
 
 	// return packer remote command for local testing on instance
 	if localExec {
@@ -230,6 +246,7 @@ func (provisioner *Provisioner) determineExecCmd(ctx context.Context, ui packer.
 					ui.Errorf("error parsing config for EnvVars key: %s", err.Error())
 					return nil, nil, err
 				}
+
 				// interpolate env var value
 				renderedValue, err := interpolate.Render(value, &provisioner.config.ctx)
 				if err != nil {
