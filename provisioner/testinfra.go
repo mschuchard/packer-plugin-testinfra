@@ -107,6 +107,11 @@ func (provisioner *Provisioner) Prepare(raws ...any) error {
 		if len(provisioner.config.EnvVars) > 0 {
 			log.Print("environment variables cannot be set for local execution, and this parameter will be ignored")
 		}
+
+		// chdir parameter
+		if len(provisioner.config.Chdir) > 0 {
+			log.Print("chdir cannot be set for local execution, and this parameter will be ignored")
+		}
 	} else { // verify testinfra installed
 		// chdir parameter
 		if len(provisioner.config.Chdir) > 0 {

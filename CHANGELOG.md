@@ -1,5 +1,6 @@
 ### 1.7.1 (Next)
 - Fix Packer generated data interpolation for `env_vars` and `test_files` parameters.
+- Minor improvement to warning logs.
 
 ### 1.7.0
 - Add `retries` parameter.
