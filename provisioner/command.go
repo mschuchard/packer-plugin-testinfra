@@ -84,8 +84,12 @@ func packerRemoteCmd(ctx context.Context, localCmd *packer.RemoteCmd, installCmd
 
 		// install testinfra on temp packer instance
 		if err := comm.Start(ctx, localInstallCmd); err != nil {
-			ui.Error("Testinfra install command execution returned non-zero exit status")
+			ui.Error("Testinfra install command execution initiation returned non-zero exit status")
 			return err
+		}
+		if exitStatus := localInstallCmd.Wait(); exitStatus != 0 {
+			ui.Error("Testinfra install command execution returned non-zero exit status")
+			return errors.New("testinfra local install command failed")
 		}
 	}
 
