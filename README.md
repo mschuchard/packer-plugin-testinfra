@@ -50,7 +50,7 @@ build {
 | **install_cmd** | Command to execute on the instance used for building the machine image artifact; can be used to e.g. install and configure Testinfra prior to a `local` test execution. Ignored unless `local` is `true`. | list(string) | [] | no |
 | **junit_xml** | Create JUnit XML style report output file at given path for test results. | string | "" | no |
 | **keyword** | PyTest keyword substring expression for selective test execution. | string | "" | no |
-| **local** | Execute Testinfra tests locally on the instance used for building the machine image artifact. Most plugin validation is skipped with this option. | bool | false | no |
+| **local** | Execute Testinfra tests locally on the instance used for building the machine image artifact. Most plugin validation is skipped with this option. Note that all string arguments in a provisioner block with this enabled must be appropriately string escaped as the Packer SDK passes strings directly to the shell interpreter. | bool | false | no |
 | **log_level** | The log level for PyTest/Testinfra execution. Valid values are `CRITICAL`, `ERROR`, `WARNING` (default), `INFO`, and `DEBUG`. Note this value is automatically converted to uppercase as a guardrail. | string | "" | no |
 | **marker** | PyTest marker expression for selective test execution. | string | "" | no |
 | **parallel** | Whether to execute the Testinfra tests in parallel across the available physical CPUs. This parameter requires installation of the [pytest-xdist](https://pypi.org/project/pytest-xdist) plugin. | bool | false | no |
