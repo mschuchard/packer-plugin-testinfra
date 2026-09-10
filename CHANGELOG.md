@@ -2,6 +2,7 @@
 - Fix Packer generated data interpolation for `env_vars` and `test_files` parameters.
 - Minor improvement to warning logs.
 - Block on `local` `install_cmd` before initiating local Testinfra test execution.
+- Stream output buffers during `local` execution instead of flushing afterwards.
 
 ### 1.7.0
 - Add `retries` parameter.

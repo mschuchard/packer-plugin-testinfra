@@ -1,7 +1,6 @@
 package testinfra
 
 import (
-	"bytes"
 	"context"
 	"errors"
 	"fmt"
@@ -93,33 +92,17 @@ func packerRemoteCmd(ctx context.Context, localCmd *packer.RemoteCmd, installCmd
 		}
 	}
 
-	// initialize stdout and stderr as bytes
-	var stdout, stderr bytes.Buffer
-	localCmd.Stdout = &stdout
-	localCmd.Stderr = &stderr
-
-	// initialize testinfra tests
+	// initialize testinfra tests while streaming stdout/stderr live to ui as the command runs
 	ui.Say("beginning Testinfra validation of machine image")
-	if err := comm.Start(ctx, localCmd); err != nil {
-		ui.Error("initialization of Testinfra py.test command execution returned non-zero exit status")
+	if err := localCmd.RunWithUi(ctx, comm, ui); err != nil {
+		ui.Error("Testinfra py.test command execution failed or was cancelled")
 		return err
 	}
 
-	// wait for testinfra to complete and flush buffers
-	// then check for pytest/testinfra execution issues
-	if exitStatus := localCmd.Wait(); exitStatus > 0 {
-		ui.Error("Testinfra errored internally during execution:")
-		ui.Error(stderr.String())
-		ui.Errorf("Testinfra returned exit status: %d", exitStatus)
+	// RunWithUi blocks until the exit channel closes, so Wait() here just reads the cached status
+	if localCmd.ExitStatus() > 0 {
+		ui.Errorf("Testinfra returned exit status: %d", localCmd.ExitStatus())
 		return errors.New("testinfra non-zero exit code")
-	}
-
-	// capture and display testinfra output
-	if len(stdout.String()) > 0 {
-		ui.Say("Testinfra results include the following:")
-		ui.Say(stdout.String())
-	} else {
-		ui.Say("Testinfra produced no stdout; it is likely something unintended occurred during execution")
 	}
 
 	// finish and return
