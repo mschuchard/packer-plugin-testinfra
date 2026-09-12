@@ -1,4 +1,4 @@
-### 1.7.1 (Next)
+### 1.7.1
 - Fix Packer generated data interpolation for `env_vars` and `test_files` parameters.
 - Minor improvement to warning logs.
 - Block on `local` `install_cmd` before initiating local Testinfra test execution.
