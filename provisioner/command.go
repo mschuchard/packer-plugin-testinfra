@@ -10,6 +10,7 @@ import (
 	"os/exec"
 	"slices"
 	"strings"
+	"sync"
 
 	"github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer-plugin-sdk/template/interpolate"
@@ -39,29 +40,49 @@ func execCmd(cmd *exec.Cmd, ui packer.Ui) error {
 		return err
 	}
 
-	// capture and display testinfra output
-	outSlurp, err := io.ReadAll(stdout)
-	if err != nil {
+	// read stdout and stderr concurrently to avoid deadlock if either pipe buffer fills
+	// while the other is still being drained (the child blocks on a full pipe otherwise)
+	var outSlurp, errSlurp []byte
+	var outErr, errErr error
+	var wg sync.WaitGroup
+	wg.Add(2)
+
+	// define goroutines to read stdout and stderr concurrently
+	go func() {
+		defer wg.Done()
+		outSlurp, outErr = io.ReadAll(stdout)
+	}()
+	go func() {
+		defer wg.Done()
+		errSlurp, errErr = io.ReadAll(stderr)
+	}()
+
+	// wait for both goroutines to finish reading stdout and stderr
+	wg.Wait()
+	if outErr != nil {
 		ui.Error("unable to read stdout from Testinfra")
-		return err
+		return outErr
 	}
+	if errErr != nil {
+		ui.Error("unable to read stderr from Testinfra")
+		return errErr
+	}
+
+	// display testinfra stdout and stderr
 	if len(outSlurp) > 0 {
 		ui.Say("Testinfra results include the following:")
 		ui.Say(string(outSlurp))
 	} else {
 		ui.Say("Testinfra produced no stdout; it is probable that something unintended occurred during execution")
 	}
-
-	errSlurp, err := io.ReadAll(stderr)
-	if err != nil {
-		ui.Error("unable to read stderr from Testinfra")
-		return err
+	if len(errSlurp) > 0 {
+		ui.Say("Testinfra stderr output includes the following:")
+		ui.Say(string(errSlurp))
 	}
 
-	// wait for testinfra to complete and flush buffers
+	// reap the child process; both pipes are already fully drained above
 	if err = cmd.Wait(); err != nil {
 		ui.Error("Testinfra returned non-zero exit status")
-		ui.Error(string(errSlurp))
 		return err
 	}
 

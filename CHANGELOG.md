@@ -1,3 +1,6 @@
+### 1.7.2 (Next)
+- Prevent Testinfra buffer overflows.
+
 ### 1.7.1
 - Fix Packer generated data interpolation for `env_vars` and `test_files` parameters.
 - Minor improvement to warning logs.
