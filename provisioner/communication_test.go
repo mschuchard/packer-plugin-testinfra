@@ -12,6 +12,8 @@ import (
 	"github.com/hashicorp/packer-plugin-sdk/packer"
 )
 
+const encodedPassword = "p%40ss%2Fw%3Ard%2541" // p@ss/w:rd%41
+
 // test provisioner determineCommunication properly determines communication strings
 func TestProvisionerDetermineCommunication(test *testing.T) {
 	// initialize simple test ui
@@ -24,7 +26,7 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
 	provisioner.generatedData = map[string]any{
 		"ConnType":          "ssh",
 		"SSHUsername":       "me",
-		"SSHPassword":       "password",
+		"SSHPassword":       "p@ss/w:rd%41",
 		"SSHPrivateKeyFile": "/path/to/sshprivatekeyfile",
 		"SSHAgentAuth":      false,
 		"SSHHost":           "192.168.0.1",
@@ -44,7 +46,7 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
 	if err != nil {
 		test.Errorf("determineCommunication function failed to determine ssh: %s", err)
 	}
-	if !slices.Equal(communication, []string{fmt.Sprintf("--hosts=ssh://%s:%s@%s:%d?timeout=%.0f", provisioner.generatedData["SSHUsername"], provisioner.generatedData["SSHPassword"], provisioner.generatedData["SSHHost"], provisioner.generatedData["SSHPort"], sshTimeout.Seconds()), "--ssh-extra-args=\"-o StrictHostKeyChecking=no\""}) {
+	if !slices.Equal(communication, []string{fmt.Sprintf("--hosts=ssh://%s:%s@%s:%d?timeout=%.0f", provisioner.generatedData["SSHUsername"], encodedPassword, provisioner.generatedData["SSHHost"], provisioner.generatedData["SSHPort"], sshTimeout.Seconds()), "--ssh-extra-args=\"-o StrictHostKeyChecking=no\""}) {
 		test.Errorf("communication string slice for ssh password incorrectly determined: %v", communication)
 	}
 
@@ -83,7 +85,7 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
 	provisioner.generatedData = map[string]any{
 		"ConnType":      "winrm",
 		"WinRMUser":     "me",
-		"WinRMPassword": "password",
+		"WinRMPassword": "p@ss/w:rd%41",
 		"WinRMHost":     "192.168.0.1",
 		"WinRMPort":     5986,
 		"WinRMUseSSL":   false,
@@ -95,7 +97,7 @@ func TestProvisionerDetermineCommunication(test *testing.T) {
 	if err != nil {
 		test.Errorf("determineCommunication function failed to determine winrm: %s", err)
 	}
-	if !slices.Equal(communication, []string{fmt.Sprintf("--hosts=winrm://%s:%s@%s:%d?no_ssl=true&no_verify_ssl=true&read_timeout_sec=1205", provisioner.generatedData["WinRMUser"], provisioner.generatedData["WinRMPassword"], provisioner.generatedData["WinRMHost"], provisioner.generatedData["WinRMPort"])}) {
+	if !slices.Equal(communication, []string{fmt.Sprintf("--hosts=winrm://%s:%s@%s:%d?no_ssl=true&no_verify_ssl=true&read_timeout_sec=1205", provisioner.generatedData["WinRMUser"], encodedPassword, provisioner.generatedData["WinRMHost"], provisioner.generatedData["WinRMPort"])}) {
 		test.Errorf("communication string slice for winrm incorrectly determined: %v", communication)
 	}
 
@@ -225,7 +227,7 @@ func TestProvisionerDetermineSSHAuth(test *testing.T) {
 
 	// dummy up fake ssh data
 	provisioner.generatedData = map[string]any{
-		"Password":          "password",
+		"Password":          "p@ss/w:rd%41",
 		"SSHPrivateKey":     "abcdefg12345",
 		"SSHPrivateKeyFile": "/tmp/sshprivatekeyfile",
 		"SSHAgentAuth":      false,

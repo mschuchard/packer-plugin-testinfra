@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"net/url"
 	"os"
 	"os/exec"
 	"strings"
@@ -80,8 +81,11 @@ func (provisioner *Provisioner) determineCommunication(ui packer.Ui) ([]string, 
 				return nil, errors.New("sshpass installation not found")
 			}
 
+			// encode the user and password so that reserved characters in the password do not break the ssh connection string
+			credentials := url.UserPassword(user, sshAuthString).String()
+
 			// append args with ssh connection backend information (user, password, host, port), and no strict host key checking
-			args = append(args, fmt.Sprintf("--hosts=ssh://%s:%s@%s", user, sshAuthString, httpAddr), "--ssh-extra-args=\"-o StrictHostKeyChecking=no\"")
+			args = append(args, fmt.Sprintf("--hosts=ssh://%s@%s", credentials, httpAddr), "--ssh-extra-args=\"-o StrictHostKeyChecking=no\"")
 		// use ssh agent auth
 		case agent:
 			ui.Say("utilizing SSH Agent for communicator authentication")
@@ -121,8 +125,11 @@ func (provisioner *Provisioner) determineCommunication(ui packer.Ui) ([]string, 
 			return nil, err
 		}
 
+		// encode the user and password so that reserved characters in the password do not break the winrm connection string
+		credentials := url.UserPassword(user, winrmPassword).String()
+
 		// format string for testinfra connection backend setting
-		connectionBackend := fmt.Sprintf("--hosts=winrm://%s:%s@%s%s", user, winrmPassword, httpAddr, strings.Join(optionalArgs, "&"))
+		connectionBackend := fmt.Sprintf("--hosts=winrm://%s@%s%s", credentials, httpAddr, strings.Join(optionalArgs, "&"))
 
 		// append args with winrm connection backend information (user, password, host, port)
 		args = append(args, connectionBackend)
