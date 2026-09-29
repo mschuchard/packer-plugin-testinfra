@@ -266,20 +266,20 @@ func (provisioner *Provisioner) Provision(ctx context.Context, ui packer.Ui, com
 	provisioner.generatedData = generatedData
 	provisioner.config.ctx.Data = generatedData
 
-	// prepare testinfra test command
-	cmd, localCmd, err := provisioner.determineExecCmd(ctx, ui)
-	if cmd != nil {
-		log.Printf("complete Testinfra remote command is: %+q", redact(cmd.Args))
-	} else if localCmd != nil {
-		log.Printf("complete Testinfra local command is: %s", localCmd.Command)
-	}
-	if err != nil {
-		ui.Error("the Testinfra execution command could not be accurately determined")
-		return err
-	}
-
 	// attempt testinfra test executions up to retries + 1 times
 	for attempt := 0; attempt <= provisioner.config.Retries; attempt++ {
+		// prepare testinfra test command
+		cmd, localCmd, err := provisioner.determineExecCmd(ctx, ui)
+		if cmd != nil {
+			log.Printf("complete Testinfra remote command is: %+q", redact(cmd.Args))
+		} else if localCmd != nil {
+			log.Printf("complete Testinfra local command is: %s", localCmd.Command)
+		}
+		if err != nil {
+			ui.Error("the Testinfra execution command could not be accurately determined")
+			return err
+		}
+
 		ui.Sayf("Testinfra tests execution attempt #%d", attempt+1)
 
 		// execute testinfra remotely with *exec.Cmd
@@ -311,11 +311,12 @@ func (provisioner *Provisioner) Provision(ctx context.Context, ui packer.Ui, com
 		if err == nil {
 			break
 		}
-	}
-	// return most recent error if all attempts failed
-	if err != nil {
-		ui.Error("the Pytest Testinfra execution failed")
-		return err
+
+		// return most recent error if all attempts failed
+		if attempt == provisioner.config.Retries {
+			ui.Error("the Pytest Testinfra execution failed")
+			return err
+		}
 	}
 
 	ui.Say("packer plugin testinfra provisioning complete")
