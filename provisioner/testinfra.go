@@ -62,26 +62,6 @@ func (provisioner *Provisioner) Prepare(raws ...any) error {
 		return err
 	}
 
-	// set default executable path for py.test
-	if len(provisioner.config.PytestPath) == 0 {
-		log.Print("setting PytestPath to default 'py.test'")
-		provisioner.config.PytestPath = "py.test"
-
-		// validate py.test exists in default path
-		if _, err := exec.LookPath("py.test"); err != nil {
-			log.Print("the default Pytest executable 'py.test' does not exist in the system PATH")
-			return err
-		}
-	} else if info, err := os.Stat(provisioner.config.PytestPath); err != nil || info.IsDir() { // verify valid py.test exists at supplied path
-		log.Printf("the Pytest executable does not exist, is not a file, or cannot be accessed at: %s", provisioner.config.PytestPath)
-
-		if err != nil {
-			return err
-		} else {
-			return errors.New("pytest installation issue")
-		}
-	}
-
 	// log optional arguments
 	// local parameter
 	if provisioner.config.Local {
@@ -113,6 +93,26 @@ func (provisioner *Provisioner) Prepare(raws ...any) error {
 			log.Print("chdir cannot be set for local execution, and this parameter will be ignored")
 		}
 	} else { // verify testinfra installed
+		// set default executable path for py.test
+		if len(provisioner.config.PytestPath) == 0 {
+			log.Print("setting PytestPath to default 'py.test'")
+			provisioner.config.PytestPath = "py.test"
+
+			// validate py.test exists in default path
+			if _, err := exec.LookPath("py.test"); err != nil {
+				log.Print("the default Pytest executable 'py.test' does not exist in the system PATH")
+				return err
+			}
+		} else if info, err := os.Stat(provisioner.config.PytestPath); err != nil || info.IsDir() { // verify valid py.test exists at supplied path
+			log.Printf("the Pytest executable does not exist, is not a file, or cannot be accessed at: %s", provisioner.config.PytestPath)
+
+			if err != nil {
+				return err
+			} else {
+				return errors.New("pytest installation issue")
+			}
+		}
+
 		// chdir parameter
 		if len(provisioner.config.Chdir) > 0 {
 			// verify chdir exists and is directory

@@ -2,6 +2,7 @@
 - Prevent Testinfra buffer overflows.
 - Fix Testinfra retry executions.
 - Encode SSH and WinRM passwords to handle special characters.
+- Skip `pytest` validation when `local` is `true`.
 
 ### 1.7.1
 - Fix Packer generated data interpolation for `env_vars` and `test_files` parameters.
