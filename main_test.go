@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
-	"regexp"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/packer-plugin-sdk/acctest"
@@ -63,18 +63,18 @@ func TestProvisioner(test *testing.T) {
 			logsString := string(logsBytes)
 
 			// verify logfile content for each communicator
-			if dockerMatches, _ := regexp.MatchString("docker.ubuntu: packer plugin testinfra provisioning complete.*", logsString); !dockerMatches {
+			if dockerMatches := strings.Contains("docker.ubuntu: packer plugin testinfra provisioning complete", logsString); !dockerMatches {
 				test.Errorf("logs do not contain expected docker testinfra completion log in logfile: %s", logfile)
 			}
-			if nullMatches, _ := regexp.MatchString("null.vbox: packer plugin testinfra provisioning complete.*", logsString); !nullMatches {
+			if nullMatches := strings.Contains("null.vbox: packer plugin testinfra provisioning complete", logsString); !nullMatches {
 				test.Errorf("logs do not contain expected ssh testinfra completion log in logfile: %s", logfile)
 			}
 			//TODO: https://github.com/hashicorp/packer-plugin-virtualbox/issues/77
-			/*if vboxMatched, _ := regexp.MatchString("virtualbox-vm.ubuntu: packer plugin testinfra provisioning complete.*", logsString); !vboxMatched {
+			/*if vboxMatched := strings.Contains("virtualbox-vm.ubuntu: packer plugin testinfra provisioning complete", logsString); !vboxMatched {
 			  test.Fatalf("logs do not contain expected local testinfra values in logfile: %s", logfile)
 			}*/
 			// verify testinfra output is as expected
-			if testsMatches, _ := regexp.MatchString("2 passed in.*", logsString); !testsMatches {
+			if testsMatches := strings.Contains("2 passed in", logsString); !testsMatches {
 				test.Errorf("logs do not contain expected testinfra test results: %s", logsString)
 			}
 

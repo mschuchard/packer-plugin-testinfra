@@ -36,7 +36,7 @@ func execCmd(cmd *exec.Cmd, ui packer.Ui) error {
 	// initialize testinfra tests
 	ui.Say("Beginning Testinfra validation of machine image")
 	if err := cmd.Start(); err != nil {
-		ui.Error("initialization of Testinfra py.test command execution returned non-zero exit status")
+		ui.Error("initialization of Testinfra py.test command execution returned error")
 		return err
 	}
 
