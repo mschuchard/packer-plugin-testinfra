@@ -103,13 +103,14 @@ func packerRemoteCmd(ctx context.Context, localCmd *packer.RemoteCmd, installCmd
 		localInstallCmd := &packer.RemoteCmd{Command: strInstallCmd}
 
 		// install testinfra on temp packer instance
-		if err := comm.Start(ctx, localInstallCmd); err != nil {
-			ui.Error("Testinfra install command execution initiation returned non-zero exit status")
+		if err := localInstallCmd.RunWithUi(ctx, comm, ui); err != nil {
+			ui.Error("Testinfra install command execution failed or was cancelled")
 			return err
 		}
-		if exitStatus := localInstallCmd.Wait(); exitStatus != 0 {
-			ui.Error("Testinfra install command execution returned non-zero exit status")
-			return errors.New("testinfra local install command failed")
+		// RunWithUi blocks until the exit channel closes, so Wait() here just reads the cached status
+		if localInstallCmd.ExitStatus() != 0 {
+			ui.Errorf("Testinfra install command returned non-zero exit status: %d", localInstallCmd.ExitStatus())
+			return errors.New("testinfra local install non-zero exit code")
 		}
 	}
 
@@ -122,7 +123,7 @@ func packerRemoteCmd(ctx context.Context, localCmd *packer.RemoteCmd, installCmd
 
 	// RunWithUi blocks until the exit channel closes, so Wait() here just reads the cached status
 	if localCmd.ExitStatus() > 0 {
-		ui.Errorf("Testinfra returned exit status: %d", localCmd.ExitStatus())
+		ui.Errorf("Testinfra returned non-zero exit status: %d", localCmd.ExitStatus())
 		return errors.New("testinfra non-zero exit code")
 	}
 

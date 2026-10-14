@@ -3,6 +3,7 @@
 - Fix Testinfra retry executions.
 - Encode SSH and WinRM passwords to handle special characters.
 - Skip `pytest` validation when `local` is `true`.
+- Stream output buffers during `install_cmd` execution instead of flushing afterwards.
 
 ### 1.7.1
 - Fix Packer generated data interpolation for `env_vars` and `test_files` parameters.
